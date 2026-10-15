@@ -1,11 +1,9 @@
 <Solution>
   <Folder Name="/src/">
+    <Project Path="src/locacaoimoveis.api/LocacaoImoveis.API.csproj" />
     <Project Path="src/LocacaoImoveis.Application/LocacaoImoveis.Application.csproj" />
     <Project Path="src/LocacaoImoveis.Domain/LocacaoImoveis.Domain.csproj" />
     <Project Path="src/LocacaoImoveis.Infrastructure/LocacaoImoveis.Infrastructure.csproj" />
-  </Folder>
-  <Folder Name="/src/locacaoimoveis.api/">
-    <Project Path="src/locacaoimoveis.api/LocacaoImoveis.API.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/LocacaoImoveis.Domain.Tests/LocacaoImoveis.Domain.Tests.csproj" />
