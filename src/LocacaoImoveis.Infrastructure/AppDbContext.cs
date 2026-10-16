@@ -16,7 +16,7 @@ namespace LocacaoImoveis.Infrastructure
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-            var cliente = modelBuilder.Entity<Cliente>(); 
+            var cliente = modelBuilder.Entity<Cliente>();
 
             cliente.HasKey(c => c.Id); // primary key
 
@@ -33,6 +33,10 @@ namespace LocacaoImoveis.Infrastructure
                 valor => new Cpf(valor))
                 .HasMaxLength(11)
                 .IsRequired();
+
+            // garante q ue o cpf seja único no banco de dados
+            cliente.HasIndex(c => c.Cpf)
+                .IsUnique(); // 
 
             cliente.Property(c => c.Email)
                 .HasConversion(

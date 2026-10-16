@@ -1,8 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using LocacaoImoveis.Application.Interfaces;
+﻿using LocacaoImoveis.Application.Interfaces;
 using LocacaoImoveis.Domain.Entities;
+using LocacaoImoveis.Domain.ValueObjects;
+using Microsoft.EntityFrameworkCore;
 
 namespace LocacaoImoveis.Infrastructure.Repositories
 {
@@ -20,5 +19,18 @@ namespace LocacaoImoveis.Infrastructure.Repositories
             _context.Clientes.Add(cliente);
             await _context.SaveChangesAsync();
         }
+
+        public async Task<Cliente?> ObterPorIdAsync(Guid id)
+        {
+            return await _context.Clientes.FindAsync(id);
+        }
+
+        public async Task<Cliente?> ObterPorCpfAsync(string cpf)
+        {
+            var cpfValidado = new Cpf(cpf);
+
+           return await _context.Clientes.FirstOrDefaultAsync(c => c.Cpf == cpfValidado);
+        }
+
     }
 }

@@ -26,9 +26,45 @@ namespace LocacaoImoveis.Application.Services
                 request.Cpf
                 );
 
+            var clienteExiste = await _clienteRepository.ObterPorCpfAsync(request.Cpf);
+            if(clienteExiste != null)
+                throw new Exception("Cliente com este CPF já existe.");
+
             await _clienteRepository.AdicionarClienteAsync(cliente); // salva o cliente no repositório
 
             return cliente.Id;
         }
+
+        public async Task<ClienteResponse?> ObterClientePorIdAsync(Guid id)
+        {
+            var cliente = await _clienteRepository.ObterPorIdAsync(id);
+            if (cliente == null)   
+                return null;
+            
+            return new ClienteResponse
+            {
+                Id = cliente.Id,
+                Nome = cliente.Nome,
+                Telefone = cliente.Telefone,
+                Email = cliente.Email.Valor,
+                Cpf = cliente.Cpf.Valor
+            };
+        }
+
+        public async Task<ClienteResponse?> ObterClientePorCpfAsync(string cpf)
+        {
+            var cliente = await _clienteRepository.ObterPorCpfAsync(cpf);
+            if (cliente == null)
+                return null;
+            return new ClienteResponse
+            {
+                Id = cliente.Id,
+                Nome = cliente.Nome,
+                Telefone = cliente.Telefone,
+                Email = cliente.Email.Valor,
+                Cpf = cliente.Cpf.Valor
+            };
+        }
+
     }
 }
