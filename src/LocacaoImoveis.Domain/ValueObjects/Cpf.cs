@@ -15,9 +15,10 @@
                 .Replace("-", "");
 
             // ve se ls caracteres são todos números 0-9 (unicode) e usa ValidaCPF 
-            if (CpfNormalizado.Any(caractere => caractere < '0' || caractere > '9')
-                || !ValidaCPF.IsCpf(CpfNormalizado))
+            if (CpfNormalizado.Any(caractere => caractere < '0' || caractere > '9'))        
                 throw new ArgumentException("CPF deve conter apenas números.", nameof(valor));
+            if(!ValidaCPF.IsCpf(CpfNormalizado))
+                throw new ArgumentException("CPF inválido.", nameof(valor));
 
             Valor = CpfNormalizado;
         }
