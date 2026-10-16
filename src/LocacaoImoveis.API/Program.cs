@@ -1,6 +1,9 @@
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using LocacaoImoveis.Infrastructure;
+using LocacaoImoveis.Application.Interfaces;
+using LocacaoImoveis.Infrastructure.Repositories;
+using LocacaoImoveis.Application.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,6 +20,10 @@ builder.Services.AddSingleton<SqliteConnection>(_ =>
     connection.Open(); 
     return connection;
 });
+
+// registra o repositório e o serviço de cliente para injeção de dependência
+builder.Services.AddScoped<IClienteRepository, ClienteRepository>();
+builder.Services.AddScoped<ClienteService>();
 
 
 // config do ef
