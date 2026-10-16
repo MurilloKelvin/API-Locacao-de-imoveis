@@ -1,15 +1,51 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using LocacaoImoveis.Domain.Entities;
+using LocacaoImoveis.Domain.ValueObjects;
 
 namespace LocacaoImoveis.Infrastructure
 {
     public class AppDbContext : DbContext
     {
-        public AppDbContext(DbContextOptions<AppDbContext> options) 
+        public AppDbContext(DbContextOptions<AppDbContext> options)
             : base(options)
         {
         }
 
-        // DbSet<Cliente>
+        public DbSet<Cliente> Clientes => Set<Cliente>();
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+            var cliente = modelBuilder.Entity<Cliente>(); 
+
+            cliente.HasKey(c => c.Id); // primary key
+
+            cliente.Property(c => c.Nome)
+                .IsRequired();
+
+            cliente.Property(c => c.Telefone)
+                .IsRequired();
+
+            // cpf e email convertidos para string no banco de dados, mas mantidos como Value Objects na aplicação
+            cliente.Property(c => c.Cpf)
+                .HasConversion(
+                cpf => cpf.Valor,
+                valor => new Cpf(valor))
+                .HasMaxLength(11)
+                .IsRequired();
+
+            cliente.Property(c => c.Email)
+                .HasConversion(
+                email => email.Valor,
+                valor => new Email(valor))
+                .IsRequired();
+
+        }
+
+
+
+
+
         // DbSet<Imovel>
         // DbSet<Reserva>
 

@@ -14,7 +14,14 @@ namespace LocacaoImoveis.Domain.Entities
         public Email Email { get; private set; }
         public Cpf Cpf { get; private set; }
 
-
+        // Construtor privado para EF 
+        private Cliente()
+        {
+            Nome = null!;
+            Telefone = null!;
+            Email = null!;
+            Cpf = null!;
+        }
 
         public Cliente(string nome, string telefone, string email, string cpf)
         {
