@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using LocacaoImoveis.Application.DTOs;
-using LocacaoImoveis.Application.Services;  
+using LocacaoImoveis.Application.Services;
 using LocacaoImoveis.Application.Exceptions;
+using LocacaoImoveis.Application.DTOs.Clientes;
 
 namespace LocacaoImoveis.API.Controllers
 {

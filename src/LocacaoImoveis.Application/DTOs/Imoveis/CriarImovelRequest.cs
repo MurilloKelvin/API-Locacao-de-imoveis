@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace LocacaoImoveis.Application.DTOs
+namespace LocacaoImoveis.Application.DTOs.Imoveis
 {
     public class CriarImovelRequest
     {

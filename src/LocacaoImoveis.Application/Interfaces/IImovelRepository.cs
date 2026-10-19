@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using LocacaoImoveis.Domain.Entities;
+using LocacaoImoveis.Application.DTOs.Imoveis;
 
 namespace LocacaoImoveis.Application.Interfaces
 {
@@ -13,6 +14,8 @@ namespace LocacaoImoveis.Application.Interfaces
         Task<Imovel?> ObterImovelPorIdAsync(Guid id,
             CancellationToken cancellationToken = default);
 
+        Task<List<Imovel>> ListarImoveisAsync(ListarImoveisRequest filtro,
+            CancellationToken cancellationToken = default);
 
     }
 }

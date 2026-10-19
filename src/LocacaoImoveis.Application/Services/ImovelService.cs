@@ -1,6 +1,7 @@
-﻿using LocacaoImoveis.Application.DTOs;
+﻿using LocacaoImoveis.Application.DTOs.Imoveis;
 using LocacaoImoveis.Application.Interfaces;
 using LocacaoImoveis.Domain.Entities;
+using System.Data.SqlTypes;
 
 namespace LocacaoImoveis.Application.Services
 {
@@ -27,10 +28,64 @@ namespace LocacaoImoveis.Application.Services
             return imovel.Id;
         }
 
-        public async Task<Imovel?> ObterImovelPorIdAsync(Guid id,
+        public async Task<ImovelResponse?> ObterImovelPorIdAsync(Guid id,
             CancellationToken cancellationToken = default)
         {
-            return await _imovelRepository.ObterImovelPorIdAsync(id, cancellationToken);
+            // Obter o imóvel do repositório
+            var imovel = await _imovelRepository.ObterImovelPorIdAsync(id, cancellationToken);
+
+            if (imovel == null)
+                return null;
+
+            // retorna o DTO de resposta
+            return new ImovelResponse
+            {
+                Id = imovel.Id,
+                Endereco = imovel.Endereco,
+                Titulo = imovel.Titulo,
+                CapacidadeHospedes = imovel.CapacidadeDeHospedes,
+                ValorDiaria = imovel.ValorDiaria,
+                Status = imovel.Status
+            };
         }
+
+        public async Task<List<ImovelResponse>> ListarImoveisAsync(
+            ListarImoveisRequest filtro,
+            CancellationToken cancellationToken = default)
+        {
+
+            // Validações dos filtros
+            if (filtro.Pagina < 1)
+                throw new ArgumentException("O número da página deve ser maior que 0.",nameof(filtro.Pagina));
+
+            if(filtro.TamanhoPagina < 1 || filtro.TamanhoPagina > 100) 
+                throw new ArgumentException("O tamanho da página deve estar entre 1 e 100.",nameof(filtro.TamanhoPagina));
+
+            if(filtro.CapacidadeMinima <= 0 || filtro.CapacidadeMaxima <= 0)
+                throw new ArgumentException("A capacidade máxima deve ser maior que 0.", nameof(filtro.CapacidadeMaxima));
+
+            if(filtro.ValorDiarioMinimo <= 0 || filtro.ValorDiarioMaximo <= 0)
+                throw new ArgumentException("O valor da diária deve ser maior que 0.", nameof(filtro.ValorDiarioMaximo));
+
+            if(filtro.ValorDiarioMinimo > filtro.ValorDiarioMaximo)
+                throw new ArgumentException("O valor da diária mínima deve ser menor que o valor da diária máxima.", nameof(filtro.ValorDiarioMaximo));
+
+            // chamada pra buscar os imoveis com filtro
+            var imoveis = await _imovelRepository.ListarImoveisAsync(filtro, cancellationToken);
+
+            // busca os imóveis do repositório e mapeia para o DTO de resposta em lista
+            return imoveis.Select(imovel => new ImovelResponse
+            {
+                Id = imovel.Id,
+                Endereco = imovel.Endereco,
+                Titulo = imovel.Titulo,
+                CapacidadeHospedes = imovel.CapacidadeDeHospedes,
+                ValorDiaria = imovel.ValorDiaria,
+                Status = imovel.Status
+            }).ToList();
+        }
+
+
+
     }
 }

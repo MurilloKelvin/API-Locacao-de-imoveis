@@ -4,7 +4,7 @@ using System.Text;
 using LocacaoImoveis.Domain.Entities;
 using LocacaoImoveis.Domain.Enums;
 
-namespace LocacaoImoveis.Application.DTOs
+namespace LocacaoImoveis.Application.DTOs.Clientes
 {
     public class ClienteResponse
     {

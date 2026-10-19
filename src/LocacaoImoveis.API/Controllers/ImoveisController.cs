@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using LocacaoImoveis.Application.Services;
-using LocacaoImoveis.Application.DTOs;
+using LocacaoImoveis.Application.DTOs.Imoveis;
 
 
 namespace LocacaoImoveis.API.Controllers
@@ -10,7 +10,7 @@ namespace LocacaoImoveis.API.Controllers
     public class ImoveisController : ControllerBase
     {
         private readonly ImovelService _imovelService;
-         
+
         public ImoveisController(ImovelService imovelService)
         {
             _imovelService = imovelService;
@@ -30,8 +30,42 @@ namespace LocacaoImoveis.API.Controllers
             {
                 return BadRequest(new { message = ex.Message });
             }
-            
+
         }
 
-    }
-}
+        [HttpGet("{id:guid}")]
+        [ProducesResponseType(typeof(ImovelResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> ObterImovelPorId(Guid id, CancellationToken cancellationToken)
+        {
+            var imovelResponse = await _imovelService.ObterImovelPorIdAsync(id, cancellationToken);
+
+            if (imovelResponse == null)
+                return NotFound("Imóvel não encontrado.");
+
+            return Ok(imovelResponse);
+        }
+
+        [HttpGet]
+        [ProducesResponseType(typeof(List<ImovelResponse>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> ListarImoveis(
+            [FromQuery] ListarImoveisRequest filtro,
+            CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                // list aos imoveis com filtro agora
+                var imoveis = await _imovelService.ListarImoveisAsync(filtro, cancellationToken);
+                return Ok(imoveis);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+
+        }
+
+
+
+     }
+ } 

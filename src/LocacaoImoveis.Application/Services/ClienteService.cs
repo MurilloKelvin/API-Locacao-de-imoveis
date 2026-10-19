@@ -1,7 +1,7 @@
-﻿using LocacaoImoveis.Application.DTOs;
-using LocacaoImoveis.Application.Interfaces;
+﻿using LocacaoImoveis.Application.Interfaces;
 using LocacaoImoveis.Domain.Entities;
 using LocacaoImoveis.Application.Exceptions;
+using LocacaoImoveis.Application.DTOs.Clientes;
 
 namespace LocacaoImoveis.Application.Services
 {
