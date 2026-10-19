@@ -1,6 +1,7 @@
 ﻿using LocacaoImoveis.Application.DTOs.Imoveis;
 using LocacaoImoveis.Application.Interfaces;
 using LocacaoImoveis.Domain.Entities;
+using LocacaoImoveis.Domain.Enums;
 using System.Data.SqlTypes;
 
 namespace LocacaoImoveis.Application.Services
@@ -104,7 +105,24 @@ namespace LocacaoImoveis.Application.Services
             return true;
         }
 
+        public async Task<bool> AlterarStatusImovelAsync(Guid id, AlterarStatusImovelRequest request,
+            CancellationToken cancellationToken = default)
+        { 
+                if (!request.Status.HasValue) // verifica se o status foi informado
+                throw new ArgumentException("O status do imovel deve ser informado.", nameof(request.Status));
 
+                var imovel = await _imovelRepository.ObterImovelPorIdAsync(id, cancellationToken); // busca o imovel pelo id
+
+            imovel.AlterarStatusImovel(request.Status.Value); // altera o status 
+
+                await _imovelRepository.AtualizarImovelAsync(cancellationToken); 
+
+                return true;
+            }
+
+
+            
+            
 
     }
 }

@@ -68,6 +68,18 @@ namespace LocacaoImoveis.Domain.Entities
 
         }
 
+        public void AlterarStatusImovel(ImovelStatus novoStatus)
+        {
+            // Valida se o novo status é diferente do atual
+            if(!Enum.IsDefined(novoStatus))
+                throw new ArgumentException($"O status '{novoStatus}' não é válido.", nameof(novoStatus));
+
+            if (Status == novoStatus)
+                throw new ArgumentException($"O imóvel já está com o status '{novoStatus}'.", nameof(novoStatus));
+            // Atualiza o status do imóvel
+            Status = novoStatus;
+        }
+
     }
 
 

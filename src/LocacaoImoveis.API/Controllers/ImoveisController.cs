@@ -69,8 +69,8 @@ namespace LocacaoImoveis.API.Controllers
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> AtualizarImovel(Guid id, 
-            [FromBody] AtualizarImovelRequest request, 
+        public async Task<IActionResult> AtualizarImovel(Guid id,
+            [FromBody] AtualizarImovelRequest request,
             CancellationToken cancellationToken = default)
         {
             try
@@ -78,7 +78,7 @@ namespace LocacaoImoveis.API.Controllers
                 // atualizar o imóvel com o id fornecido
                 var imovelAtualizado = await _imovelService.AtualizarImovelAsync(id, request, cancellationToken);
 
-                if(!imovelAtualizado)
+                if (!imovelAtualizado)
                     return NotFound("Imóvel não encontrado.");
                 return NoContent();
             }
@@ -88,6 +88,29 @@ namespace LocacaoImoveis.API.Controllers
             }
         }
 
+        [HttpPut("{id:guid}/status")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> AlterarStatusImovel(Guid id,
+            [FromBody] AlterarStatusImovelRequest request, CancellationToken cancellationToken = default)
+        {
 
-     }
- } 
+            try
+            {
+                // alterar o status do imóvel com o id fornecido
+                var atualizado = await _imovelService.AlterarStatusImovelAsync(id, request, cancellationToken);
+
+                if(!atualizado)
+                    return NotFound(new { message = "Imóvel não encontrado." });
+
+                return NoContent();
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+
+        }
+    }
+}
