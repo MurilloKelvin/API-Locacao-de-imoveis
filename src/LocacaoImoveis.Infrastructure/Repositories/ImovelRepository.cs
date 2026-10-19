@@ -23,5 +23,12 @@ namespace LocacaoImoveis.Infrastructure.Repositories
             await _context.SaveChangesAsync(cancellationToken);
         }
 
+        public async Task<Imovel?> ObterImovelPorIdAsync(Guid id,
+            CancellationToken cancellationToken = default)
+        {
+            // busca imovel pelo ID 
+            return await _context.Imoveis.FindAsync(new object[] { id }, cancellationToken); 
+        }
+
     }
 }

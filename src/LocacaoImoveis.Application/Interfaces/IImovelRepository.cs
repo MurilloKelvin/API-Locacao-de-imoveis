@@ -9,5 +9,10 @@ namespace LocacaoImoveis.Application.Interfaces
     {
         Task AdicionarAsync(Imovel imovel,
             CancellationToken cancellationToken = default);
+
+        Task<Imovel?> ObterImovelPorIdAsync(Guid id,
+            CancellationToken cancellationToken = default);
+
+
     }
 }

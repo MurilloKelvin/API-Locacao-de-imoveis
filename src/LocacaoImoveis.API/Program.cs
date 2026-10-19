@@ -25,6 +25,10 @@ builder.Services.AddSingleton<SqliteConnection>(_ =>
 builder.Services.AddScoped<IClienteRepository, ClienteRepository>();
 builder.Services.AddScoped<ClienteService>();
 
+// dependencia do imovel
+builder.Services.AddScoped<IImovelRepository, ImovelRepository>();
+builder.Services.AddScoped<ImovelService>();
+
 
 // config do ef
 builder.Services.AddDbContext<AppDbContext>((ServiceProvider, options) =>
