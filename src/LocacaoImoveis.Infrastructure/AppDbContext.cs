@@ -12,10 +12,15 @@ namespace LocacaoImoveis.Infrastructure
         }
 
         public DbSet<Cliente> Clientes => Set<Cliente>();
+        public DbSet<Imovel> Imoveis => Set<Imovel>();
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            
             base.OnModelCreating(modelBuilder);
+
+            // Clientes
             var cliente = modelBuilder.Entity<Cliente>();
 
             cliente.HasKey(c => c.Id); // primary key
@@ -44,13 +49,35 @@ namespace LocacaoImoveis.Infrastructure
                 valor => new Email(valor))
                 .IsRequired();
 
+            // Imoveis
+            var imovel = modelBuilder.Entity<Imovel>();
+
+            imovel.HasKey(i => i.Id);
+
+            imovel.Property(i => i.Titulo)
+                .IsRequired();
+
+            imovel.Property(i => i.Endereco)
+                .IsRequired();
+
+            imovel.Property(i => i.CapacidadeDeHospedes)
+                .IsRequired();
+
+            imovel.Property(i => i.ValorDiaria)
+                .IsRequired();
+
+            imovel.Property(i => i.Status)
+                .IsRequired();
+
         }
 
 
 
 
 
-        // DbSet<Imovel>
+
+
+
         // DbSet<Reserva>
 
     }
