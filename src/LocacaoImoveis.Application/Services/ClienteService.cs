@@ -45,7 +45,8 @@ namespace LocacaoImoveis.Application.Services
                 Nome = cliente.Nome,
                 Telefone = cliente.Telefone,
                 Email = cliente.Email.Valor,
-                Cpf = cliente.Cpf.Valor
+                Cpf = cliente.Cpf.Valor,
+                Status = cliente.Status
             };
         }
 
@@ -60,7 +61,9 @@ namespace LocacaoImoveis.Application.Services
                 Nome = cliente.Nome,
                 Telefone = cliente.Telefone,
                 Email = cliente.Email.Valor,
-                Cpf = cliente.Cpf.Valor
+                Cpf = cliente.Cpf.Valor,
+                Status = cliente.Status
+
             };
         }
 
@@ -73,7 +76,8 @@ namespace LocacaoImoveis.Application.Services
                 Nome = cliente.Nome,
                 Telefone = cliente.Telefone,
                 Email = cliente.Email.Valor,
-                Cpf = cliente.Cpf.Valor
+                Cpf = cliente.Cpf.Valor,
+                Status = cliente.Status
             }).ToList();
         }
 
@@ -88,5 +92,30 @@ namespace LocacaoImoveis.Application.Services
             return true;
         }
 
-    }
+        public async Task<bool> AtivarClienteAsync(Guid id)
+        {
+            var cliente = await _clienteRepository.ObterPorIdAsync(id);
+            if (cliente == null)
+                return false;
+
+            cliente.AtivarCliente();
+
+            await _clienteRepository.AtualizarClienteAsync(cliente);
+            return true;
+        }
+
+        public async Task<bool> InativarClienteAsync(Guid id)
+        {
+            var cliente = await _clienteRepository.ObterPorIdAsync(id); 
+            if(cliente == null)
+                return false;
+
+            cliente.InativarCliente();
+
+            await _clienteRepository.AtualizarClienteAsync(cliente);
+            return true;
+        }
+
+
+        }
 }

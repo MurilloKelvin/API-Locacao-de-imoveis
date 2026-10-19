@@ -45,7 +45,18 @@ namespace LocacaoImoveis.Domain.Entities
 
             Nome = nome.Trim();
             Telefone = telefone;
-            Email = new Email(email); // atualiza o Value Object Email
+            Email = emailValido; // atualiza o Value Object Email
 
         }
+
+        public void AtivarCliente()
+        {
+            Status = ClienteStatus.Ativo;
+        }
+
+        public void InativarCliente()
+        {
+            Status = ClienteStatus.Inativo;
+        }
+
     } }

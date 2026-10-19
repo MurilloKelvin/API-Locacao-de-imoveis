@@ -110,6 +110,33 @@ namespace LocacaoImoveis.API.Controllers
             }
         }
 
+        // altera somente o status do cliente
+        [HttpPut("{id:guid}/ativar")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> AtivarCliente(Guid id)
+        {
+            var clienteEncontrado = await _clienteService.AtivarClienteAsync(id);
+
+            if (!clienteEncontrado)
+                return NotFound(new { message = "Cliente não encontrado." });
+
+            return NoContent();
+        }
+
+        // altera somente o status do cliente para inativo
+        [HttpPut("{id:guid}/inativar")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> InativarCliente(Guid id)
+        {
+            var clienteEncontrado = await _clienteService.InativarClienteAsync(id);
+
+            if (!clienteEncontrado)
+                return NotFound(new { message = "Cliente não encontrado." });
+
+            return NoContent();
+        }
 
 
     }
