@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using LocacaoImoveis.Application.DTOs;
 using LocacaoImoveis.Application.Services;  
+using LocacaoImoveis.Application.Exceptions;
 
 namespace LocacaoImoveis.API.Controllers
 {
@@ -18,6 +19,8 @@ namespace LocacaoImoveis.API.Controllers
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)] // Indica que a resposta será 201 Created
         [ProducesResponseType(StatusCodes.Status400BadRequest)] // Indica que a resposta será 400 Bad Request
+        [ProducesResponseType(StatusCodes.Status409Conflict)] // caso de 2 cpfs iguais
+
         public async Task<IActionResult> CriarCliente(
             [FromBody] CriarClienteRequestDTO request)
         {
@@ -25,7 +28,11 @@ namespace LocacaoImoveis.API.Controllers
             {
                 var clienteId = await _clienteService.CriarClienteAsync(request);
 
-                return StatusCode(StatusCodes.Status201Created, new { id = clienteId }); 
+                return StatusCode(StatusCodes.Status201Created, new { id = clienteId });
+            }
+            catch (CpfJaCadastradoException e)
+            {
+                return Conflict(new { message = e.Message });
             }
             catch (ArgumentException e)
             {
@@ -64,6 +71,46 @@ namespace LocacaoImoveis.API.Controllers
                 return BadRequest(new { message = e.Message });
             }
         }
+
+        [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<IActionResult> ObterTodosClientes()
+        {
+
+            var clientes = await _clienteService.ObterTodosClientesAsync();
+
+            if (clientes.Count == 0)
+                return Ok(new { message = "Nenhum cliente encontrado no banco de dados." });
+
+
+            return Ok(clientes);
+
+        }
+
+        [HttpPut("{id:guid}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> AtualizarClienteRequest(Guid id, [FromBody] AtualizarClienteRequest request)
+        {
+            try
+            {
+                // Chama o serviço para atualizar o cliente
+                var atualizado = await _clienteService.AtualizarClienteAsync(id, request);
+                // Se o cliente não foi encontrado, retorna 404 Not Found
+                if (!atualizado)
+                    return NotFound(new { message = "Cliente não encontrado." });
+
+                return NoContent();
+            }
+            catch (ArgumentException e)
+            {
+                return BadRequest(new { message = e.Message });
+
+            }
+        }
+
+
 
     }
 }

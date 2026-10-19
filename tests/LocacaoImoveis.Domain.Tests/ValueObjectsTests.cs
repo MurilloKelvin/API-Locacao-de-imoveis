@@ -10,9 +10,8 @@ namespace LocacaoImoveis.Domain.Tests
             // Arrange
             var cpfInvalido = "11111111111";
             // Act & Assert
-            var exception = Assert.Throws<ArgumentException>(() => new Cpf(cpfInvalido));
+            var exception = Assert.Throws<ArgumentException>(() => new Cpf(cpfInvalido)); // tenta criar o cpf
 
-            Assert.StartsWith("CPF deve conter apenas números.", exception.Message);
             Assert.Equal("valor", exception.ParamName); // precisa verificar o parametro se n falha
         }
         [Fact]

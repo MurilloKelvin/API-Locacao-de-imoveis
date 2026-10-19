@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using LocacaoImoveis.Application.DTOs;
+﻿using LocacaoImoveis.Application.DTOs;
 using LocacaoImoveis.Application.Interfaces;
 using LocacaoImoveis.Domain.Entities;
+using LocacaoImoveis.Application.Exceptions;
 
 namespace LocacaoImoveis.Application.Services
 {
@@ -28,7 +26,7 @@ namespace LocacaoImoveis.Application.Services
 
             var clienteExiste = await _clienteRepository.ObterPorCpfAsync(request.Cpf);
             if(clienteExiste != null)
-                throw new Exception("Cliente com este CPF já existe.");
+                throw new CpfJaCadastradoException();
 
             await _clienteRepository.AdicionarClienteAsync(cliente); // salva o cliente no repositório
 
@@ -64,6 +62,30 @@ namespace LocacaoImoveis.Application.Services
                 Email = cliente.Email.Valor,
                 Cpf = cliente.Cpf.Valor
             };
+        }
+
+        public async Task<List<ClienteResponse>> ObterTodosClientesAsync()
+        {
+            var clientes = await _clienteRepository.ObterTodosClientesAsync();
+            return clientes.Select(cliente => new ClienteResponse
+            {
+                Id = cliente.Id,
+                Nome = cliente.Nome,
+                Telefone = cliente.Telefone,
+                Email = cliente.Email.Valor,
+                Cpf = cliente.Cpf.Valor
+            }).ToList();
+        }
+
+        public async Task<bool> AtualizarClienteAsync(Guid id, AtualizarClienteRequest request)
+        {
+            var cliente = await _clienteRepository.ObterPorIdAsync(id);
+            if (cliente == null)
+                return false;
+
+            cliente.AtualizarDadosCliente(request.Nome, request.Telefone, request.Email);
+            await _clienteRepository.AtualizarClienteAsync(cliente);
+            return true;
         }
 
     }

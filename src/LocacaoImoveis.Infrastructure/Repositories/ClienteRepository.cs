@@ -2,6 +2,10 @@
 using LocacaoImoveis.Domain.Entities;
 using LocacaoImoveis.Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Data.Sqlite;
+using LocacaoImoveis.Application.Exceptions;
+using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
+
 
 namespace LocacaoImoveis.Infrastructure.Repositories
 {
@@ -17,7 +21,16 @@ namespace LocacaoImoveis.Infrastructure.Repositories
         public async Task AdicionarClienteAsync(Cliente cliente)
         {
             _context.Clientes.Add(cliente);
-            await _context.SaveChangesAsync();
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch(DbUpdateException ex)
+                when (ex.InnerException is SqliteException sqlite // so executo se der a exceçao de unicidade 
+                && sqlite.SqliteExtendedErrorCode == 2067)
+            { 
+                throw new CpfJaCadastradoException(); 
+            }
         }
 
         public async Task<Cliente?> ObterPorIdAsync(Guid id)
@@ -30,6 +43,18 @@ namespace LocacaoImoveis.Infrastructure.Repositories
             var cpfValidado = new Cpf(cpf);
 
            return await _context.Clientes.FirstOrDefaultAsync(c => c.Cpf == cpfValidado);
+        }
+
+        public async Task<List<Cliente>> ObterTodosClientesAsync()
+        {
+            return await _context.Clientes
+                .OrderBy(Cliente => Cliente.Nome) // traz a lista ordenada pelo nome do cliente
+                .ToListAsync();
+        }
+
+        public async Task AtualizarClienteAsync(Cliente cliente)
+        {
+            await _context.SaveChangesAsync();
         }
 
     }
