@@ -17,5 +17,7 @@ namespace LocacaoImoveis.Application.Interfaces
         Task<List<Imovel>> ListarImoveisAsync(ListarImoveisRequest filtro,
             CancellationToken cancellationToken = default);
 
+        Task AtualizarImovelAsync(CancellationToken cancellationToken = default);
+
     }
 }

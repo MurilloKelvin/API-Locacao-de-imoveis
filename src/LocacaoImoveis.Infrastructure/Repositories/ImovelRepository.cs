@@ -17,7 +17,7 @@ namespace LocacaoImoveis.Infrastructure.Repositories
             _context = context;
         }
 
-        
+      
         public async Task AdicionarAsync(Imovel imovel,
             CancellationToken cancellationToken = default)
         {
@@ -63,6 +63,11 @@ namespace LocacaoImoveis.Infrastructure.Repositories
                 .Skip((filtro.Pagina - 1) * filtro.TamanhoPagina)
                 .Take(filtro.TamanhoPagina)
                 .ToListAsync(cancellationToken);
+        }
+
+        public async Task AtualizarImovelAsync(CancellationToken cancellationToken = default)
+        {
+            await _context.SaveChangesAsync(cancellationToken);
         }
 
     }

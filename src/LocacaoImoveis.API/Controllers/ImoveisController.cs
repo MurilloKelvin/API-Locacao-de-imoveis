@@ -65,6 +65,28 @@ namespace LocacaoImoveis.API.Controllers
 
         }
 
+        [HttpPut("{id:guid}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> AtualizarImovel(Guid id, 
+            [FromBody] AtualizarImovelRequest request, 
+            CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                // atualizar o imóvel com o id fornecido
+                var imovelAtualizado = await _imovelService.AtualizarImovelAsync(id, request, cancellationToken);
+
+                if(!imovelAtualizado)
+                    return NotFound("Imóvel não encontrado.");
+                return NoContent();
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
 
 
      }

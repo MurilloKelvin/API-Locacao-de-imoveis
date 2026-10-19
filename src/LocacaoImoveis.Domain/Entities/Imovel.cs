@@ -44,6 +44,30 @@ namespace LocacaoImoveis.Domain.Entities
             Status = ImovelStatus.Disponivel;
         }
 
+        public void AtualizarImovel(string endereco, string titulo, int capacidadeDeHospedes, decimal valorDiaria)
+        {
+            // confere se nao tem nenhum param invalido
+            if(string.IsNullOrWhiteSpace(endereco))
+                throw new ArgumentException("Endereço não pode ser vazio.", nameof(endereco));
+
+            if (string.IsNullOrWhiteSpace(titulo))
+                throw new ArgumentException("Título não pode ser vazio.", nameof(titulo));
+
+            if(valorDiaria <= 0)
+                throw new ArgumentException("Valor da diária deve ser maior que zero.", nameof(valorDiaria));
+
+            if(capacidadeDeHospedes <= 0)
+                throw new ArgumentException("Capacidade de hóspedes deve ser maior que zero.", nameof(capacidadeDeHospedes));
+
+
+            // Atualiza os valores do imóvel
+            Endereco = endereco.Trim();
+            Titulo = titulo.Trim();
+            CapacidadeDeHospedes = capacidadeDeHospedes;
+            ValorDiaria = valorDiaria;
+
+        }
+
     }
 
 

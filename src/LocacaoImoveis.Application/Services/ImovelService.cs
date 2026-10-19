@@ -85,6 +85,25 @@ namespace LocacaoImoveis.Application.Services
             }).ToList();
         }
 
+        public async Task<bool>AtualizarImovelAsync(Guid id, AtualizarImovelRequest request,
+            CancellationToken cancellationToken = default)
+        {
+            var imovel = await _imovelRepository.ObterImovelPorIdAsync(id, cancellationToken);
+
+            if (imovel is null)
+                return false;
+
+            imovel.AtualizarImovel(
+                request.Endereco,
+                request.Titulo,
+                request.CapacidadeDeHospedes,
+                request.ValorDiaria
+            );
+
+            await _imovelRepository.AtualizarImovelAsync(cancellationToken);
+            return true;
+        }
+
 
 
     }
