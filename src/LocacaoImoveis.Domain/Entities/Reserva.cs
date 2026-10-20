@@ -81,7 +81,8 @@ namespace LocacaoImoveis.Domain.Entities
         }
 
         public int CalcularQuantidadeNoites() => (DataSaida.DayNumber - DataEntrada.DayNumber);
-        
+
+
          public void Confirmar()
         {
             if(Status != ReservaStatus.Pendente)

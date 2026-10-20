@@ -47,6 +47,21 @@ namespace LocacaoImoveis.Infrastructure.Repositories
                 cancellationToken);
         }
 
+        public async Task<int> ContarReservasAtivasPorCliente(
+            Guid clienteId,
+            CancellationToken cancellationToken = default)
+        {
+            // Conta somente reservas do cliente informado.
+            // Reservas pendentes e confirmadas são consideradas ativas.
+            // Reservas concluídas ou canceladas não bloqueiam o imóvel.
+            return await _context.Reservas.CountAsync(
+                reserva =>
+                    reserva.ClienteId == clienteId &&
+                    (reserva.Status == ReservaStatus.Pendente ||
+                     reserva.Status == ReservaStatus.Confirmada),
+                cancellationToken);
+        }
+
         public async Task<bool> ExisteConflitos(
             Guid imovelId,
             DateOnly entrada,

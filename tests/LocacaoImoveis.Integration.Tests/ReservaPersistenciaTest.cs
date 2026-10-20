@@ -1,4 +1,5 @@
 using LocacaoImoveis.Application.Services;
+using LocacaoImoveis.Application.DTOs.Reservas;
 using LocacaoImoveis.Domain.Entities;
 using LocacaoImoveis.Domain.Enums;
 using LocacaoImoveis.Infrastructure;
@@ -62,6 +63,67 @@ public class ReservaPersistenciaTest
 
         // Duas das quatro reservas devem ser consideradas ativas.
         Assert.Equal(2, total);
+    }
+
+    [Fact]
+    public async Task DeveBloquearQuartaReservaAtivaDoMesmoCliente()
+    {
+        using var connection = new SqliteConnection("Data Source=:memory:");
+        await connection.OpenAsync();
+
+        var options = new DbContextOptionsBuilder<AppDbContext>()
+            .UseSqlite(connection)
+            .Options;
+
+        await using var context = new AppDbContext(options);
+        await context.Database.EnsureCreatedAsync();
+
+        var cliente = CriarCliente();
+        var imoveis = Enumerable.Range(1, 4)
+            .Select(indice => CriarImovel($"Imóvel limite {indice}"))
+            .ToList();
+
+        context.Clientes.Add(cliente);
+        context.Imoveis.AddRange(imoveis);
+        await context.SaveChangesAsync();
+
+        var service = new ReservaService(
+            new ReservaRepository(context),
+            new ImovelRepository(context),
+            new ClienteRepository(context));
+
+        var dataBase = DateOnly.FromDateTime(DateTime.UtcNow).AddDays(1);
+
+        for (var indice = 0; indice < 3; indice++)
+        {
+            var entrada = dataBase.AddDays(indice * 3);
+
+            await service.CriarReservaAsync(new CriarReservaRequest
+            {
+                ClienteId = cliente.Id,
+                ImovelId = imoveis[indice].Id,
+                DataEntrada = entrada,
+                DataSaida = entrada.AddDays(2),
+                QuantidadeHospedes = 2
+            });
+        }
+
+        var entradaQuartaReserva = dataBase.AddDays(9);
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            service.CriarReservaAsync(new CriarReservaRequest
+            {
+                ClienteId = cliente.Id,
+                ImovelId = imoveis[3].Id,
+                DataEntrada = entradaQuartaReserva,
+                DataSaida = entradaQuartaReserva.AddDays(2),
+                QuantidadeHospedes = 2
+            }));
+
+        var total = await new ReservaRepository(context)
+            .ContarReservasAtivasPorCliente(cliente.Id);
+
+        Assert.Equal(3, total);
     }
 
     [Fact]

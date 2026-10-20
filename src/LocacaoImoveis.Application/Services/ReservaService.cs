@@ -29,7 +29,12 @@ namespace LocacaoImoveis.Application.Services
             //busca o cliente para verificar se ele existe e se está ativo
             var cliente = await _clienteRepository.ObterPorIdAsync(request.ClienteId);
 
-            if(cliente is null)
+            var contadorReservasCliente = await _reservaRepository.ContarReservasAtivasPorCliente(request.ClienteId, cancellationToken); 
+
+            if(contadorReservasCliente >= 3)
+                throw new InvalidOperationException("Cliente não pode ter mais de 3 reservas ativas");
+
+            if (cliente is null)
                 throw new ArgumentException("Cliente não encontrado",nameof(request.ClienteId));
 
             if(cliente.Status != ClienteStatus.Ativo)

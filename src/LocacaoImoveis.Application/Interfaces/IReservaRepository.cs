@@ -20,6 +20,8 @@ namespace LocacaoImoveis.Application.Interfaces
             DateOnly saida,
             CancellationToken  cancellationToken = default);
 
-        Task<int>ContarReservasAtivas(Guid id, CancellationToken cancelToken = default);
+        Task<int>ContarReservasAtivas(Guid imovelId, CancellationToken cancelToken = default);
+
+        Task<int>ContarReservasAtivasPorCliente(Guid clienteId, CancellationToken cancelToken = default);
     }
 }

@@ -124,6 +124,7 @@ namespace LocacaoImoveis.Application.Services
                 var reservasAtivas = await _reservaRepository.ContarReservasAtivas(id, cancellationToken);
                 if (reservasAtivas > 0) // verifica se existem reservas ativas
                     throw new InvalidOperationException("Não é possível alterar o status do imóvel para indisponível, pois existem reservas ativas.");
+
             }
 
             imovel.AlterarStatusImovel(request.Status.Value); // altera o status 
