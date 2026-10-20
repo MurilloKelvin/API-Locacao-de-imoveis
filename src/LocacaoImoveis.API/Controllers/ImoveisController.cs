@@ -107,6 +107,10 @@ namespace LocacaoImoveis.API.Controllers
 
                 return NoContent();
             }
+            catch (ArgumentException ex) // 400 badrequest
+            {
+                return BadRequest(new { message = ex.Message });
+            }
             catch (InvalidOperationException ex) 
             {
                 return Conflict(new { message = ex.Message });

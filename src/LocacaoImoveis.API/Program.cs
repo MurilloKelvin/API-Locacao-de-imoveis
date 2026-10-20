@@ -30,6 +30,7 @@ builder.Services.AddScoped<IImovelRepository, ImovelRepository>();
 builder.Services.AddScoped<ImovelService>();
 
 builder.Services.AddScoped<IReservaRepository, ReservaRepository>();
+builder.Services.AddScoped<ReservaService>();
 
 
 // config do ef

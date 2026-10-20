@@ -40,11 +40,15 @@ namespace LocacaoImoveis.Infrastructure.Repositories
             Guid imovelId,
             CancellationToken cancellationToken = default)
         {
-            return await _context.Reservas
-                .CountAsync(r => r.ImovelId == imovelId && //verifica se a reserva e do mesmo imovel e se ta como pendente ou confirmdo
-                                (r.Status == ReservaStatus.Pendente ||
-                                 r.Status == ReservaStatus.Confirmada),
-                           cancellationToken);
+            // Conta somente reservas do imóvel informado.
+            // Reservas pendentes e confirmadas são consideradas ativas.
+            // Reservas concluídas ou canceladas não bloqueiam o imóvel.
+            return await _context.Reservas.CountAsync(
+                reserva =>
+                    reserva.ImovelId == imovelId &&
+                    (reserva.Status == ReservaStatus.Pendente ||
+                     reserva.Status == ReservaStatus.Confirmada),
+                cancellationToken);
         }
 
         public async Task<bool> ExisteConflitos(
@@ -53,17 +57,21 @@ namespace LocacaoImoveis.Infrastructure.Repositories
             DateOnly saida,
             CancellationToken cancellationToken = default)
         {
-            {
-                //procura pelomenos uma reserva que atende os requisitos: mesmo imovel
-                //somente reservas pendentes ou confirmadas bloqueiam datas
-                // verifica se as datas se cruzam
-                return await _context.Reservas.AnyAsync(r => r.ImovelId == imovelId &&
-                                                        r.Status == ReservaStatus.Pendente ||
-                                                       (r.Status == ReservaStatus.Confirmada) &&
+            // Procura pelo menos uma reserva que possa bloquear o período solicitado.
+            return await _context.Reservas.AnyAsync(
+                reserva =>
+                    // A reserva precisa pertencer ao imóvel consultado.
+                    reserva.ImovelId == imovelId &&
 
-                                                        r.DataEntrada < saida &&
-                                                        r.DataSaida > entrada, cancellationToken);
-            }
+                    // Somente reservas pendentes ou confirmadas bloqueiam o período.
+                    (reserva.Status == ReservaStatus.Pendente ||
+                     reserva.Status == ReservaStatus.Confirmada) &&
+
+                    // Os períodos se sobrepõem quando a entrada ocorre antes da saída
+                    // existente e a saída ocorre depois da entrada existente.
+                    reserva.DataEntrada < saida &&
+                    reserva.DataSaida > entrada,
+                cancellationToken);
         }
 
 
