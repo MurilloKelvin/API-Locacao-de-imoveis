@@ -14,6 +14,8 @@ namespace LocacaoImoveis.Infrastructure
         public DbSet<Cliente> Clientes => Set<Cliente>();
         public DbSet<Imovel> Imoveis => Set<Imovel>();
 
+        public DbSet<Reserva> Reservas => Set<Reserva>();
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -68,6 +70,27 @@ namespace LocacaoImoveis.Infrastructure
 
             imovel.Property(i => i.Status)
                 .IsRequired();
+
+            // Reservas
+            var reserva = modelBuilder.Entity<Reserva>();
+
+            reserva.HasKey(r => r.Id);
+
+            // um cliente pode ter várias reservas)
+            reserva.HasOne<Cliente>()
+                .WithMany()
+                .HasForeignKey(r => r.ClienteId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            //  Cada reserva pertence a um cliente e a um imóvel.
+            //  Um cliente ou imóvel pode estar associado a várias reservas.
+            //  O banco impede excluir fisicamente um cliente ou imóvel que tenha reservas
+
+            // um imóvel pode ter várias reservas, mas uma reserva pertence a apenas um imóvel
+            reserva.HasOne<Imovel>()
+             .WithMany()
+            .HasForeignKey(r => r.ImovelId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         }
 
