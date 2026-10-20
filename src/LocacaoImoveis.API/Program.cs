@@ -29,6 +29,8 @@ builder.Services.AddScoped<ClienteService>();
 builder.Services.AddScoped<IImovelRepository, ImovelRepository>();
 builder.Services.AddScoped<ImovelService>();
 
+builder.Services.AddScoped<IReservaRepository, ReservaRepository>();
+
 
 // config do ef
 builder.Services.AddDbContext<AppDbContext>((ServiceProvider, options) =>
