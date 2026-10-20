@@ -208,4 +208,95 @@ public class ReservaTests
         Assert.Equal(ReservaStatus.Pendente, reserva.Status);
     }
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void DeveCancelarReservaPendenteOuConfirmada(bool confirmar)
+    {
+        // data de referência para a criação da reserva
+        var criacao = new DateTimeOffset(
+            2026, 10, 19, 10, 0, 0, TimeSpan.FromHours(-3));
+
+        var reserva = new Reserva(
+            Guid.NewGuid(),
+            Guid.NewGuid(),
+            new DateOnly(2026, 11, 10),
+            new DateOnly(2026, 11, 13),
+            2,
+            750m,
+            criacao);
+
+        // confirma a reserva se o parâmetro for verdadeiro
+        if (confirmar)
+            reserva.Confirmar();
+
+        // data de cancelamento, um dia após a criação da reserva
+        var cancelamento = criacao.AddDays(1);
+
+        // tenta cancelar a reserva
+        reserva.Cancelar(cancelamento, 750m);
+
+        // verifica se o status da reserva foi alterado para cancelada e se os detalhes do cancelamento estão corretos
+        Assert.Equal(ReservaStatus.Cancelada, reserva.Status);
+        Assert.Equal(cancelamento, reserva.CanceladaEm);
+        Assert.Equal(750m, reserva.ValorReembolso);
+    }
+
+    [Fact]
+    public void DeveRejeitarCancelamentoDeReservaConcluida()
+    {
+        // Arrange
+        var criacao = new DateTimeOffset(
+            2026, 10, 19, 10, 0, 0, TimeSpan.FromHours(-3));
+
+        var reserva = new Reserva(
+            Guid.NewGuid(),
+            Guid.NewGuid(),
+            new DateOnly(2026, 11, 10),
+            new DateOnly(2026, 11, 13),
+            2,
+            750m,
+            criacao);
+
+        reserva.Confirmar();
+        reserva.Concluir();
+
+        var cancelamento = new DateTimeOffset(
+            2026, 11, 14, 10, 0, 0, TimeSpan.FromHours(-3));
+
+        // tenta cancelar a reserva concluída e verifica se a exceção é lançada
+        Assert.Throws<InvalidOperationException>(
+            () => reserva.Cancelar(cancelamento, 0m));
+
+        Assert.Equal(ReservaStatus.Concluida, reserva.Status);
+        Assert.Null(reserva.CanceladaEm);
+        Assert.Null(reserva.ValorReembolso);
+    }
+
+    [Fact]
+    public void DeveRejeitarSegundoCancelamento()
+    {
+        // Arrange
+        var criacao = new DateTimeOffset(
+            2026, 10, 19, 10, 0, 0, TimeSpan.FromHours(-3));
+
+        var reserva = new Reserva(
+            Guid.NewGuid(), Guid.NewGuid(),
+            new DateOnly(2026, 11, 10),
+            new DateOnly(2026, 11, 13),
+            2, 750m, criacao);
+
+        var primeiroCancelamento = criacao.AddDays(1);
+        reserva.Cancelar(primeiroCancelamento, 750m);
+
+        // tenta cancelar a reserva novamente e verifica se a exceção é lançada
+        Assert.Throws<InvalidOperationException>(() =>
+            reserva.Cancelar(primeiroCancelamento.AddDays(1), 0m));
+
+        // verifica se o status da reserva permanece como cancelada e se os detalhes do primeiro cancelamento estão corretos
+        Assert.Equal(ReservaStatus.Cancelada, reserva.Status);
+        Assert.Equal(primeiroCancelamento, reserva.CanceladaEm);
+        Assert.Equal(750m, reserva.ValorReembolso);
+    }
+
 }

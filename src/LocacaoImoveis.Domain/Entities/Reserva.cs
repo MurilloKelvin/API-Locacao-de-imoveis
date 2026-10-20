@@ -20,6 +20,8 @@ namespace LocacaoImoveis.Domain.Entities
         public DateTimeOffset? CanceladaEm { get; private set; }
         public decimal? ValorReembolso { get; private set; }
 
+        private Reserva() { } // Construtor privado para EF Core
+
         // Construtor da classe 
         public Reserva(
             Guid clienteId, 
