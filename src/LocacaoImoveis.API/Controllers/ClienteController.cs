@@ -34,6 +34,10 @@ namespace LocacaoImoveis.API.Controllers
             {
                 return Conflict(new { message = e.Message });
             }
+            catch(EmailJaCadastradoException e)
+            {
+                return Conflict(new { message = e.Message });
+            }
             catch (ArgumentException e)
             {
                 return BadRequest(new { message = e.Message });

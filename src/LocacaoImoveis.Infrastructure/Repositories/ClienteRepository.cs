@@ -40,7 +40,10 @@ namespace LocacaoImoveis.Infrastructure.Repositories
 
         public async Task<Cliente?> ObterPorEmailAsync(string email)
         {
-            return await _context.Clientes.FirstOrDefaultAsync(c => c.Email.Valor == email);
+            // cria um objeto Email para validar o email antes de consultar o banco de dados
+            var emailValidado = new Email(email);
+            return await _context.Clientes.FirstOrDefaultAsync(c => c.Email == emailValidado);
+
         }
 
         public async Task<Cliente?> ObterPorCpfAsync(string cpf)

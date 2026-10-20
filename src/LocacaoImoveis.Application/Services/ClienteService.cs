@@ -29,6 +29,7 @@ namespace LocacaoImoveis.Application.Services
 
             if(emailClienteExiste != null)
                 throw new EmailJaCadastradoException();
+
             if(cpfClienteExiste != null)
                 throw new CpfJaCadastradoException();
 
