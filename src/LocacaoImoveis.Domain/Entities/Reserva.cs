@@ -98,7 +98,31 @@ namespace LocacaoImoveis.Domain.Entities
             Status = ReservaStatus.Concluida;
         }
 
-        
+        public void Cancelar(DateTimeOffset agora, decimal valorReembolso)
+        {
+            if (Status != ReservaStatus.Pendente &&
+                Status != ReservaStatus.Confirmada)
+            {
+                throw new InvalidOperationException(
+                    "Somente reservas pendentes ou confirmadas podem ser canceladas.");
+            }
+
+            if (agora < CriadaEm)
+                throw new ArgumentException(
+                    "O cancelamento não pode ocorrer antes da criação.",
+                    nameof(agora));
+
+            if (valorReembolso < 0 || valorReembolso > ValorTotalPreco)
+                throw new ArgumentException(
+                    "O reembolso deve estar entre zero e o valor total da reserva.",
+                    nameof(valorReembolso));
+
+            Status = ReservaStatus.Cancelada;
+            CanceladaEm = agora;
+            ValorReembolso = valorReembolso;
+        }
+
+
 
 
     }
