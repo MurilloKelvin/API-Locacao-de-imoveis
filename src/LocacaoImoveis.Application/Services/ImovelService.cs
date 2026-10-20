@@ -2,17 +2,19 @@
 using LocacaoImoveis.Application.Interfaces;
 using LocacaoImoveis.Domain.Entities;
 using LocacaoImoveis.Domain.Enums;
-using System.Data.SqlTypes;
+
 
 namespace LocacaoImoveis.Application.Services
 {
     public class ImovelService
     {
         private readonly IImovelRepository _imovelRepository;
+        private readonly IReservaRepository _reservaRepository;
 
-        public ImovelService(IImovelRepository imovelRepository)
+        public ImovelService(IImovelRepository imovelRepository, IReservaRepository reservaRepository)
         {
             _imovelRepository = imovelRepository;
+            _reservaRepository = reservaRepository;
         }
 
         public async Task<Guid> CriarImovelAsync(CriarImovelRequest request,
@@ -108,15 +110,26 @@ namespace LocacaoImoveis.Application.Services
         public async Task<bool> AlterarStatusImovelAsync(Guid id, AlterarStatusImovelRequest request,
             CancellationToken cancellationToken = default)
         { 
-                if (!request.Status.HasValue) // verifica se o status foi informado
+            if (!request.Status.HasValue) // verifica se o status foi informado
                 throw new ArgumentException("O status do imovel deve ser informado.", nameof(request.Status));
 
-                var imovel = await _imovelRepository.ObterImovelPorIdAsync(id, cancellationToken); // busca o imovel pelo id
+            // busca o imovel pelo id
+            var imovel = await _imovelRepository.ObterImovelPorIdAsync(id, cancellationToken);
+
+            if (imovel is null)
+                return false;
+
+            if(request.Status == ImovelStatus.Indisponivel) // verifica se o status é indisponível
+            {
+                var reservasAtivas = await _reservaRepository.ContarReservasAtivas(id, cancellationToken);
+                if (reservasAtivas > 0) // verifica se existem reservas ativas
+                    throw new InvalidOperationException("Não é possível alterar o status do imóvel para indisponível, pois existem reservas ativas.");
+            }
 
             imovel.AlterarStatusImovel(request.Status.Value); // altera o status 
 
                 await _imovelRepository.AtualizarImovelAsync(cancellationToken); 
-
+            
                 return true;
             }
 
