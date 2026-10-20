@@ -24,9 +24,15 @@ namespace LocacaoImoveis.Application.Services
                 request.Cpf
                 );
 
-            var clienteExiste = await _clienteRepository.ObterPorCpfAsync(request.Cpf);
-            if(clienteExiste != null)
+            var emailClienteExiste = await _clienteRepository.ObterPorEmailAsync(request.Email);
+            var cpfClienteExiste = await _clienteRepository.ObterPorCpfAsync(request.Cpf);
+
+            if(emailClienteExiste != null)
+                throw new EmailJaCadastradoException();
+            if(cpfClienteExiste != null)
                 throw new CpfJaCadastradoException();
+
+
 
             await _clienteRepository.AdicionarClienteAsync(cliente); // salva o cliente no repositório
 

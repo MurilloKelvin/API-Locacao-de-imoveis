@@ -38,6 +38,11 @@ namespace LocacaoImoveis.Infrastructure.Repositories
             return await _context.Clientes.FindAsync(id);
         }
 
+        public async Task<Cliente?> ObterPorEmailAsync(string email)
+        {
+            return await _context.Clientes.FirstOrDefaultAsync(c => c.Email.Valor == email);
+        }
+
         public async Task<Cliente?> ObterPorCpfAsync(string cpf)
         {
             var cpfValidado = new Cpf(cpf);

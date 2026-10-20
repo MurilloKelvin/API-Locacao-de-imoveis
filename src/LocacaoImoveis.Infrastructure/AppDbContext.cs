@@ -51,6 +51,11 @@ namespace LocacaoImoveis.Infrastructure
                 valor => new Email(valor))
                 .IsRequired();
 
+            cliente.HasIndex(c => c.Email)
+                .IsUnique(); // garante que o email seja único no banco de dados
+
+
+
             // Imoveis
             var imovel = modelBuilder.Entity<Imovel>();
 
