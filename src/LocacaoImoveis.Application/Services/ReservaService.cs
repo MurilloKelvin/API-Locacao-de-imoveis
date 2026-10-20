@@ -97,6 +97,29 @@ namespace LocacaoImoveis.Application.Services
             }).ToList();
         }
 
+        public async Task<ReservaResponse?> ObterReservaPorIdAsync(Guid id, CancellationToken cancellationToken = default)
+        {
+            var reserva = await _reservaRepository.ObterIdAsync(id);
+
+            if (reserva is null)
+                return null;
+
+            return new ReservaResponse
+            {
+                Id = reserva.Id,
+                ClienteId = reserva.ClienteId,
+                ImovelId = reserva.ImovelId,
+                QuantidadeDeNoites = reserva.CalcularQuantidadeNoites(),
+                DataEntrada = reserva.DataEntrada,
+                DataSaida = reserva.DataSaida,
+                QuantidadeHospedes = reserva.QuantidadeHospedes,
+                ValorTotalPreco = reserva.ValorTotalPreco,
+                Status = reserva.Status,
+                CriadaEm = reserva.CriadaEm,
+                CanceladaEm = reserva.CanceladaEm,
+                ValorReembolso = reserva.ValorReembolso
+            };
+        }
 
 
     }

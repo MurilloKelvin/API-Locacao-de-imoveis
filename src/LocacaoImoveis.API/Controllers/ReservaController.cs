@@ -45,6 +45,20 @@ namespace LocacaoImoveis.API.Controllers
             return Ok(reservas);
         }
 
+        [HttpGet]
+        [Route("{id:guid}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> ObterReservaPorIdAsync(Guid id, CancellationToken cancellationToken)
+        {
+            var reserva = await _reservaService.ObterReservaPorIdAsync(id, cancellationToken);
+
+            if(reserva is null)
+                return NotFound(new { message = "Reserva não encontrada" });
+
+            return Ok(reserva);
+        }
+
 
     }
 }
