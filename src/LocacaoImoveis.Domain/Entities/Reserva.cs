@@ -80,13 +80,22 @@ namespace LocacaoImoveis.Domain.Entities
 
         public int CalcularQuantidadeNoites() => (DataSaida.DayNumber - DataEntrada.DayNumber);
         
-         public void ConfirmarReserva()
+         public void Confirmar()
         {
             if(Status != ReservaStatus.Pendente)
                 throw new InvalidOperationException(
                     "Somente reservas pendentes podem ser confirmadas.");
 
             Status = ReservaStatus.Confirmada;
+        }
+
+        public void Concluir()
+        {
+            if(Status != ReservaStatus.Confirmada)
+                throw new InvalidOperationException(
+                    "Somente reservas confirmadas podem ser concluídas.");
+
+            Status = ReservaStatus.Concluida;
         }
 
         

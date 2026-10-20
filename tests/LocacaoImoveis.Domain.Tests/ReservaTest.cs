@@ -118,4 +118,94 @@ public class ReservaTests
         Assert.Equal(1, reserva.CalcularQuantidadeNoites());
     }
 
+    [Fact]
+    public void DeveConfirmarReservaPendente()
+    {
+        // cria a data de referência para a criação da reserva
+        var agora = new DateTimeOffset(
+            2026, 10, 19, 10, 0, 0, TimeSpan.FromHours(-3));
+
+        var reserva = new Reserva(
+            Guid.NewGuid(),
+            Guid.NewGuid(),
+            new DateOnly(2026, 10, 20),
+            new DateOnly(2026, 10, 23),
+            2,
+            750m,
+            agora);
+
+        // tenta confirmar a reserva pendente
+        reserva.Confirmar();
+
+        // verifica se o status da reserva foi alterado para confirmada
+        Assert.Equal(ReservaStatus.Confirmada, reserva.Status);
+    }
+
+    [Fact]
+    public void DeveRejeitarConfirmacaoDeReservaJaConfirmada()
+    {
+        // data de referência para a criação da reserva
+        var agora = new DateTimeOffset(
+            2026, 10, 19, 10, 0, 0, TimeSpan.FromHours(-3));
+
+        var reserva = new Reserva(
+            Guid.NewGuid(),
+            Guid.NewGuid(),
+            new DateOnly(2026, 10, 20),
+            new DateOnly(2026, 10, 23),
+            2,
+            750m,
+            agora);
+
+        reserva.Confirmar();
+
+        // verifica se a tentativa de confirmar novamente a reserva confirmada lança uma exceção
+        Assert.Throws<InvalidOperationException>(
+            () => reserva.Confirmar());
+
+        Assert.Equal(ReservaStatus.Confirmada, reserva.Status);
+    }
+
+    [Fact]
+    public void DeveConcluirReservaConfirmada()
+    {
+        // cria a data de referência para a criação da reserva
+        var agora = new DateTimeOffset(
+            2026, 10, 19, 10, 0, 0, TimeSpan.FromHours(-3));
+
+        var reserva = new Reserva(
+            Guid.NewGuid(), Guid.NewGuid(),
+            new DateOnly(2026, 10, 20),
+            new DateOnly(2026, 10, 23),
+            2, 750m, agora);
+
+        reserva.Confirmar();
+
+        // tenta concluir a reserva confirmada
+        reserva.Concluir();
+
+        // verifica se o status da reserva foi alterado para concluída
+        Assert.Equal(ReservaStatus.Concluida, reserva.Status);
+    }
+
+    [Fact]
+    public void DeveRejeitarConclusaoDeReservaPendente()
+    {
+        
+        var agora = new DateTimeOffset(
+            2026, 10, 19, 10, 0, 0, TimeSpan.FromHours(-3));
+
+        var reserva = new Reserva(
+            Guid.NewGuid(), Guid.NewGuid(),
+            new DateOnly(2026, 10, 20),
+            new DateOnly(2026, 10, 23),
+            2, 750m, agora);
+
+        // tenta concluir a reserva pendente
+        Assert.Throws<InvalidOperationException>(
+            () => reserva.Concluir());
+
+        Assert.Equal(ReservaStatus.Pendente, reserva.Status);
+    }
+
 }
