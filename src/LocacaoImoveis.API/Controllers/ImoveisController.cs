@@ -92,6 +92,7 @@ namespace LocacaoImoveis.API.Controllers
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
         public async Task<IActionResult> AlterarStatusImovel(Guid id,
             [FromBody] AlterarStatusImovelRequest request, CancellationToken cancellationToken = default)
         {
@@ -106,9 +107,9 @@ namespace LocacaoImoveis.API.Controllers
 
                 return NoContent();
             }
-            catch (ArgumentException ex)
+            catch (InvalidOperationException ex) 
             {
-                return BadRequest(new { message = ex.Message });
+                return Conflict(new { message = ex.Message });
             }
 
         }
