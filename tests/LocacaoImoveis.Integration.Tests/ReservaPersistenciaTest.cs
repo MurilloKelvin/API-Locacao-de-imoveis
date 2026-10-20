@@ -1,3 +1,4 @@
+using LocacaoImoveis.Application.Services;
 using LocacaoImoveis.Domain.Entities;
 using LocacaoImoveis.Domain.Enums;
 using LocacaoImoveis.Infrastructure;
@@ -261,14 +262,90 @@ public class ReservaPersistenciaTest
         Assert.False(existeConflito);
     }
 
+    [Fact]
+    public async Task DeveListarReservasComQuantidadeDeNoitesCorreta()
+    {
+        // Cria uma conexão SQLite em memória para isolar o teste.
+        using var connection = new SqliteConnection("Data Source=:memory:");
+        await connection.OpenAsync();
+
+        // Configura o EF Core para utilizar a conexão SQLite do teste.
+        var options = new DbContextOptionsBuilder<AppDbContext>()
+            .UseSqlite(connection)
+            .Options;
+
+        // Cria o contexto e as tabelas do banco em memória.
+        await using var context = new AppDbContext(options);
+        await context.Database.EnsureCreatedAsync();
+
+        // Cria o cliente e o imóvel usados nas reservas.
+        var cliente = CriarCliente();
+        var imovel = CriarImovel("Imóvel para listagem");
+        context.Clientes.Add(cliente);
+        context.Imoveis.Add(imovel);
+
+        // Cria reservas com quantidades diferentes de noites.
+        var agora = DateTimeOffset.UtcNow;
+        var reservaDeDuasNoites = CriarReserva(cliente.Id, imovel.Id, agora, 1, 2);
+        var reservaDeCincoNoites = CriarReserva(cliente.Id, imovel.Id, agora, 5, 5);
+        context.Reservas.AddRange(reservaDeDuasNoites, reservaDeCincoNoites);
+        await context.SaveChangesAsync();
+
+        // Cria o serviço para testar a conversão para ReservaResponse.
+        var service = new ReservaService(
+            new ReservaRepository(context),
+            new ImovelRepository(context),
+            new ClienteRepository(context));
+
+        // Solicita a listagem de reservas.
+        var reservas = await service.ObterTodasReservasAsync();
+
+        // Confirma que as duas reservas foram retornadas.
+        Assert.Equal(2, reservas.Count);
+
+        // Confirma que cada reserva recebeu sua própria quantidade de noites.
+        Assert.Contains(reservas, reserva => reserva.QuantidadeDeNoites == 2);
+        Assert.Contains(reservas, reserva => reserva.QuantidadeDeNoites == 5);
+    }
+
+    [Fact]
+    public async Task DeveRetornarListaVaziaQuandoNaoExistiremReservas()
+    {
+        // Cria uma conexão SQLite em memória para isolar o teste.
+        using var connection = new SqliteConnection("Data Source=:memory:");
+        await connection.OpenAsync();
+
+        // Configura o EF Core para utilizar a conexão SQLite do teste.
+        var options = new DbContextOptionsBuilder<AppDbContext>()
+            .UseSqlite(connection)
+            .Options;
+
+        // Cria o contexto e as tabelas do banco em memória.
+        await using var context = new AppDbContext(options);
+        await context.Database.EnsureCreatedAsync();
+
+        // Cria o serviço sem inserir reservas no banco.
+        var service = new ReservaService(
+            new ReservaRepository(context),
+            new ImovelRepository(context),
+            new ClienteRepository(context));
+
+        // Solicita a listagem de reservas.
+        var reservas = await service.ObterTodasReservasAsync();
+
+        // Uma consulta sem registros deve retornar uma lista vazia.
+        Assert.Empty(reservas);
+    }
+
     private static Reserva CriarReserva(
         Guid clienteId,
         Guid imovelId,
         DateTimeOffset agora,
-        int diasAteEntrada)
+        int diasAteEntrada,
+        int quantidadeDeNoites = 2)
     {
         var entrada = DateOnly.FromDateTime(agora.DateTime).AddDays(diasAteEntrada);
-        var saida = entrada.AddDays(2);
+        var saida = entrada.AddDays(quantidadeDeNoites);
 
         return new Reserva(
             clienteId,

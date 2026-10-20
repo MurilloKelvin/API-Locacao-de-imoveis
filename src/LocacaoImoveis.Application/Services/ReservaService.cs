@@ -1,10 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using LocacaoImoveis.Application.DTOs.Clientes;
 using LocacaoImoveis.Application.DTOs.Reservas;
 using LocacaoImoveis.Application.Interfaces;
 using LocacaoImoveis.Domain.Entities;
 using LocacaoImoveis.Domain.Enums;
+using System;
+using System.Collections.Generic;
+using System.Text;
 
 namespace LocacaoImoveis.Application.Services
 {
@@ -74,6 +75,28 @@ namespace LocacaoImoveis.Application.Services
             return reserva.Id;
         }
 
+        public async Task<List<ReservaResponse>> ObterTodasReservasAsync()
+        {
+            var reservas = await _reservaRepository.ObterTodasReservasAsync(); 
+
+            // mapeia as reservas para o DTO de resposta
+            return reservas.Select(r => new ReservaResponse
+            {
+                Id = r.Id,
+                ClienteId = r.ClienteId,
+                ImovelId = r.ImovelId,
+                QuantidadeDeNoites = r.CalcularQuantidadeNoites(),
+                DataEntrada = r.DataEntrada,
+                DataSaida = r.DataSaida,
+                QuantidadeHospedes = r.QuantidadeHospedes,
+                ValorTotalPreco = r.ValorTotalPreco,
+                Status = r.Status,
+                CriadaEm = r.CriadaEm,
+                CanceladaEm = r.CanceladaEm,
+                ValorReembolso = r.ValorReembolso
+            }).ToList();
+        }
+
 
 
     }
@@ -83,5 +106,5 @@ namespace LocacaoImoveis.Application.Services
 
 
 
-    
-    }
+
+}

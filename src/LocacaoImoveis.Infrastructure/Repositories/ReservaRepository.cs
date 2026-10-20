@@ -1,12 +1,8 @@
 ﻿using LocacaoImoveis.Application.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using LocacaoImoveis.Domain.Entities;
-using Microsoft.EntityFrameworkCore;
 using LocacaoImoveis.Domain.Enums;
-using System.Security.Cryptography.X509Certificates;
-
+using Microsoft.EntityFrameworkCore;
+using LocacaoImoveis.Application.DTOs.Reservas;
 namespace LocacaoImoveis.Infrastructure.Repositories
 {
     public class ReservaRepository : IReservaRepository
@@ -73,6 +69,14 @@ namespace LocacaoImoveis.Infrastructure.Repositories
                     reserva.DataSaida > entrada,
                 cancellationToken);
         }
+
+        public async Task<List<Reserva>> ObterTodasReservasAsync()
+        {
+             return await _context.Reservas
+                .OrderBy(reserva => reserva.DataEntrada) // traz a lista ordenada pela data de entrada
+                .ToListAsync();
+        }
+
 
 
     }

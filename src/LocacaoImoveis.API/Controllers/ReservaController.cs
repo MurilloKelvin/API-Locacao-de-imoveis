@@ -36,5 +36,15 @@ namespace LocacaoImoveis.API.Controllers
                 return Conflict(new { message = ex.Message });
             }
         }
+
+        [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<IActionResult> ObterTodasReservasAsync()
+        {
+            var reservas = await _reservaService.ObterTodasReservasAsync();
+            return Ok(reservas);
+        }
+
+
     }
 }

@@ -9,6 +9,8 @@ namespace LocacaoImoveis.Application.Interfaces
     {
         Task AdicionarAsync(Reserva reserva, CancellationToken cancellationToken = default);
 
+        Task<List<Reserva>> ObterTodasReservasAsync();
+
         Task<Reserva?> ObterIdAsync(Guid id, CancellationToken cancellationToken = default);
 
         Task AtualizarAsync(CancellationToken cancellationToken = default);
