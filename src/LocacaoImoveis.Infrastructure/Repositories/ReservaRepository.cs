@@ -87,9 +87,12 @@ namespace LocacaoImoveis.Infrastructure.Repositories
 
         public async Task<List<Reserva>> ObterTodasReservasAsync()
         {
-             return await _context.Reservas
-                .OrderBy(reserva => reserva.CriadaEm) // traz a lista ordenada pela data de entrada
-                .ToListAsync();
+            var reservas = await _context.Reservas.ToListAsync();
+
+            // Ordena as reservas pela data de criação (CriadaEm) antes de retornar
+            return reservas
+                .OrderBy(reserva => reserva.CriadaEm)
+                .ToList();
         }
 
 
