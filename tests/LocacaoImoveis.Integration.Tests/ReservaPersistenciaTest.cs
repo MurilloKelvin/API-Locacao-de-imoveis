@@ -579,6 +579,94 @@ public class ReservaPersistenciaTest
         Assert.Empty(reservas);
     }
 
+    [Fact]
+    public async Task DevePermitirSomenteUmaReservaEmChamadasConcorrentesParaMesmoPeriodo()
+    {
+        // Mantém o banco SQLite em memória disponível durante toda a execução do teste.
+        await using var connection = new SqliteConnection("Data Source=:memory:");
+        await connection.OpenAsync();
+
+        // Todos os contextos usam a mesma conexão para compartilhar o banco de teste.
+        var options = new DbContextOptionsBuilder<AppDbContext>()
+            .UseSqlite(connection)
+            .Options;
+
+        // Cria as tabelas e persiste os dados necessários antes das chamadas concorrentes.
+        await using var contextoInicial = new AppDbContext(options);
+        await contextoInicial.Database.EnsureCreatedAsync();
+
+        var cliente = CriarCliente();
+        var imovel = CriarImovel("Imóvel para concorrência");
+        contextoInicial.Clientes.Add(cliente);
+        contextoInicial.Imoveis.Add(imovel);
+        await contextoInicial.SaveChangesAsync();
+
+        // Cada serviço recebe seu próprio DbContext, pois um contexto não deve
+        // executar operações simultâneas na mesma instância.
+        await using var contexto1 = new AppDbContext(options);
+        await using var contexto2 = new AppDbContext(options);
+
+        // Os dois serviços tentam reservar o mesmo imóvel no mesmo período.
+        var service1 = new ReservaService(
+            new ReservaRepository(contexto1),
+            new ImovelRepository(contexto1),
+            new ClienteRepository(contexto1),
+            new PoliticaDeReembolso());
+        var service2 = new ReservaService(
+            new ReservaRepository(contexto2),
+            new ImovelRepository(contexto2),
+            new ClienteRepository(contexto2),
+            new PoliticaDeReembolso());
+
+        var entrada = DateOnly.FromDateTime(DateTime.UtcNow).AddDays(1);
+        var request = new CriarReservaRequest
+        {
+            ClienteId = cliente.Id,
+            ImovelId = imovel.Id,
+            DataEntrada = entrada,
+            DataSaida = entrada.AddDays(2),
+            QuantidadeHospedes = 2
+        };
+
+        // Converte o resultado de cada chamada em uma exceção ou null,
+        // permitindo validar as duas execuções sem interromper o Task.WhenAll.
+        static async Task<Exception?> TentarCriarReservaAsync(
+            ReservaService service,
+            CriarReservaRequest request)
+        {
+            try
+            {
+                await service.CriarReservaAsync(request);
+                return null;
+            }
+            catch (Exception exception)
+            {
+                return exception;
+            }
+        }
+
+        // As chamadas começam concorrentemente; o lock estático deve permitir
+        // que apenas uma delas passe pela verificação e persistência.
+        var falhas = await Task.WhenAll(
+            TentarCriarReservaAsync(service1, request),
+            TentarCriarReservaAsync(service2, request));
+
+        // Exatamente uma chamada deve ter sucesso e a outra deve falhar
+        // por conflito de período.
+        Assert.Equal(1, falhas.Count(falha => falha is null));
+        var falhaDeConflito = Assert.Single(falhas.Where(falha => falha is not null));
+        Assert.IsType<InvalidOperationException>(falhaDeConflito);
+
+        // Consulta com um contexto independente para verificar o estado persistido.
+        await using var contextoVerificacao = new AppDbContext(options);
+        var reservasPersistidas = await contextoVerificacao.Reservas
+            .Where(reserva => reserva.ImovelId == imovel.Id)
+            .ToListAsync();
+
+        // A concorrência não pode produzir duas reservas para o mesmo período.
+        Assert.Single(reservasPersistidas);
+    }
+
     private static Reserva CriarReserva(
         Guid clienteId,
         Guid imovelId,
