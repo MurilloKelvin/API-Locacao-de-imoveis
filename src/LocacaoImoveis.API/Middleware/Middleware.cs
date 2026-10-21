@@ -19,6 +19,7 @@ public sealed class ExceptionHandlingMiddleware
         _logger = logger;
     }
 
+
     public async Task InvokeAsync(HttpContext context)
     {
         try
@@ -48,6 +49,9 @@ public sealed class ExceptionHandlingMiddleware
         {
             CpfJaCadastradoException or EmailJaCadastradoException
                 => (StatusCodes.Status409Conflict, "Conflito"),
+
+            RecursoNaoEncontradoException
+                => (StatusCodes.Status404NotFound, "Recurso não encontrado"),
 
             InvalidOperationException
                 => (StatusCodes.Status409Conflict, "Regra de negócio violada"),

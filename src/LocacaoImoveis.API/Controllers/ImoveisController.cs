@@ -1,6 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using LocacaoImoveis.Application.DTOs.Imoveis;
 using LocacaoImoveis.Application.Services;
-using LocacaoImoveis.Application.DTOs.Imoveis;
+using Microsoft.AspNetCore.Mvc;
 
 
 namespace LocacaoImoveis.API.Controllers
@@ -21,20 +21,13 @@ namespace LocacaoImoveis.API.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> CriarImovel([FromBody] CriarImovelRequest request, CancellationToken cancellationToken)
         {
-            try
-            {
-                var imovelId = await _imovelService.CriarImovelAsync(request, cancellationToken);
+            var imovelId = await _imovelService.CriarImovelAsync(request, cancellationToken);
 
-                //retorna um objeto com o id do imóvel criado
-                return CreatedAtAction(
-                    nameof(ObterImovelPorId),
-                    new { id = imovelId },
-                    new { id = imovelId });
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
+            //retorna um objeto com o id do imóvel criado
+            return CreatedAtAction(
+                nameof(ObterImovelPorId),
+                new { id = imovelId },
+                new { id = imovelId });
 
         }
 
@@ -59,16 +52,11 @@ namespace LocacaoImoveis.API.Controllers
             [FromQuery] ListarImoveisRequest filtro,
             CancellationToken cancellationToken = default)
         {
-            try
-            {
-                // list aos imoveis com filtro agora
-                var imoveis = await _imovelService.ListarImoveisAsync(filtro, cancellationToken);
-                return Ok(imoveis);
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
+
+            // list aos imoveis com filtro agora
+            var imoveis = await _imovelService.ListarImoveisAsync(filtro, cancellationToken);
+            return Ok(imoveis);
+
 
         }
 
@@ -80,19 +68,14 @@ namespace LocacaoImoveis.API.Controllers
             [FromBody] AtualizarImovelRequest request,
             CancellationToken cancellationToken = default)
         {
-            try
-            {
-                // atualizar o imóvel com o id fornecido
-                var imovelAtualizado = await _imovelService.AtualizarImovelAsync(id, request, cancellationToken);
 
-                if (!imovelAtualizado)
-                    return NotFound("Imóvel não encontrado.");
-                return NoContent();
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
+            // atualizar o imóvel com o id fornecido
+            var imovelAtualizado = await _imovelService.AtualizarImovelAsync(id, request, cancellationToken);
+
+            if (!imovelAtualizado)
+                return NotFound("Imóvel não encontrado.");
+            return NoContent();
+
         }
 
         [HttpPut("{id:guid}/atualizarStatus")]
@@ -104,24 +87,13 @@ namespace LocacaoImoveis.API.Controllers
             [FromBody] AlterarStatusImovelRequest request, CancellationToken cancellationToken = default)
         {
 
-            try
-            {
-                // alterar o status do imóvel com o id fornecido
-                var atualizado = await _imovelService.AlterarStatusImovelAsync(id, request, cancellationToken);
+            // alterar o status do imóvel com o id fornecido
+            var atualizado = await _imovelService.AlterarStatusImovelAsync(id, request, cancellationToken);
 
-                if(!atualizado)
-                    return NotFound(new { message = "Imóvel não encontrado." });
+            if (!atualizado)
+                return NotFound(new { message = "Imóvel não encontrado." });
 
-                return NoContent();
-            }
-            catch (ArgumentException ex) // 400 badrequest
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (InvalidOperationException ex) 
-            {
-                return Conflict(new { message = ex.Message });
-            }
+            return NoContent();
 
         }
     }

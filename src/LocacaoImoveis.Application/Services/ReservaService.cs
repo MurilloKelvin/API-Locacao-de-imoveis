@@ -3,6 +3,7 @@ using LocacaoImoveis.Application.Interfaces;
 using LocacaoImoveis.Domain.Entities;
 using LocacaoImoveis.Domain.Enums;
 using LocacaoImoveis.Domain.Policies;
+using LocacaoImoveis.Application.Exceptions;
 
 namespace LocacaoImoveis.Application.Services
 {
@@ -110,7 +111,7 @@ namespace LocacaoImoveis.Application.Services
             var reserva = await _reservaRepository.ObterIdAsync(id, cancellationToken);
 
             if (reserva is null)
-                return null;
+                throw new RecursoNaoEncontradoException("Reserva", id);
 
             return new ReservaResponse
             {

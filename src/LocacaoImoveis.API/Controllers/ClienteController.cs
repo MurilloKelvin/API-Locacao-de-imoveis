@@ -1,7 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using LocacaoImoveis.Application.DTOs.Clientes;
 using LocacaoImoveis.Application.Services;
-using LocacaoImoveis.Application.Exceptions;
-using LocacaoImoveis.Application.DTOs.Clientes;
+using Microsoft.AspNetCore.Mvc;
 
 namespace LocacaoImoveis.API.Controllers
 {
@@ -24,28 +23,15 @@ namespace LocacaoImoveis.API.Controllers
         public async Task<IActionResult> CriarCliente(
             [FromBody] CriarClienteRequestDTO request)
         {
-            try
-            {
-                var clienteId = await _clienteService.CriarClienteAsync(request);
 
-                // Retorna 201 Created com o ID do cliente criado
-                return CreatedAtAction(
-                    nameof(ObterClientePorId),
-                    new { id = clienteId },
-                    new { id = clienteId });
-            }
-            catch (CpfJaCadastradoException e)
-            {
-                return Conflict(new { message = e.Message });
-            }
-            catch(EmailJaCadastradoException e)
-            {
-                return Conflict(new { message = e.Message });
-            }
-            catch (ArgumentException e)
-            {
-                return BadRequest(new { message = e.Message });
-            }
+            var clienteId = await _clienteService.CriarClienteAsync(request);
+
+            // Retorna 201 Created com o ID do cliente criado
+            return CreatedAtAction(
+                nameof(ObterClientePorId),
+                new { id = clienteId },
+                new { id = clienteId });
+
         }
 
         [HttpGet("{id:guid}/detalhes")]
@@ -65,19 +51,13 @@ namespace LocacaoImoveis.API.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> ObterPorCpfAsync(string cpf)
         {
-            try
-            {
-                var cliente = await _clienteService.ObterClientePorCpfAsync(cpf);
-                if (cliente is null)
-                    return NotFound(new { message = "Cliente não encontrado." });
 
-                return Ok(cliente);
+            var cliente = await _clienteService.ObterClientePorCpfAsync(cpf);
+            if (cliente is null)
+                return NotFound(new { message = "Cliente não encontrado." });
 
-            }
-            catch (ArgumentException e)
-            {
-                return BadRequest(new { message = e.Message });
-            }
+            return Ok(cliente);
+
         }
 
         [HttpGet]
@@ -102,21 +82,15 @@ namespace LocacaoImoveis.API.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> AtualizarClienteRequest(Guid id, [FromBody] AtualizarClienteRequest request)
         {
-            try
-            {
-                // Chama o serviço para atualizar o cliente
-                var atualizado = await _clienteService.AtualizarClienteAsync(id, request);
-                // Se o cliente não foi encontrado, retorna 404 Not Found
-                if (!atualizado)
-                    return NotFound(new { message = "Cliente não encontrado." });
 
-                return NoContent();
-            }
-            catch (ArgumentException e)
-            {
-                return BadRequest(new { message = e.Message });
+            // Chama o serviço para atualizar o cliente
+            var atualizado = await _clienteService.AtualizarClienteAsync(id, request);
+            // Se o cliente não foi encontrado, retorna 404 Not Found
+            if (!atualizado)
+                return NotFound(new { message = "Cliente não encontrado." });
 
-            }
+            return NoContent();
+
         }
 
         // altera somente o status do cliente
@@ -141,8 +115,6 @@ namespace LocacaoImoveis.API.Controllers
         {
             var clienteEncontrado = await _clienteService.InativarClienteAsync(id);
 
-            if (!clienteEncontrado)
-                return NotFound(new { message = "Cliente não encontrado." });
 
             return NoContent();
         }

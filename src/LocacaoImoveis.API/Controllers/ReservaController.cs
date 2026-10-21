@@ -1,6 +1,6 @@
 ﻿using LocacaoImoveis.Application.DTOs.Reservas;
+using LocacaoImoveis.Application.Exceptions;
 using LocacaoImoveis.Application.Services;
-using LocacaoImoveis.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LocacaoImoveis.API.Controllers
@@ -23,23 +23,14 @@ namespace LocacaoImoveis.API.Controllers
         public async Task<IActionResult> CriarReservaAsync(
             [FromBody] CriarReservaRequest request, CancellationToken cancellationToken)
         {
-            try
-            {   // chamando o serviço para criar a reserva
-                var reservaId = await _reservaService.CriarReservaAsync(request, cancellationToken);
+            // chamando o serviço para criar a reserva
+            var reservaId = await _reservaService.CriarReservaAsync(request, cancellationToken);
 
-                return CreatedAtAction(
-                    nameof(ObterReservaPorIdAsync),
-                    new { id = reservaId },
-                    new { id = reservaId });
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (InvalidOperationException ex)
-            {
-                return Conflict(new { message = ex.Message });
-            }
+            return CreatedAtAction(
+                nameof(ObterReservaPorIdAsync),
+                new { id = reservaId },
+                new { id = reservaId });
+
         }
 
         [HttpGet]
@@ -74,24 +65,12 @@ namespace LocacaoImoveis.API.Controllers
             Guid id,
              CancellationToken cancellationToken = default)
         {
-            try
-            {
-                // chamando o serviço para cancelar a reserva
-                var cancelada = await _reservaService.CancelarReservaAsync(id, cancellationToken);
 
-                if (!cancelada)
-                    return NotFound();
+            // chamando o serviço para cancelar a reserva
+            var cancelada = await _reservaService.CancelarReservaAsync(id, cancellationToken);
 
-                return NoContent();
-            }
-            catch (InvalidOperationException ex) 
-            {
-                return Conflict(new {message = ex.Message});
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
+            return NoContent();
+
         }
 
         [HttpPut]
@@ -102,23 +81,14 @@ namespace LocacaoImoveis.API.Controllers
         [ProducesResponseType(StatusCodes.Status409Conflict)]
         public async Task<IActionResult> ConfirmarReservaAsync(Guid id, CancellationToken cancellationToken = default)
         {
-            try
-            {
-                var confirmada = await _reservaService.ConfirmarReservaAsync(id, cancellationToken);
 
-                if(!confirmada)
-                    return NotFound();
+            var confirmada = await _reservaService.ConfirmarReservaAsync(id, cancellationToken);
 
-                return NoContent();
-            }
-            catch (InvalidOperationException ex)
-            {
-                return Conflict(new { message = ex.Message });
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
+            if(!confirmada)
+                return BadRequest(new { message = "Não foi possível confirmar a reserva." });
+
+            return NoContent();
+
         }
 
         [HttpPut]
@@ -129,23 +99,13 @@ namespace LocacaoImoveis.API.Controllers
         [ProducesResponseType(StatusCodes.Status409Conflict)]
         public async Task<IActionResult> ConcluirReservaAsync(Guid id, CancellationToken cancellationToken = default)
         {
-            try
-            {
-                var concluida = await _reservaService.ConcluirReservaAsync(id, cancellationToken);
 
-                if (!concluida)
-                    return NotFound();
+            var concluida = await _reservaService.ConcluirReservaAsync(id, cancellationToken);
 
-                return NoContent(); 
-            }
-            catch (InvalidOperationException ex)
-            {
-                return Conflict(new { message = ex.Message });
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
+            if(!concluida)
+                throw new RecursoNaoEncontradoException("Reserva", id);
+
+            return NoContent();
 
         }
 
