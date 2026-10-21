@@ -33,7 +33,7 @@ namespace LocacaoImoveis.API.Controllers
 
         }
 
-        [HttpGet("{id:guid}")]
+        [HttpGet("{id:guid}/detalhes")]
         [ProducesResponseType(typeof(ImovelResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> ObterImovelPorId(Guid id, CancellationToken cancellationToken)
@@ -47,6 +47,8 @@ namespace LocacaoImoveis.API.Controllers
         }
 
         [HttpGet]
+        [Route("listar")]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(List<ImovelResponse>), StatusCodes.Status200OK)]
         public async Task<IActionResult> ListarImoveis(
             [FromQuery] ListarImoveisRequest filtro,
@@ -65,7 +67,7 @@ namespace LocacaoImoveis.API.Controllers
 
         }
 
-        [HttpPut("{id:guid}")]
+        [HttpPut("{id:guid}/atualizarImovel")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -88,7 +90,7 @@ namespace LocacaoImoveis.API.Controllers
             }
         }
 
-        [HttpPut("{id:guid}/status")]
+        [HttpPut("{id:guid}/atualizarStatus")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]

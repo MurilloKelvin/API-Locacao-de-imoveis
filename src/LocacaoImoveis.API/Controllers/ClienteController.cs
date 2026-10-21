@@ -17,10 +17,10 @@ namespace LocacaoImoveis.API.Controllers
         }
 
         [HttpPost]
+        [Route("criarCliente")]
         [ProducesResponseType(StatusCodes.Status201Created)] // Indica que a resposta será 201 Created
         [ProducesResponseType(StatusCodes.Status400BadRequest)] // Indica que a resposta será 400 Bad Request
         [ProducesResponseType(StatusCodes.Status409Conflict)] // caso de 2 cpfs iguais
-
         public async Task<IActionResult> CriarCliente(
             [FromBody] CriarClienteRequestDTO request)
         {
@@ -44,7 +44,7 @@ namespace LocacaoImoveis.API.Controllers
             }
         }
 
-        [HttpGet("{id:guid}")]
+        [HttpGet("{id:guid}/detalhes")]
         [ProducesResponseType(StatusCodes.Status200OK)] // Indica que a resposta será 200 OK
         [ProducesResponseType(StatusCodes.Status404NotFound)] // Indica que a resposta será 404 Not Found
         public async Task<IActionResult> ObterClientePorId(Guid id)
@@ -56,7 +56,7 @@ namespace LocacaoImoveis.API.Controllers
             return Ok(cliente);
         }
 
-        [HttpGet("cpf/{cpf}")]
+        [HttpGet("{cpf}/detalhes")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> ObterPorCpfAsync(string cpf)
@@ -77,6 +77,7 @@ namespace LocacaoImoveis.API.Controllers
         }
 
         [HttpGet]
+        [Route("obterTodosClientes")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> ObterTodosClientes()
         {
@@ -91,7 +92,7 @@ namespace LocacaoImoveis.API.Controllers
 
         }
 
-        [HttpPut("{id:guid}")]
+        [HttpPut("{id:guid}/atualizar")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
