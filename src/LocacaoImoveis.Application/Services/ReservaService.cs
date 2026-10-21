@@ -1,9 +1,9 @@
 ﻿using LocacaoImoveis.Application.DTOs.Reservas;
+using LocacaoImoveis.Application.Exceptions;
 using LocacaoImoveis.Application.Interfaces;
 using LocacaoImoveis.Domain.Entities;
 using LocacaoImoveis.Domain.Enums;
 using LocacaoImoveis.Domain.Policies;
-using LocacaoImoveis.Application.Exceptions;
 
 namespace LocacaoImoveis.Application.Services
 {
@@ -13,6 +13,9 @@ namespace LocacaoImoveis.Application.Services
         private readonly IImovelRepository _imovelRepository;
         private readonly IClienteRepository _clienteRepository;
         private readonly PoliticaDeReembolso _politicaDeReembolso;
+
+        // lock para evitar duas threads ao mesmo tempo (1,1) 1 vaga de 1 maximo
+        private static readonly SemaphoreSlim CriacaoReservaLock = new(1, 1);
 
         public ReservaService(
             IReservaRepository reservaRepository,
@@ -29,64 +32,76 @@ namespace LocacaoImoveis.Application.Services
         public async Task<Guid> CriarReservaAsync(
             CriarReservaRequest request,
             CancellationToken cancellationToken = default)
-         {
-            //busca o cliente para verificar se ele existe e se está ativo
-            var cliente = await _clienteRepository.ObterPorIdAsync(request.ClienteId);
+        {
+            // lock pra evitar duas threads ao mesmo tempo
+            await CriacaoReservaLock.WaitAsync(cancellationToken);
+            try
+            {
+                //busca o cliente para verificar se ele existe e se está ativo
+                var cliente = await _clienteRepository.ObterPorIdAsync(request.ClienteId);
 
-            if (cliente is null)
-                throw new ArgumentException("Cliente não encontrado", nameof(request.ClienteId));
+                if (cliente is null)
+                    throw new ArgumentException("Cliente não encontrado", nameof(request.ClienteId));
 
-            var contadorReservasCliente = await _reservaRepository.ContarReservasAtivasPorCliente(request.ClienteId, cancellationToken); 
+                var contadorReservasCliente = await _reservaRepository.ContarReservasAtivasPorCliente(request.ClienteId, cancellationToken);
 
-            if(contadorReservasCliente >= 3)
-                throw new InvalidOperationException("Cliente não pode ter mais de 3 reservas ativas");
+                if (contadorReservasCliente >= 3)
+                    throw new InvalidOperationException("Cliente não pode ter mais de 3 reservas ativas");
 
-            if(cliente.Status != ClienteStatus.Ativo)
-                throw new InvalidOperationException("Cliente inativo não pode realizar reservas");
+                if (cliente.Status != ClienteStatus.Ativo)
+                    throw new InvalidOperationException("Cliente inativo não pode realizar reservas");
 
-            //busca o imovel para verificar se ele existe e se está disponível
-            var imovel = await _imovelRepository.ObterImovelPorIdAsync(request.ImovelId);
+                //busca o imovel para verificar se ele existe e se está disponível
+                var imovel = await _imovelRepository.ObterImovelPorIdAsync(request.ImovelId);
 
-            if(imovel is null)
-                throw new ArgumentException("Imóvel não encontrado", nameof(request.ImovelId));
+                if (imovel is null)
+                    throw new ArgumentException("Imóvel não encontrado", nameof(request.ImovelId));
 
-            if(imovel.Status != ImovelStatus.Disponivel)
-                throw new InvalidOperationException("Imóvel não está disponível para reserva");
+                if (imovel.Status != ImovelStatus.Disponivel)
+                    throw new InvalidOperationException("Imóvel não está disponível para reserva");
 
-            if(request.QuantidadeHospedes > imovel.CapacidadeDeHospedes)
-                throw new InvalidOperationException("Quantidade de hóspedes excede a capacidade do imóvel");
+                if (request.QuantidadeHospedes > imovel.CapacidadeDeHospedes)
+                    throw new InvalidOperationException("Quantidade de hóspedes excede a capacidade do imóvel");
 
-            // verifica se ja tem reservas/conflitos para o imovel
-            var existeConflito = await _reservaRepository.ExisteConflitos(request.ImovelId, request.DataEntrada, request.DataSaida, cancellationToken);
+                // verifica se ja tem reservas/conflitos para o imovel
+                var existeConflito = await _reservaRepository.ExisteConflitos(request.ImovelId, request.DataEntrada, request.DataSaida, cancellationToken);
 
-            if(existeConflito)
-                throw new InvalidOperationException("Já existe uma reserva para este imóvel no período informado");
+                if (existeConflito)
+                    throw new InvalidOperationException("Já existe uma reserva para este imóvel no período informado");
 
-            // verifica o numero de dias
-            var quantidadeDeNoites = (request.DataSaida.DayNumber - request.DataEntrada.DayNumber);
-            // calcula o valor total da reserva
-            var valorTotal = quantidadeDeNoites * imovel.ValorDiaria;
+                // verifica o numero de dias
+                var quantidadeDeNoites = (request.DataSaida.DayNumber - request.DataEntrada.DayNumber);
+                // calcula o valor total da reserva
+                var valorTotal = quantidadeDeNoites * imovel.ValorDiaria;
 
-            //cria a reserva
-            var reserva = new Reserva(
-                request.ClienteId,
-                request.ImovelId,
-                request.DataEntrada,
-                request.DataSaida,
-                request.QuantidadeHospedes,
-                valorTotal,
-                DateTimeOffset.UtcNow
-                );
+                //cria a reserva
+                var reserva = new Reserva(
+                    request.ClienteId,
+                    request.ImovelId,
+                    request.DataEntrada,
+                    request.DataSaida,
+                    request.QuantidadeHospedes,
+                    valorTotal,
+                    DateTimeOffset.UtcNow
+                    );
 
-            //salva a reserva
-            await _reservaRepository.AdicionarAsync(reserva, cancellationToken);
-            
-            return reserva.Id;
+                //salva a reserva
+                await _reservaRepository.AdicionarAsync(reserva, cancellationToken);
+
+                return reserva.Id;
+            }
+
+            // esse finnaly diz pra liberar o lock podendo criar outra reserva
+            finally
+            {
+                CriacaoReservaLock.Release(); 
+            }
+
         }
 
         public async Task<List<ReservaResponse>> ObterTodasReservasAsync()
         {
-            var reservas = await _reservaRepository.ObterTodasReservasAsync(); 
+            var reservas = await _reservaRepository.ObterTodasReservasAsync();
 
             // mapeia as reservas para o DTO de resposta
             return reservas.Select(r => new ReservaResponse
@@ -158,14 +173,14 @@ namespace LocacaoImoveis.Application.Services
             if (reserva is null)
                 throw new RecursoNaoEncontradoException("Reserva", id);
 
-           var cancelamento = DateTimeOffset.UtcNow;
+            var cancelamento = DateTimeOffset.UtcNow;
 
             var entrada = new DateTimeOffset(reserva.DataEntrada.ToDateTime(TimeOnly.MinValue), TimeSpan.Zero);
 
-           var valorReembolso = _politicaDeReembolso.CalcularReembolso(reserva.ValorTotalPreco,
-               entrada,
-               cancelamento
-                );
+            var valorReembolso = _politicaDeReembolso.CalcularReembolso(reserva.ValorTotalPreco,
+                entrada,
+                cancelamento
+                 );
 
             reserva.Cancelar(
                 cancelamento,
