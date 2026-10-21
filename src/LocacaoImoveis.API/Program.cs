@@ -1,10 +1,11 @@
-using Microsoft.Data.Sqlite;
-using Microsoft.EntityFrameworkCore;
-using LocacaoImoveis.Infrastructure;
+using LocacaoImoveis.API.Middleware;
 using LocacaoImoveis.Application.Interfaces;
-using LocacaoImoveis.Infrastructure.Repositories;
 using LocacaoImoveis.Application.Services;
 using LocacaoImoveis.Domain.Policies;
+using LocacaoImoveis.Infrastructure;
+using LocacaoImoveis.Infrastructure.Repositories;
+using Microsoft.Data.Sqlite;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -48,6 +49,9 @@ builder.Services.AddDbContext<AppDbContext>((ServiceProvider, options) =>
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
+
+// configura o middleware de tratamento de exceções
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 // garante que o banco exista e que as tabelas sejam criadas
 using (var scope = app.Services.CreateScope())
