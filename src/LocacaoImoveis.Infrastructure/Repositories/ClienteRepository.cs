@@ -21,28 +21,37 @@ namespace LocacaoImoveis.Infrastructure.Repositories
         public async Task AdicionarClienteAsync(Cliente cliente, CancellationToken cancellationToken = default)
         {
             _context.Clientes.Add(cliente);
-            
-                await _context.SaveChangesAsync(cancellationToken);
-         }
 
-        public async Task<Cliente?> ObterPorIdAsync(Guid id, CancellationToken cancellationToken = default)
-        {
-            return await _context.Clientes.FindAsync(id, cancellationToken);
+            try
+            {
+                await _context.SaveChangesAsync(cancellationToken);
+            }
+            catch (DbUpdateException exception)
+                when (exception.InnerException is SqliteException sqlite
+                    && sqlite.SqliteExtendedErrorCode == 2067)
+            {
+                throw new CpfJaCadastradoException();
+            }
         }
 
-        public async Task<Cliente?> ObterPorEmailAsync(string email, CancellationToken cancellationToken = default)
+        public async Task<Cliente?> ObterPorIdAsync(Guid id)
+        {
+            return await _context.Clientes.FindAsync(id);
+        }
+
+        public async Task<Cliente?> ObterPorEmailAsync(string email)
         {
             // cria um objeto Email para validar o email antes de consultar o banco de dados
             var emailValidado = new Email(email);
-            return await _context.Clientes.FirstOrDefaultAsync(c => c.Email == emailValidado, cancellationToken);
+            return await _context.Clientes.FirstOrDefaultAsync(c => c.Email == emailValidado);
 
         }
 
-        public async Task<Cliente?> ObterPorCpfAsync(string cpf, CancellationToken cancellationToken = default)
+        public async Task<Cliente?> ObterPorCpfAsync(string cpf)
         {
             var cpfValidado = new Cpf(cpf);
 
-           return await _context.Clientes.FirstOrDefaultAsync(c => c.Cpf == cpfValidado, cancellationToken);
+           return await _context.Clientes.FirstOrDefaultAsync(c => c.Cpf == cpfValidado);
         }
 
         public async Task<List<Cliente>> ObterTodosClientesAsync()
