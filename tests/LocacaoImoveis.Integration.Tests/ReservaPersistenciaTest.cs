@@ -127,6 +127,185 @@ public class ReservaPersistenciaTest
     }
 
     [Fact]
+    public async Task DeveConfirmarReservaPendente()
+    {
+        // Cria uma conexão SQLite em memória para isolar o teste.
+        using var connection = new SqliteConnection("Data Source=:memory:");
+        await connection.OpenAsync();
+
+        // Configura o EF Core para utilizar a conexão SQLite do teste.
+        var options = new DbContextOptionsBuilder<AppDbContext>()
+            .UseSqlite(connection)
+            .Options;
+
+        // Cria o contexto e as tabelas do banco em memória.
+        await using var context = new AppDbContext(options);
+        await context.Database.EnsureCreatedAsync();
+
+        // Cria e persiste o cliente e o imóvel da reserva.
+        var cliente = CriarCliente();
+        var imovel = CriarImovel("Imóvel para confirmação");
+        context.Clientes.Add(cliente);
+        context.Imoveis.Add(imovel);
+        await context.SaveChangesAsync();
+
+        // Cria o serviço utilizando os repositórios reais com o banco em memória.
+        var service = new ReservaService(
+            new ReservaRepository(context),
+            new ImovelRepository(context),
+            new ClienteRepository(context));
+
+        // Define um período futuro válido para a reserva.
+        var agora = DateTimeOffset.UtcNow;
+        var entrada = DateOnly.FromDateTime(agora.DateTime).AddDays(1);
+
+        // Cria a reserva, que deve iniciar com status pendente.
+        var reservaId = await service.CriarReservaAsync(new CriarReservaRequest
+        {
+            ClienteId = cliente.Id,
+            ImovelId = imovel.Id,
+            DataEntrada = entrada,
+            DataSaida = entrada.AddDays(2),
+            QuantidadeHospedes = 2
+        });
+
+        // Confirma a reserva por meio do serviço.
+        var resultado = await service.ConfirmarReservaAsync(reservaId);
+
+        // Busca a reserva novamente para verificar o status persistido.
+        var reserva = await new ReservaRepository(context)
+            .ObterIdAsync(reservaId);
+
+        // A confirmação deve ser concluída com sucesso.
+        Assert.True(resultado);
+        Assert.NotNull(reserva);
+
+        // O status da reserva deve ser alterado para confirmado.
+        Assert.Equal(ReservaStatus.Confirmada, reserva.Status);
+    }
+
+    [Fact]
+    public async Task DeveConcluirReservaConfirmada()
+    {
+        // Cria uma conexão SQLite em memória para isolar o teste.
+        using var connection = new SqliteConnection("Data Source=:memory:");
+        await connection.OpenAsync();
+
+        // Configura o EF Core para utilizar a conexão SQLite do teste.
+        var options = new DbContextOptionsBuilder<AppDbContext>()
+            .UseSqlite(connection)
+            .Options;
+
+        // Cria o contexto e as tabelas do banco em memória.
+        await using var context = new AppDbContext(options);
+        await context.Database.EnsureCreatedAsync();
+
+        // Cria e persiste o cliente e o imóvel da reserva.
+        var cliente = CriarCliente();
+        var imovel = CriarImovel("Imóvel para conclusão");
+        context.Clientes.Add(cliente);
+        context.Imoveis.Add(imovel);
+        await context.SaveChangesAsync();
+
+        // Cria o serviço utilizando os repositórios reais com o banco em memória.
+        var service = new ReservaService(
+            new ReservaRepository(context),
+            new ImovelRepository(context),
+            new ClienteRepository(context));
+
+        // Define um período futuro válido para a reserva.
+        var agora = DateTimeOffset.UtcNow;
+        var entrada = DateOnly.FromDateTime(agora.DateTime).AddDays(1);
+
+        // Cria uma reserva pendente.
+        var reservaId = await service.CriarReservaAsync(new CriarReservaRequest
+        {
+            ClienteId = cliente.Id,
+            ImovelId = imovel.Id,
+            DataEntrada = entrada,
+            DataSaida = entrada.AddDays(2),
+            QuantidadeHospedes = 2
+        });
+
+        // Confirma a reserva antes de tentar concluí-la.
+        await service.ConfirmarReservaAsync(reservaId);
+
+        // Conclui a reserva por meio do serviço.
+        var resultado = await service.ConcluirReservaAsync(reservaId);
+
+        // Busca a reserva novamente para verificar o status persistido.
+        var reserva = await new ReservaRepository(context)
+            .ObterIdAsync(reservaId);
+
+        // A conclusão deve ser executada com sucesso.
+        Assert.True(resultado);
+        Assert.NotNull(reserva);
+
+        // O status da reserva deve ser alterado para concluído.
+        Assert.Equal(ReservaStatus.Concluida, reserva.Status);
+    }
+
+    [Fact]
+    public async Task DeveCancelarReservaComReembolsoValido()
+    {
+        // Cria uma conexão SQLite em memória para isolar o teste.
+        using var connection = new SqliteConnection("Data Source=:memory:");
+        await connection.OpenAsync();
+
+        // Configura o EF Core para utilizar a conexão SQLite do teste.
+        var options = new DbContextOptionsBuilder<AppDbContext>()
+            .UseSqlite(connection)
+            .Options;
+
+        // Cria o contexto e as tabelas do banco em memória.
+        await using var context = new AppDbContext(options);
+        await context.Database.EnsureCreatedAsync();
+
+        // Cria e persiste o cliente e o imóvel da reserva.
+        var cliente = CriarCliente();
+        var imovel = CriarImovel("Imóvel para cancelamento");
+        context.Clientes.Add(cliente);
+        context.Imoveis.Add(imovel);
+        await context.SaveChangesAsync();
+
+        // Cria o serviço utilizando os repositórios reais com o banco em memória.
+        var service = new ReservaService(
+            new ReservaRepository(context),
+            new ImovelRepository(context),
+            new ClienteRepository(context));
+
+        // Define um período futuro válido para a reserva.
+        var agora = DateTimeOffset.UtcNow;
+        var entrada = DateOnly.FromDateTime(agora.DateTime).AddDays(1);
+
+        // Cria uma reserva pendente para ser cancelada.
+        var reservaId = await service.CriarReservaAsync(new CriarReservaRequest
+        {
+            ClienteId = cliente.Id,
+            ImovelId = imovel.Id,
+            DataEntrada = entrada,
+            DataSaida = entrada.AddDays(2),
+            QuantidadeHospedes = 2
+        });
+
+        // Cancela a reserva informando um valor de reembolso válido.
+        var resultado = await service.CancelarReservaAsync(reservaId, 100m);
+
+        // Busca a reserva novamente para verificar os dados persistidos.
+        var reserva = await new ReservaRepository(context)
+            .ObterIdAsync(reservaId);
+
+        // O cancelamento deve ser executado com sucesso.
+        Assert.True(resultado);
+        Assert.NotNull(reserva);
+
+        // O status, o valor do reembolso e a data de cancelamento devem ser registrados.
+        Assert.Equal(ReservaStatus.Cancelada, reserva.Status);
+        Assert.Equal(100m, reserva.ValorReembolso);
+        Assert.NotNull(reserva.CanceladaEm);
+    }
+
+    [Fact]
     public async Task DeveDetectarConflitoComReservaPendente()
     {
         // Cria o banco de dados em memória utilizado pelo teste.
