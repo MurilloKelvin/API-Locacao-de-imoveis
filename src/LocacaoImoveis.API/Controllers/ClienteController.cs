@@ -6,7 +6,7 @@ using LocacaoImoveis.Application.DTOs.Clientes;
 namespace LocacaoImoveis.API.Controllers
 {
     [ApiController]
-    [Route("api/clientes")]
+    [Route("api/v1/clientes")]
     public class ClienteController : ControllerBase
     {
 
@@ -28,7 +28,11 @@ namespace LocacaoImoveis.API.Controllers
             {
                 var clienteId = await _clienteService.CriarClienteAsync(request);
 
-                return StatusCode(StatusCodes.Status201Created, new { id = clienteId });
+                // Retorna 201 Created com o ID do cliente criado
+                return CreatedAtAction(
+                    nameof(ObterClientePorId),
+                    new { id = clienteId },
+                    new { id = clienteId });
             }
             catch (CpfJaCadastradoException e)
             {

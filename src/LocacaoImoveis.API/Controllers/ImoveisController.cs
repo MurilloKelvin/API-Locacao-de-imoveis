@@ -6,7 +6,7 @@ using LocacaoImoveis.Application.DTOs.Imoveis;
 namespace LocacaoImoveis.API.Controllers
 {
     [ApiController]
-    [Route("api/imoveis")]
+    [Route("api/v1/imoveis")]
     public class ImoveisController : ControllerBase
     {
         private readonly ImovelService _imovelService;
@@ -24,7 +24,12 @@ namespace LocacaoImoveis.API.Controllers
             try
             {
                 var imovelId = await _imovelService.CriarImovelAsync(request, cancellationToken);
-                return StatusCode(StatusCodes.Status201Created, new { Id = imovelId });
+
+                //retorna um objeto com o id do imóvel criado
+                return CreatedAtAction(
+                    nameof(ObterImovelPorId),
+                    new { id = imovelId },
+                    new { id = imovelId });
             }
             catch (ArgumentException ex)
             {

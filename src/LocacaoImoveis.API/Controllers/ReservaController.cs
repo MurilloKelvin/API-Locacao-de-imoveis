@@ -1,11 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using LocacaoImoveis.Application.DTOs.Reservas;
 using LocacaoImoveis.Application.Services;
-using LocacaoImoveis.Application.DTOs.Reservas;
+using LocacaoImoveis.Domain.Entities;
+using Microsoft.AspNetCore.Mvc;
 
 namespace LocacaoImoveis.API.Controllers
 {
     [ApiController]
-    [Route("api/reservas")]
+    [Route("api/v1/reservas")]
     public class ReservaController : ControllerBase
     {
         private readonly ReservaService _reservaService;
@@ -25,7 +26,11 @@ namespace LocacaoImoveis.API.Controllers
             try
             {   // chamando o serviço para criar a reserva
                 var reservaId = await _reservaService.CriarReservaAsync(request, cancellationToken);
-                return StatusCode(StatusCodes.Status201Created, new { Id = reservaId });
+
+                return CreatedAtAction(
+                    nameof(ObterReservaPorIdAsync),
+                    new { id = reservaId },
+                    new { id = reservaId });
             }
             catch (ArgumentException ex)
             {
