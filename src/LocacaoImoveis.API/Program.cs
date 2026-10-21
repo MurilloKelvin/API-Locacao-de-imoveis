@@ -4,6 +4,7 @@ using LocacaoImoveis.Infrastructure;
 using LocacaoImoveis.Application.Interfaces;
 using LocacaoImoveis.Infrastructure.Repositories;
 using LocacaoImoveis.Application.Services;
+using LocacaoImoveis.Domain.Policies;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,6 +32,8 @@ builder.Services.AddScoped<ImovelService>();
 
 builder.Services.AddScoped<IReservaRepository, ReservaRepository>();
 builder.Services.AddScoped<ReservaService>();
+
+builder.Services.AddScoped<PoliticaDeReembolso>();
 
 
 // config do ef
@@ -68,5 +71,17 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+
+// garante que o banco de dados seja criado e que os dados iniciais sejam inseridos (seed)
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider
+        .GetRequiredService<AppDbContext>();
+
+    await context.Database.EnsureCreatedAsync();
+
+    // chama o método de seed para popular o banco de dados com dados iniciais
+    await DbInitializer.SeedAsync(context);
+}
 
 app.Run();
