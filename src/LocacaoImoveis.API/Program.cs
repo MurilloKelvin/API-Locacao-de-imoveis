@@ -89,3 +89,9 @@ using (var scope = app.Services.CreateScope())
 }
 
 app.Run();
+
+
+// e usado pelo apiFactory para fazer os testes htpp usando o mesmo Program da API real
+public partial class Program
+{
+}
