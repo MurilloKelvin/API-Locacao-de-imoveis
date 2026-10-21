@@ -26,9 +26,9 @@ namespace LocacaoImoveis.API.Controllers
             // chamando o serviço para criar a reserva
             var reservaId = await _reservaService.CriarReservaAsync(request, cancellationToken);
 
-            return CreatedAtAction(
-                nameof(ObterReservaPorIdAsync),
-                new { id = reservaId },
+            //retorna o status 201 Created com o id da reserva criada 
+            return Created(
+                $"/api/v1/reservas/{reservaId}/detalhes",
                 new { id = reservaId });
 
         }
