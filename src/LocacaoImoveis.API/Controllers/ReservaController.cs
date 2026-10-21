@@ -65,13 +65,14 @@ namespace LocacaoImoveis.API.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
-        public async Task<IActionResult> CancelarReservaAsync(Guid id,
-            [FromBody] CancelarReservaRequest request, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> CancelarReservaAsync(
+            Guid id,
+             CancellationToken cancellationToken = default)
         {
             try
             {
                 // chamando o serviço para cancelar a reserva
-                var cancelada = await _reservaService.CancelarReservaAsync(id, request.ValorReembolso, cancellationToken);
+                var cancelada = await _reservaService.CancelarReservaAsync(id, cancellationToken);
 
                 if (!cancelada)
                     return NotFound();

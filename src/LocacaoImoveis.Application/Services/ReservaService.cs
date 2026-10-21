@@ -1,11 +1,8 @@
-﻿using LocacaoImoveis.Application.DTOs.Clientes;
-using LocacaoImoveis.Application.DTOs.Reservas;
+﻿using LocacaoImoveis.Application.DTOs.Reservas;
 using LocacaoImoveis.Application.Interfaces;
 using LocacaoImoveis.Domain.Entities;
 using LocacaoImoveis.Domain.Enums;
-using System;
-using System.Collections.Generic;
-using System.Text;
+using LocacaoImoveis.Domain.Policies;
 
 namespace LocacaoImoveis.Application.Services
 {
@@ -14,12 +11,18 @@ namespace LocacaoImoveis.Application.Services
         private readonly IReservaRepository _reservaRepository;
         private readonly IImovelRepository _imovelRepository;
         private readonly IClienteRepository _clienteRepository;
+        private readonly PoliticaDeReembolso _politicaDeReembolso;
 
-        public ReservaService(IReservaRepository reservaRepository, IImovelRepository imovelRepository, IClienteRepository clienteRepository)
+        public ReservaService(
+            IReservaRepository reservaRepository,
+            IImovelRepository imovelRepository,
+            IClienteRepository clienteRepository,
+            PoliticaDeReembolso politicaDeReembolso)
         {
             _reservaRepository = reservaRepository;
             _imovelRepository = imovelRepository;
             _clienteRepository = clienteRepository;
+            _politicaDeReembolso = politicaDeReembolso;
         }
 
         public async Task<Guid> CriarReservaAsync(
@@ -152,14 +155,23 @@ namespace LocacaoImoveis.Application.Services
 
         }
 
-        public async Task<bool> CancelarReservaAsync(Guid id, decimal valorReembolso, CancellationToken cancellationToken = default)
+        public async Task<bool> CancelarReservaAsync(Guid id, CancellationToken cancellationToken = default)
         {
             var reserva = await _reservaRepository.ObterIdAsync(id, cancellationToken);
             if (reserva is null)
                 return false;
 
+           var cancelamento = DateTimeOffset.UtcNow;
+
+            var entrada = new DateTimeOffset(reserva.DataEntrada.ToDateTime(TimeOnly.MinValue), TimeSpan.Zero);
+
+           var valorReembolso = _politicaDeReembolso.CalcularReembolso(reserva.ValorTotalPreco,
+               entrada,
+               cancelamento
+                );
+
             reserva.Cancelar(
-                DateTimeOffset.UtcNow,
+                cancelamento,
                 valorReembolso);
 
             await _reservaRepository.AtualizarAsync(cancellationToken);

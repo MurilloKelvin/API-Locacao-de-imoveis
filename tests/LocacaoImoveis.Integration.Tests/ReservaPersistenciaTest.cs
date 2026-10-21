@@ -2,6 +2,7 @@ using LocacaoImoveis.Application.Services;
 using LocacaoImoveis.Application.DTOs.Reservas;
 using LocacaoImoveis.Domain.Entities;
 using LocacaoImoveis.Domain.Enums;
+using LocacaoImoveis.Domain.Policies;
 using LocacaoImoveis.Infrastructure;
 using LocacaoImoveis.Infrastructure.Repositories;
 using Microsoft.Data.Sqlite;
@@ -90,7 +91,8 @@ public class ReservaPersistenciaTest
         var service = new ReservaService(
             new ReservaRepository(context),
             new ImovelRepository(context),
-            new ClienteRepository(context));
+            new ClienteRepository(context),
+            new PoliticaDeReembolso());
 
         var dataBase = DateOnly.FromDateTime(DateTime.UtcNow).AddDays(1);
 
@@ -153,7 +155,8 @@ public class ReservaPersistenciaTest
         var service = new ReservaService(
             new ReservaRepository(context),
             new ImovelRepository(context),
-            new ClienteRepository(context));
+            new ClienteRepository(context),
+            new PoliticaDeReembolso());
 
         // Define um período futuro válido para a reserva.
         var agora = DateTimeOffset.UtcNow;
@@ -211,7 +214,8 @@ public class ReservaPersistenciaTest
         var service = new ReservaService(
             new ReservaRepository(context),
             new ImovelRepository(context),
-            new ClienteRepository(context));
+            new ClienteRepository(context),
+            new PoliticaDeReembolso());
 
         // Define um período futuro válido para a reserva.
         var agora = DateTimeOffset.UtcNow;
@@ -272,7 +276,8 @@ public class ReservaPersistenciaTest
         var service = new ReservaService(
             new ReservaRepository(context),
             new ImovelRepository(context),
-            new ClienteRepository(context));
+            new ClienteRepository(context),
+            new PoliticaDeReembolso());
 
         // Define um período futuro válido para a reserva.
         var agora = DateTimeOffset.UtcNow;
@@ -289,7 +294,7 @@ public class ReservaPersistenciaTest
         });
 
         // Cancela a reserva informando um valor de reembolso válido.
-        var resultado = await service.CancelarReservaAsync(reservaId, 100m);
+        var resultado = await service.CancelarReservaAsync(reservaId);
 
         // Busca a reserva novamente para verificar os dados persistidos.
         var reserva = await new ReservaRepository(context)
@@ -301,7 +306,7 @@ public class ReservaPersistenciaTest
 
         // O status, o valor do reembolso e a data de cancelamento devem ser registrados.
         Assert.Equal(ReservaStatus.Cancelada, reserva.Status);
-        Assert.Equal(100m, reserva.ValorReembolso);
+        Assert.Equal(0m, reserva.ValorReembolso);
         Assert.NotNull(reserva.CanceladaEm);
     }
 
@@ -536,7 +541,8 @@ public class ReservaPersistenciaTest
         var service = new ReservaService(
             new ReservaRepository(context),
             new ImovelRepository(context),
-            new ClienteRepository(context));
+            new ClienteRepository(context),
+            new PoliticaDeReembolso());
 
         // Solicita a listagem de reservas.
         var reservas = await service.ObterTodasReservasAsync();
@@ -569,7 +575,8 @@ public class ReservaPersistenciaTest
         var service = new ReservaService(
             new ReservaRepository(context),
             new ImovelRepository(context),
-            new ClienteRepository(context));
+            new ClienteRepository(context),
+            new PoliticaDeReembolso());
 
         // Solicita a listagem de reservas.
         var reservas = await service.ObterTodasReservasAsync();
