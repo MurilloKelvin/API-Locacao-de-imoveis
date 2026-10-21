@@ -40,11 +40,11 @@ namespace LocacaoImoveis.Application.Services
             return cliente.Id;
         }
 
-        public async Task<ClienteResponse?> ObterClientePorIdAsync(Guid id)
+        public async Task<ClienteResponse> ObterClientePorIdAsync(Guid id)
         {
             var cliente = await _clienteRepository.ObterPorIdAsync(id);
             if (cliente == null)   
-                return null;
+                throw new RecursoNaoEncontradoException("Cliente", id);
             
             return new ClienteResponse
             {
@@ -57,11 +57,11 @@ namespace LocacaoImoveis.Application.Services
             };
         }
 
-        public async Task<ClienteResponse?> ObterClientePorCpfAsync(string cpf)
+        public async Task<ClienteResponse> ObterClientePorCpfAsync(string cpf)
         {
             var cliente = await _clienteRepository.ObterPorCpfAsync(cpf);
             if (cliente == null)
-                return null;
+                throw new RecursoNaoEncontradoException("Cliente", cpf);
             return new ClienteResponse
             {
                 Id = cliente.Id,
@@ -88,39 +88,36 @@ namespace LocacaoImoveis.Application.Services
             }).ToList();
         }
 
-        public async Task<bool> AtualizarClienteAsync(Guid id, AtualizarClienteRequest request)
+        public async Task AtualizarClienteAsync(Guid id, AtualizarClienteRequest request)
         {
             var cliente = await _clienteRepository.ObterPorIdAsync(id);
             if (cliente == null)
-                return false;
+                throw new RecursoNaoEncontradoException("Cliente", id);
 
             cliente.AtualizarDadosCliente(request.Nome, request.Telefone, request.Email);
             await _clienteRepository.AtualizarClienteAsync(cliente);
-            return true;
         }
 
-        public async Task<bool> AtivarClienteAsync(Guid id)
+        public async Task AtivarClienteAsync(Guid id)
         {
             var cliente = await _clienteRepository.ObterPorIdAsync(id);
             if (cliente == null)
-                return false;
+                throw new RecursoNaoEncontradoException("Cliente", id);
 
             cliente.AtivarCliente();
 
             await _clienteRepository.AtualizarClienteAsync(cliente);
-            return true;
         }
 
-        public async Task<bool> InativarClienteAsync(Guid id)
+        public async Task InativarClienteAsync(Guid id)
         {
             var cliente = await _clienteRepository.ObterPorIdAsync(id); 
             if(cliente == null)
-                return false;
+                throw new RecursoNaoEncontradoException("Cliente", id);
 
             cliente.InativarCliente();
 
             await _clienteRepository.AtualizarClienteAsync(cliente);
-            return true;
         }
 
 

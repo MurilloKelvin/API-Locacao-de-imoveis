@@ -173,14 +173,12 @@ public class ReservaPersistenciaTest
         });
 
         // Confirma a reserva por meio do serviço.
-        var resultado = await service.ConfirmarReservaAsync(reservaId);
+        await service.ConfirmarReservaAsync(reservaId);
 
         // Busca a reserva novamente para verificar o status persistido.
         var reserva = await new ReservaRepository(context)
             .ObterIdAsync(reservaId);
 
-        // A confirmação deve ser concluída com sucesso.
-        Assert.True(resultado);
         Assert.NotNull(reserva);
 
         // O status da reserva deve ser alterado para confirmado.
@@ -235,14 +233,12 @@ public class ReservaPersistenciaTest
         await service.ConfirmarReservaAsync(reservaId);
 
         // Conclui a reserva por meio do serviço.
-        var resultado = await service.ConcluirReservaAsync(reservaId);
+        await service.ConcluirReservaAsync(reservaId);
 
         // Busca a reserva novamente para verificar o status persistido.
         var reserva = await new ReservaRepository(context)
             .ObterIdAsync(reservaId);
 
-        // A conclusão deve ser executada com sucesso.
-        Assert.True(resultado);
         Assert.NotNull(reserva);
 
         // O status da reserva deve ser alterado para concluído.
@@ -294,14 +290,12 @@ public class ReservaPersistenciaTest
         });
 
         // Cancela a reserva informando um valor de reembolso válido.
-        var resultado = await service.CancelarReservaAsync(reservaId);
+        await service.CancelarReservaAsync(reservaId);
 
         // Busca a reserva novamente para verificar os dados persistidos.
         var reserva = await new ReservaRepository(context)
             .ObterIdAsync(reservaId);
 
-        // O cancelamento deve ser executado com sucesso.
-        Assert.True(resultado);
         Assert.NotNull(reserva);
 
         // O status, o valor do reembolso e a data de cancelamento devem ser registrados.

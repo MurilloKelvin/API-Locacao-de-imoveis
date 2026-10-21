@@ -49,9 +49,6 @@ namespace LocacaoImoveis.API.Controllers
         {
             var reserva = await _reservaService.ObterReservaPorIdAsync(id, cancellationToken);
 
-            if (reserva is null)
-                return NotFound(new { message = "Reserva não encontrada" });
-
             return Ok(reserva);
         }
 
@@ -67,7 +64,7 @@ namespace LocacaoImoveis.API.Controllers
         {
 
             // chamando o serviço para cancelar a reserva
-            var cancelada = await _reservaService.CancelarReservaAsync(id, cancellationToken);
+            await _reservaService.CancelarReservaAsync(id, cancellationToken);
 
             return NoContent();
 
@@ -82,10 +79,7 @@ namespace LocacaoImoveis.API.Controllers
         public async Task<IActionResult> ConfirmarReservaAsync(Guid id, CancellationToken cancellationToken = default)
         {
 
-            var confirmada = await _reservaService.ConfirmarReservaAsync(id, cancellationToken);
-
-            if(!confirmada)
-                return BadRequest(new { message = "Não foi possível confirmar a reserva." });
+            await _reservaService.ConfirmarReservaAsync(id, cancellationToken);
 
             return NoContent();
 
@@ -100,10 +94,7 @@ namespace LocacaoImoveis.API.Controllers
         public async Task<IActionResult> ConcluirReservaAsync(Guid id, CancellationToken cancellationToken = default)
         {
 
-            var concluida = await _reservaService.ConcluirReservaAsync(id, cancellationToken);
-
-            if(!concluida)
-                throw new RecursoNaoEncontradoException("Reserva", id);
+            await _reservaService.ConcluirReservaAsync(id, cancellationToken);
 
             return NoContent();
 

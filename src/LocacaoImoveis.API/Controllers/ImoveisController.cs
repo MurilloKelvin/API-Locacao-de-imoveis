@@ -38,9 +38,6 @@ namespace LocacaoImoveis.API.Controllers
         {
             var imovelResponse = await _imovelService.ObterImovelPorIdAsync(id, cancellationToken);
 
-            if (imovelResponse == null)
-                return NotFound("Imóvel não encontrado.");
-
             return Ok(imovelResponse);
         }
 
@@ -70,10 +67,7 @@ namespace LocacaoImoveis.API.Controllers
         {
 
             // atualizar o imóvel com o id fornecido
-            var imovelAtualizado = await _imovelService.AtualizarImovelAsync(id, request, cancellationToken);
-
-            if (!imovelAtualizado)
-                return NotFound("Imóvel não encontrado.");
+            await _imovelService.AtualizarImovelAsync(id, request, cancellationToken);
             return NoContent();
 
         }
@@ -88,10 +82,7 @@ namespace LocacaoImoveis.API.Controllers
         {
 
             // alterar o status do imóvel com o id fornecido
-            var atualizado = await _imovelService.AlterarStatusImovelAsync(id, request, cancellationToken);
-
-            if (!atualizado)
-                return NotFound(new { message = "Imóvel não encontrado." });
+            await _imovelService.AlterarStatusImovelAsync(id, request, cancellationToken);
 
             return NoContent();
 

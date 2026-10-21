@@ -106,7 +106,7 @@ namespace LocacaoImoveis.Application.Services
             }).ToList();
         }
 
-        public async Task<ReservaResponse?> ObterReservaPorIdAsync(Guid id, CancellationToken cancellationToken = default)
+        public async Task<ReservaResponse> ObterReservaPorIdAsync(Guid id, CancellationToken cancellationToken = default)
         {
             var reserva = await _reservaRepository.ObterIdAsync(id, cancellationToken);
 
@@ -130,37 +130,33 @@ namespace LocacaoImoveis.Application.Services
             };
         }
 
-        public async Task<bool> ConcluirReservaAsync(Guid id, CancellationToken cancellationToken = default)
+        public async Task ConcluirReservaAsync(Guid id, CancellationToken cancellationToken = default)
         {
             var reserva = await _reservaRepository.ObterIdAsync(id, cancellationToken);
             if (reserva is null)
-                return false;
+                throw new RecursoNaoEncontradoException("Reserva", id);
 
             reserva.Concluir();
 
             await _reservaRepository.AtualizarAsync(cancellationToken);
-            return true;
-
         }
 
-        public async Task<bool> ConfirmarReservaAsync(Guid id, CancellationToken cancellationToken = default)
+        public async Task ConfirmarReservaAsync(Guid id, CancellationToken cancellationToken = default)
         {
             var reserva = await _reservaRepository.ObterIdAsync(id, cancellationToken);
             if (reserva is null)
-                return false;
+                throw new RecursoNaoEncontradoException("Reserva", id);
 
             reserva.Confirmar();
 
             await _reservaRepository.AtualizarAsync(cancellationToken);
-            return true;
-
         }
 
-        public async Task<bool> CancelarReservaAsync(Guid id, CancellationToken cancellationToken = default)
+        public async Task CancelarReservaAsync(Guid id, CancellationToken cancellationToken = default)
         {
             var reserva = await _reservaRepository.ObterIdAsync(id, cancellationToken);
             if (reserva is null)
-                return false;
+                throw new RecursoNaoEncontradoException("Reserva", id);
 
            var cancelamento = DateTimeOffset.UtcNow;
 
@@ -176,8 +172,6 @@ namespace LocacaoImoveis.Application.Services
                 valorReembolso);
 
             await _reservaRepository.AtualizarAsync(cancellationToken);
-            return true;
-
         }
 
     }

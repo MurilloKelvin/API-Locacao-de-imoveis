@@ -121,12 +121,11 @@ public class ImovelServiceTest
         };
 
         // Executa a alteração; sem reservas ativas, ela deve ser permitida.
-        var resultado = await service.AlterarStatusImovelAsync(
+        await service.AlterarStatusImovelAsync(
             imovel.Id,
             request);
 
-        // Confirma que a operação foi bem-sucedida e o status foi atualizado.
-        Assert.True(resultado);
+        // Confirma que o status foi atualizado.
         Assert.Equal(ImovelStatus.Indisponivel, imovel.Status);
     }
 }

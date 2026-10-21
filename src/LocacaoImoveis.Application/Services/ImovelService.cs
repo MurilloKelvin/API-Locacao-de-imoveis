@@ -1,4 +1,5 @@
 ﻿using LocacaoImoveis.Application.DTOs.Imoveis;
+using LocacaoImoveis.Application.Exceptions;
 using LocacaoImoveis.Application.Interfaces;
 using LocacaoImoveis.Domain.Entities;
 using LocacaoImoveis.Domain.Enums;
@@ -31,14 +32,14 @@ namespace LocacaoImoveis.Application.Services
             return imovel.Id;
         }
 
-        public async Task<ImovelResponse?> ObterImovelPorIdAsync(Guid id,
+        public async Task<ImovelResponse> ObterImovelPorIdAsync(Guid id,
             CancellationToken cancellationToken = default)
         {
             // Obter o imóvel do repositório
             var imovel = await _imovelRepository.ObterImovelPorIdAsync(id, cancellationToken);
 
             if (imovel == null)
-                return null;
+                throw new RecursoNaoEncontradoException("Imóvel", id);
 
             // retorna o DTO de resposta
             return new ImovelResponse
@@ -88,13 +89,13 @@ namespace LocacaoImoveis.Application.Services
             }).ToList();
         }
 
-        public async Task<bool>AtualizarImovelAsync(Guid id, AtualizarImovelRequest request,
+        public async Task AtualizarImovelAsync(Guid id, AtualizarImovelRequest request,
             CancellationToken cancellationToken = default)
         {
             var imovel = await _imovelRepository.ObterImovelPorIdAsync(id, cancellationToken);
 
             if (imovel is null)
-                return false;
+                throw new RecursoNaoEncontradoException("Imóvel", id);
 
             imovel.AtualizarImovel(
                 request.Endereco,
@@ -104,10 +105,9 @@ namespace LocacaoImoveis.Application.Services
             );
 
             await _imovelRepository.AtualizarImovelAsync(cancellationToken);
-            return true;
         }
 
-        public async Task<bool> AlterarStatusImovelAsync(Guid id, AlterarStatusImovelRequest request,
+        public async Task AlterarStatusImovelAsync(Guid id, AlterarStatusImovelRequest request,
             CancellationToken cancellationToken = default)
         { 
             if (!request.Status.HasValue) // verifica se o status foi informado
@@ -117,7 +117,7 @@ namespace LocacaoImoveis.Application.Services
             var imovel = await _imovelRepository.ObterImovelPorIdAsync(id, cancellationToken);
 
             if (imovel is null)
-                return false;
+                throw new RecursoNaoEncontradoException("Imóvel", id);
 
             if(request.Status == ImovelStatus.Indisponivel) // verifica se o status é indisponível
             {
@@ -131,7 +131,6 @@ namespace LocacaoImoveis.Application.Services
 
                 await _imovelRepository.AtualizarImovelAsync(cancellationToken); 
             
-                return true;
             }
 
 

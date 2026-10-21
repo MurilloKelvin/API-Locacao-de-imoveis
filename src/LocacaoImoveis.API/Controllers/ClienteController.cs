@@ -40,9 +40,6 @@ namespace LocacaoImoveis.API.Controllers
         public async Task<IActionResult> ObterClientePorId(Guid id)
         {
             var cliente = await _clienteService.ObterClientePorIdAsync(id);
-            if (cliente == null)
-                return NotFound(new { message = "Cliente não encontrado." });
-
             return Ok(cliente);
         }
 
@@ -53,9 +50,6 @@ namespace LocacaoImoveis.API.Controllers
         {
 
             var cliente = await _clienteService.ObterClientePorCpfAsync(cpf);
-            if (cliente is null)
-                return NotFound(new { message = "Cliente não encontrado." });
-
             return Ok(cliente);
 
         }
@@ -84,10 +78,7 @@ namespace LocacaoImoveis.API.Controllers
         {
 
             // Chama o serviço para atualizar o cliente
-            var atualizado = await _clienteService.AtualizarClienteAsync(id, request);
-            // Se o cliente não foi encontrado, retorna 404 Not Found
-            if (!atualizado)
-                return NotFound(new { message = "Cliente não encontrado." });
+            await _clienteService.AtualizarClienteAsync(id, request);
 
             return NoContent();
 
@@ -99,10 +90,7 @@ namespace LocacaoImoveis.API.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> AtivarCliente(Guid id)
         {
-            var clienteEncontrado = await _clienteService.AtivarClienteAsync(id);
-
-            if (!clienteEncontrado)
-                return NotFound(new { message = "Cliente não encontrado." });
+            await _clienteService.AtivarClienteAsync(id);
 
             return NoContent();
         }
@@ -113,9 +101,7 @@ namespace LocacaoImoveis.API.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> InativarCliente(Guid id)
         {
-            var clienteEncontrado = await _clienteService.InativarClienteAsync(id);
-
-
+            await _clienteService.InativarClienteAsync(id);
             return NoContent();
         }
 
