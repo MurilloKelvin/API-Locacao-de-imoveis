@@ -25,24 +25,24 @@ namespace LocacaoImoveis.Infrastructure.Repositories
                 await _context.SaveChangesAsync(cancellationToken);
          }
 
-        public async Task<Cliente?> ObterPorIdAsync(Guid id)
+        public async Task<Cliente?> ObterPorIdAsync(Guid id, CancellationToken cancellationToken = default)
         {
-            return await _context.Clientes.FindAsync(id);
+            return await _context.Clientes.FindAsync(id, cancellationToken);
         }
 
-        public async Task<Cliente?> ObterPorEmailAsync(string email)
+        public async Task<Cliente?> ObterPorEmailAsync(string email, CancellationToken cancellationToken = default)
         {
             // cria um objeto Email para validar o email antes de consultar o banco de dados
             var emailValidado = new Email(email);
-            return await _context.Clientes.FirstOrDefaultAsync(c => c.Email == emailValidado);
+            return await _context.Clientes.FirstOrDefaultAsync(c => c.Email == emailValidado, cancellationToken);
 
         }
 
-        public async Task<Cliente?> ObterPorCpfAsync(string cpf)
+        public async Task<Cliente?> ObterPorCpfAsync(string cpf, CancellationToken cancellationToken = default)
         {
             var cpfValidado = new Cpf(cpf);
 
-           return await _context.Clientes.FirstOrDefaultAsync(c => c.Cpf == cpfValidado);
+           return await _context.Clientes.FirstOrDefaultAsync(c => c.Cpf == cpfValidado, cancellationToken);
         }
 
         public async Task<List<Cliente>> ObterTodosClientesAsync()

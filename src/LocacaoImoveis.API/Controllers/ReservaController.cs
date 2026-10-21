@@ -35,7 +35,7 @@ namespace LocacaoImoveis.API.Controllers
 
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<IActionResult> ObterTodasReservasAsync()
+        public async Task<IActionResult> ObterTodasReservasAsync(CancellationToken cancellationToken = default)
         {
             var reservas = await _reservaService.ObterTodasReservasAsync();
             return Ok(reservas);
