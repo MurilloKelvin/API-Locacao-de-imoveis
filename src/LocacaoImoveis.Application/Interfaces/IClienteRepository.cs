@@ -4,13 +4,13 @@ namespace LocacaoImoveis.Application.Interfaces
 {
     public interface IClienteRepository
     {
-        Task AdicionarClienteAsync(Cliente cliente);
+        Task AdicionarClienteAsync(Cliente cliente, CancellationToken cancellationToken = default);
         Task<Cliente?> ObterPorIdAsync(Guid id);
         Task<Cliente?> ObterPorCpfAsync(string cpf);
         Task<Cliente?> ObterPorEmailAsync(string email);
         Task<List<Cliente>> ObterTodosClientesAsync();
 
-        Task AtualizarClienteAsync(Cliente cliente);
+        Task AtualizarClienteAsync(Cliente cliente, CancellationToken cancellationToken = default);
 
     }
 }

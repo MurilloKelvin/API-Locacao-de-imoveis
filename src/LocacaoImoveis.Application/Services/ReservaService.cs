@@ -4,6 +4,7 @@ using LocacaoImoveis.Application.Interfaces;
 using LocacaoImoveis.Domain.Entities;
 using LocacaoImoveis.Domain.Enums;
 using LocacaoImoveis.Domain.Policies;
+using Microsoft.Extensions.Logging;
 
 namespace LocacaoImoveis.Application.Services
 {
@@ -13,6 +14,7 @@ namespace LocacaoImoveis.Application.Services
         private readonly IImovelRepository _imovelRepository;
         private readonly IClienteRepository _clienteRepository;
         private readonly PoliticaDeReembolso _politicaDeReembolso;
+        private readonly ILogger<ReservaService> _logger;
 
         // lock para evitar duas threads ao mesmo tempo (1,1) 1 vaga de 1 maximo
         private static readonly SemaphoreSlim CriacaoReservaLock = new(1, 1);
@@ -21,18 +23,26 @@ namespace LocacaoImoveis.Application.Services
             IReservaRepository reservaRepository,
             IImovelRepository imovelRepository,
             IClienteRepository clienteRepository,
-            PoliticaDeReembolso politicaDeReembolso)
+            PoliticaDeReembolso politicaDeReembolso,
+            ILogger<ReservaService> logger)
         {
             _reservaRepository = reservaRepository;
             _imovelRepository = imovelRepository;
             _clienteRepository = clienteRepository;
             _politicaDeReembolso = politicaDeReembolso;
+            _logger = logger;
         }
 
         public async Task<Guid> CriarReservaAsync(
             CriarReservaRequest request,
             CancellationToken cancellationToken = default)
         {
+            //log
+            _logger.LogInformation("Criando rserva para o cliente {ClienteId} e imóvel {ImovelId}",
+                request.ClienteId, request.ImovelId);
+
+
+
             // lock pra evitar duas threads ao mesmo tempo
             await CriacaoReservaLock.WaitAsync(cancellationToken);
             try
@@ -88,6 +98,10 @@ namespace LocacaoImoveis.Application.Services
                 //salva a reserva
                 await _reservaRepository.AdicionarAsync(reserva, cancellationToken);
 
+                //log
+                    _logger.LogInformation("reserva criada parao cliente {ClienteId} e imóvel {ImovelId}",
+                    request.ClienteId, request.ImovelId);
+                
                 return reserva.Id;
             }
 
@@ -154,6 +168,10 @@ namespace LocacaoImoveis.Application.Services
             reserva.Concluir();
 
             await _reservaRepository.AtualizarAsync(cancellationToken);
+
+            //log
+            _logger.LogInformation("Reserva concluida para o cliente {ClienteId} e imovel {ImovelId}",
+                reserva.ClienteId, reserva.ImovelId);
         }
 
         public async Task ConfirmarReservaAsync(Guid id, CancellationToken cancellationToken = default)
@@ -165,6 +183,10 @@ namespace LocacaoImoveis.Application.Services
             reserva.Confirmar();
 
             await _reservaRepository.AtualizarAsync(cancellationToken);
+
+            //log
+            _logger.LogInformation("Reserva confirmada para o cliente {ClienteId} e imovel {ImovelId}",
+                reserva.ClienteId, reserva.ImovelId);
         }
 
         public async Task CancelarReservaAsync(Guid id, CancellationToken cancellationToken = default)
@@ -187,6 +209,10 @@ namespace LocacaoImoveis.Application.Services
                 valorReembolso);
 
             await _reservaRepository.AtualizarAsync(cancellationToken);
+
+            //log
+            _logger.LogInformation("Reserva cancelada para o cliente {ClienteId} e imovel {ImovelId}",
+                reserva.ClienteId, reserva.ImovelId);
         }
 
     }

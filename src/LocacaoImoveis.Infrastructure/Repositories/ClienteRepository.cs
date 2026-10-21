@@ -18,20 +18,12 @@ namespace LocacaoImoveis.Infrastructure.Repositories
             _context = context;
         }
 
-        public async Task AdicionarClienteAsync(Cliente cliente)
+        public async Task AdicionarClienteAsync(Cliente cliente, CancellationToken cancellationToken = default)
         {
             _context.Clientes.Add(cliente);
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch(DbUpdateException ex)
-                when (ex.InnerException is SqliteException sqlite // so executo se der a exceçao de unicidade 
-                && sqlite.SqliteExtendedErrorCode == 2067)
-            { 
-                throw new CpfJaCadastradoException(); 
-            }
-        }
+            
+                await _context.SaveChangesAsync(cancellationToken);
+         }
 
         public async Task<Cliente?> ObterPorIdAsync(Guid id)
         {
@@ -60,9 +52,9 @@ namespace LocacaoImoveis.Infrastructure.Repositories
                 .ToListAsync();
         }
 
-        public async Task AtualizarClienteAsync(Cliente cliente)
+        public async Task AtualizarClienteAsync(Cliente cliente, CancellationToken cancellationToken = default)
         {
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync(cancellationToken);
         }
 
     }

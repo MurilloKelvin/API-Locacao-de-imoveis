@@ -7,6 +7,7 @@ using LocacaoImoveis.Infrastructure;
 using LocacaoImoveis.Infrastructure.Repositories;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace LocacaoImoveis.Integration.Tests;
 
@@ -92,7 +93,8 @@ public class ReservaPersistenciaTest
             new ReservaRepository(context),
             new ImovelRepository(context),
             new ClienteRepository(context),
-            new PoliticaDeReembolso());
+            new PoliticaDeReembolso(),
+            NullLogger<ReservaService>.Instance);
 
         var dataBase = DateOnly.FromDateTime(DateTime.UtcNow).AddDays(1);
 
@@ -156,7 +158,8 @@ public class ReservaPersistenciaTest
             new ReservaRepository(context),
             new ImovelRepository(context),
             new ClienteRepository(context),
-            new PoliticaDeReembolso());
+            new PoliticaDeReembolso(),
+            NullLogger<ReservaService>.Instance);
 
         // Define um período futuro válido para a reserva.
         var agora = DateTimeOffset.UtcNow;
@@ -213,7 +216,8 @@ public class ReservaPersistenciaTest
             new ReservaRepository(context),
             new ImovelRepository(context),
             new ClienteRepository(context),
-            new PoliticaDeReembolso());
+            new PoliticaDeReembolso(),
+            NullLogger<ReservaService>.Instance);
 
         // Define um período futuro válido para a reserva.
         var agora = DateTimeOffset.UtcNow;
@@ -273,7 +277,8 @@ public class ReservaPersistenciaTest
             new ReservaRepository(context),
             new ImovelRepository(context),
             new ClienteRepository(context),
-            new PoliticaDeReembolso());
+            new PoliticaDeReembolso(),
+            NullLogger<ReservaService>.Instance);
 
         // Define um período futuro válido para a reserva.
         var agora = DateTimeOffset.UtcNow;
@@ -536,7 +541,8 @@ public class ReservaPersistenciaTest
             new ReservaRepository(context),
             new ImovelRepository(context),
             new ClienteRepository(context),
-            new PoliticaDeReembolso());
+            new PoliticaDeReembolso(),
+            NullLogger<ReservaService>.Instance);
 
         // Solicita a listagem de reservas.
         var reservas = await service.ObterTodasReservasAsync();
@@ -570,7 +576,8 @@ public class ReservaPersistenciaTest
             new ReservaRepository(context),
             new ImovelRepository(context),
             new ClienteRepository(context),
-            new PoliticaDeReembolso());
+            new PoliticaDeReembolso(),
+            NullLogger<ReservaService>.Instance);
 
         // Solicita a listagem de reservas.
         var reservas = await service.ObterTodasReservasAsync();
@@ -611,12 +618,14 @@ public class ReservaPersistenciaTest
             new ReservaRepository(contexto1),
             new ImovelRepository(contexto1),
             new ClienteRepository(contexto1),
-            new PoliticaDeReembolso());
+            new PoliticaDeReembolso(),
+            NullLogger<ReservaService>.Instance);
         var service2 = new ReservaService(
             new ReservaRepository(contexto2),
             new ImovelRepository(contexto2),
             new ClienteRepository(contexto2),
-            new PoliticaDeReembolso());
+            new PoliticaDeReembolso(),
+            NullLogger<ReservaService>.Instance);
 
         var entrada = DateOnly.FromDateTime(DateTime.UtcNow).AddDays(1);
         var request = new CriarReservaRequest
@@ -654,7 +663,7 @@ public class ReservaPersistenciaTest
         // Exatamente uma chamada deve ter sucesso e a outra deve falhar
         // por conflito de período.
         Assert.Equal(1, falhas.Count(falha => falha is null));
-        var falhaDeConflito = Assert.Single(falhas.Where(falha => falha is not null));
+        var falhaDeConflito = Assert.Single(falhas.OfType<Exception>());
         Assert.IsType<InvalidOperationException>(falhaDeConflito);
 
         // Consulta com um contexto independente para verificar o estado persistido.

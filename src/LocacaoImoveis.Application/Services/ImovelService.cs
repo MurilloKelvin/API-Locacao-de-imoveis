@@ -3,7 +3,7 @@ using LocacaoImoveis.Application.Exceptions;
 using LocacaoImoveis.Application.Interfaces;
 using LocacaoImoveis.Domain.Entities;
 using LocacaoImoveis.Domain.Enums;
-
+using Microsoft.Extensions.Logging;
 
 namespace LocacaoImoveis.Application.Services
 {
@@ -11,11 +11,13 @@ namespace LocacaoImoveis.Application.Services
     {
         private readonly IImovelRepository _imovelRepository;
         private readonly IReservaRepository _reservaRepository;
+        private readonly ILogger<ImovelService> _logger;
 
-        public ImovelService(IImovelRepository imovelRepository, IReservaRepository reservaRepository)
+        public ImovelService(IImovelRepository imovelRepository, IReservaRepository reservaRepository, ILogger<ImovelService> logger)
         {
             _imovelRepository = imovelRepository;
             _reservaRepository = reservaRepository;
+            _logger = logger;
         }
 
         public async Task<Guid> CriarImovelAsync(CriarImovelRequest request,
@@ -29,6 +31,11 @@ namespace LocacaoImoveis.Application.Services
             );
 
             await _imovelRepository.AdicionarAsync(imovel, cancellationToken);
+
+            //log
+            _logger.LogInformation("Imóvel criado com sucesso. Id: {Id}, Endereço: {Endereco}, Título: {Titulo}, Capacidade: {Capacidade}, Valor Diária: {ValorDiaria}",
+                imovel.Id, imovel.Endereco, imovel.Titulo, imovel.CapacidadeDeHospedes, imovel.ValorDiaria);
+
             return imovel.Id;
         }
 
@@ -105,6 +112,10 @@ namespace LocacaoImoveis.Application.Services
             );
 
             await _imovelRepository.AtualizarImovelAsync(cancellationToken);
+
+            //log
+            _logger.LogInformation("Imóvel atualizado com sucesso. Id: {Id}, Endereço: {Endereco}, Título: {Titulo}, Capacidade: {Capacidade}, Valor Diária: {ValorDiaria}",
+                imovel.Id, imovel.Endereco, imovel.Titulo, imovel.CapacidadeDeHospedes, imovel.ValorDiaria);
         }
 
         public async Task AlterarStatusImovelAsync(Guid id, AlterarStatusImovelRequest request,
@@ -130,8 +141,11 @@ namespace LocacaoImoveis.Application.Services
             imovel.AlterarStatusImovel(request.Status.Value); // altera o status 
 
                 await _imovelRepository.AtualizarImovelAsync(cancellationToken); 
-            
-            }
+
+            _logger.LogInformation("Status do imóvel alterado com sucesso. Id: {Id}, Novo Status: {Status}",
+                imovel.Id, imovel.Status);
+
+        }
 
 
             

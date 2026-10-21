@@ -36,16 +36,14 @@ namespace LocacaoImoveis.Domain.Entities
             Cpf = new Cpf(cpf);
         }
 
-        public void AtualizarDadosCliente(string nome, string telefone, string email)
+        public void AtualizarDadosCliente(string nome, string telefone)
         {
             if (string.IsNullOrWhiteSpace(nome))
                 throw new ArgumentException("Nome não pode ser vazio.", nameof(nome));
 
-            var emailValido = new Email(email); // valida o email antes de atualizar  **
 
             Nome = nome.Trim();
             Telefone = telefone;
-            Email = emailValido; // atualiza o Value Object Email
 
         }
 

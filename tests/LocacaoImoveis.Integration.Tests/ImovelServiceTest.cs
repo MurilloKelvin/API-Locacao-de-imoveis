@@ -6,6 +6,7 @@ using LocacaoImoveis.Infrastructure;
 using LocacaoImoveis.Infrastructure.Repositories;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace LocacaoImoveis.Integration.Tests;
 
@@ -67,7 +68,8 @@ public class ImovelServiceTest
         // Cria o serviço utilizando os repositórios reais com o banco em memória.
         var service = new ImovelService(
             new ImovelRepository(context),
-            new ReservaRepository(context));
+            new ReservaRepository(context),
+            NullLogger<ImovelService>.Instance);
 
         // Solicita a alteração do imóvel para indisponível.
         var request = new AlterarStatusImovelRequest
@@ -112,7 +114,8 @@ public class ImovelServiceTest
         // Cria o serviço utilizando os repositórios reais com o banco em memória.
         var service = new ImovelService(
             new ImovelRepository(context),
-            new ReservaRepository(context));
+            new ReservaRepository(context),
+            NullLogger<ImovelService>.Instance);
 
         // Solicita a alteração do imóvel para indisponível.
         var request = new AlterarStatusImovelRequest
