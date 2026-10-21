@@ -126,6 +126,46 @@ namespace LocacaoImoveis.Application.Services
             };
         }
 
+        public async Task<bool> ConcluirReservaAsync(Guid id, CancellationToken cancellationToken = default)
+        {
+            var reserva = await _reservaRepository.ObterIdAsync(id, cancellationToken);
+            if (reserva is null)
+                return false;
+
+            reserva.Concluir();
+
+            await _reservaRepository.AtualizarAsync(cancellationToken);
+            return true;
+
+        }
+
+        public async Task<bool> ConfirmarReservaAsync(Guid id, CancellationToken cancellationToken = default)
+        {
+            var reserva = await _reservaRepository.ObterIdAsync(id, cancellationToken);
+            if (reserva is null)
+                return false;
+
+            reserva.Confirmar();
+
+            await _reservaRepository.AtualizarAsync(cancellationToken);
+            return true;
+
+        }
+
+        public async Task<bool> CancelarReservaAsync(Guid id, decimal valorReembolso, CancellationToken cancellationToken = default)
+        {
+            var reserva = await _reservaRepository.ObterIdAsync(id, cancellationToken);
+            if (reserva is null)
+                return false;
+
+            reserva.Cancelar(
+                DateTimeOffset.UtcNow,
+                valorReembolso);
+
+            await _reservaRepository.AtualizarAsync(cancellationToken);
+            return true;
+
+        }
 
     }
 

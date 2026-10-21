@@ -28,7 +28,7 @@ namespace LocacaoImoveis.API.Controllers
                 return StatusCode(StatusCodes.Status201Created, new { Id = reservaId });
             }
             catch (ArgumentException ex)
-            { 
+            {
                 return BadRequest(new { message = ex.Message });
             }
             catch (InvalidOperationException ex)
@@ -46,17 +46,101 @@ namespace LocacaoImoveis.API.Controllers
         }
 
         [HttpGet]
-        [Route("{id:guid}")]
+        [Route("{id:guid}/detalhes")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> ObterReservaPorIdAsync(Guid id, CancellationToken cancellationToken)
         {
             var reserva = await _reservaService.ObterReservaPorIdAsync(id, cancellationToken);
 
-            if(reserva is null)
+            if (reserva is null)
                 return NotFound(new { message = "Reserva não encontrada" });
 
             return Ok(reserva);
+        }
+
+        [HttpPut]
+        [Route("{id:guid}/cancelar")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
+        public async Task<IActionResult> CancelarReservaAsync(Guid id,
+            [FromBody] CancelarReservaRequest request, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                // chamando o serviço para cancelar a reserva
+                var cancelada = await _reservaService.CancelarReservaAsync(id, request.ValorReembolso, cancellationToken);
+
+                if (!cancelada)
+                    return NotFound();
+
+                return NoContent();
+            }
+            catch (InvalidOperationException ex) 
+            {
+                return Conflict(new {message = ex.Message});
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [HttpPut]
+        [Route("{id:guid}/confirmar")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
+        public async Task<IActionResult> ConfirmarReservaAsync(Guid id, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var confirmada = await _reservaService.ConfirmarReservaAsync(id, cancellationToken);
+
+                if(!confirmada)
+                    return NotFound();
+
+                return NoContent();
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(new { message = ex.Message });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [HttpPut]
+        [Route("{id:guid}/concluir")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
+        public async Task<IActionResult> ConcluirReservaAsync(Guid id, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var concluida = await _reservaService.ConcluirReservaAsync(id, cancellationToken);
+
+                if (!concluida)
+                    return NotFound();
+
+                return NoContent(); 
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(new { message = ex.Message });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+
         }
 
 
