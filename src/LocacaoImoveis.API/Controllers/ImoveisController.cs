@@ -57,6 +57,22 @@ namespace LocacaoImoveis.API.Controllers
 
         }
 
+        [HttpGet("imoveisDisponiveis")]
+        [ProducesResponseType(typeof(List<ImovelResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        public async Task<IActionResult> ListarImoveisDisponiveis(
+            [FromQuery] ConsultarDisponibilidade request,
+            CancellationToken cancellationToken = default)
+        {
+            // list aos imoveis disponíveis para o cliente com o id fornecido
+            var imoveisDisponiveis = await _imovelService.ListarImoveisDisponiveisAsync(request, cancellationToken);
+
+            return Ok(imoveisDisponiveis);
+        }
+
+
+
+
         [HttpPut("{id:guid}/atualizarImovel")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -87,5 +103,7 @@ namespace LocacaoImoveis.API.Controllers
             return NoContent();
 
         }
+
+        
     }
 }

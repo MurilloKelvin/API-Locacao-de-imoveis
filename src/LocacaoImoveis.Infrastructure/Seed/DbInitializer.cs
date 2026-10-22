@@ -23,6 +23,11 @@ public static class DbInitializer
             "roberto.carlos@teste.com",
             "52998224725");
 
+        var cliente3 = new Cliente(
+            "Lucas silva",
+            "11999999999",
+            "lucas.silva@teste.com",
+            "29875676004");
 
         //imoveis
         var imovel = new Imovel(
@@ -52,6 +57,45 @@ public static class DbInitializer
         context.Imoveis.Add(imovel);
         context.Imoveis.Add(imovel2);
         context.Imoveis.Add(imovel3);
+
+
+        // reservas
+        var agora = DateTimeOffset.UtcNow
+            .ToOffset(TimeSpan.FromHours(-3));
+
+        var entrada = DateOnly.FromDateTime(agora.DateTime).AddDays(10);
+        var saida = entrada.AddDays(3);
+
+        var quantidadeNoites = saida.DayNumber - entrada.DayNumber;
+        var valorTotal = quantidadeNoites * imovel.ValorDiaria;
+
+        var reserva = new Reserva(
+            cliente.Id,
+            imovel.Id,
+            entrada,
+            saida,
+            2,
+            valorTotal,
+            agora
+        );
+
+
+        var entrada2 = DateOnly.FromDateTime(agora.DateTime).AddDays(2);
+        var saida2 = entrada.AddDays(3);
+        var reserva2 = new Reserva(
+            cliente2.Id,
+            imovel2.Id,
+            entrada2,
+            saida2,
+            2,
+            valorTotal,
+            agora
+        );
+
+        context.Reservas.Add(reserva);
+        context.Reservas.Add(reserva2);
+
+
 
         await context.SaveChangesAsync();
     }

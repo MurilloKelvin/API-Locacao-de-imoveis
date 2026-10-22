@@ -97,6 +97,66 @@ namespace LocacaoImoveis.Application.Services
             }).ToList();
         }
 
+        public async Task<List<ImovelResponse>> ListarImoveisDisponiveisAsync(
+            ConsultarDisponibilidade request,
+            CancellationToken cancellationToken = default)
+        {
+            // Validações dos filtros
+            var hoje = DateOnly.FromDateTime(
+                DateTimeOffset.UtcNow.ToOffset(TimeSpan.FromHours(-3)).DateTime);
+
+            //se o valor foi null atribui a data padrao
+            request.Entrada ??= hoje;
+            request.Saida ??= request.Entrada.Value.AddDays(30);
+
+
+            var entrada = request.Entrada.Value;
+            var saida = request.Saida.Value;
+
+
+            if (entrada < hoje)
+                throw new ArgumentException("A entrada não pode ser no passado.");
+
+            if (saida <= request.Entrada)
+                throw new ArgumentException("A saída deve ser posterior à entrada.");
+
+            if (saida.DayNumber - entrada.DayNumber > 30)
+                throw new ArgumentException("A estadia não pode superar 30 noites.");
+
+            if (request.QuantidadeHospedes <= 0)
+                throw new ArgumentException(
+                    "A quantidade de hóspedes deve ser maior que zero.");
+
+            if (request.Paginas < 1)
+                throw new ArgumentException("A página deve ser maior que zero.");
+
+            if (request.ItensPorPagina < 1 || request.ItensPorPagina > 100)
+                throw new ArgumentException(
+                    "A quantidade de itens por página deve estar entre 1 e 100.");
+
+            if (request.ValorDiarioMinimo < 0 || request.ValorDiarioMaximo < 0)
+                throw new ArgumentException("Os preços não podem ser negativos.");
+
+            if (request.ValorDiarioMinimo > request.ValorDiarioMaximo)
+                throw new ArgumentException(
+                    "O preço mínimo não pode superar o máximo.");
+
+            //busca os imoveis com os filtros
+            var imoveis = await _imovelRepository.ListarImoveisDisponiveisAsync(
+                request, cancellationToken);
+
+            // retorna a lista de imovesm mapeados em DTOs de resposta
+            return imoveis.Select(imovel => new ImovelResponse
+            {
+                Id = imovel.Id,
+                Endereco = imovel.Endereco,
+                Titulo = imovel.Titulo,
+                CapacidadeHospedes = imovel.CapacidadeDeHospedes,
+                ValorDiaria = imovel.ValorDiaria,
+                Status = imovel.Status
+            }).ToList();
+        }
+
         public async Task AtualizarImovelAsync(Guid id, AtualizarImovelRequest request,
             CancellationToken cancellationToken = default)
         {
