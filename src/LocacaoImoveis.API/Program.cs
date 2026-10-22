@@ -97,7 +97,6 @@ using (var scope = app.Services.CreateScope())
     var context = scope.ServiceProvider
         .GetRequiredService<AppDbContext>();
 
-    await context.Database.EnsureCreatedAsync();
     // pega a politica de desconto pra usar no seed
     var politicaDesconto = scope.ServiceProvider
         .GetRequiredService<IPoliticaDesconto>();
