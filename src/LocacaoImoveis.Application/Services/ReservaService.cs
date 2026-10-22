@@ -3,13 +3,14 @@ using LocacaoImoveis.Application.Exceptions;
 using LocacaoImoveis.Application.Interfaces;
 using LocacaoImoveis.Domain.Entities;
 using LocacaoImoveis.Domain.Enums;
-using LocacaoImoveis.Domain.Policies;
+using LocacaoImoveis.Domain.Policies.Reembolso;
 using Microsoft.Extensions.Logging;
 
 namespace LocacaoImoveis.Application.Services
 {
     public class ReservaService
     {
+        private readonly IPoliticaDesconto _politicaDesconto;
         private readonly IReservaRepository _reservaRepository;
         private readonly IImovelRepository _imovelRepository;
         private readonly IClienteRepository _clienteRepository;
@@ -21,12 +22,14 @@ namespace LocacaoImoveis.Application.Services
 
         public ReservaService(
             IReservaRepository reservaRepository,
+            IPoliticaDesconto politicaDesconto,
             IImovelRepository imovelRepository,
             IClienteRepository clienteRepository,
             PoliticaDeReembolso politicaDeReembolso,
             ILogger<ReservaService> logger)
         {
             _reservaRepository = reservaRepository;
+            _politicaDesconto = politicaDesconto;
             _imovelRepository = imovelRepository;
             _clienteRepository = clienteRepository;
             _politicaDeReembolso = politicaDeReembolso;
@@ -82,7 +85,9 @@ namespace LocacaoImoveis.Application.Services
                 // verifica o numero de dias
                 var quantidadeDeNoites = (request.DataSaida.DayNumber - request.DataEntrada.DayNumber);
                 // calcula o valor total da reserva
-                var valorTotal = quantidadeDeNoites * imovel.ValorDiaria;
+                var subTotal = quantidadeDeNoites * imovel.ValorDiaria;
+
+                var valorTotal = _politicaDesconto.CalcularTotal(subTotal, quantidadeDeNoites);
 
                 //cria a reserva
                 var reserva = new Reserva(

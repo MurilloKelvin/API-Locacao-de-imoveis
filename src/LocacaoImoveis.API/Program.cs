@@ -1,10 +1,11 @@
 using LocacaoImoveis.API.Middleware;
 using LocacaoImoveis.Application.Interfaces;
 using LocacaoImoveis.Application.Services;
-using LocacaoImoveis.Domain.Policies;
+using LocacaoImoveis.Domain.Policies.Reembolso;
 using LocacaoImoveis.Infrastructure;
 using LocacaoImoveis.Infrastructure.Repositories;
 using Microsoft.Data.Sqlite;
+using LocacaoImoveis.Domain.Policies.Desconto;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -35,6 +36,14 @@ builder.Services.AddScoped<IReservaRepository, ReservaRepository>();
 builder.Services.AddScoped<ReservaService>();
 
 builder.Services.AddScoped<PoliticaDeReembolso>();
+
+//configuraçao do desconto 7 dias ou mais, 10% de desconto (VALOR PADRAO caso nao tenha no appsettings)
+var minimoNoites = builder.Configuration.GetValue<int>("Desconto:MinimoNoites", 7);
+var percentual = builder.Configuration.GetValue<decimal>("Desconto:Percentual", 10m);
+
+// dependencia do desconto registra a politica na app toda
+builder.Services.AddSingleton<IPoliticaDesconto>
+    (new DescontoPorDuracao(minimoNoites, percentual));
 
 
 // config do ef

@@ -3,6 +3,8 @@ using LocacaoImoveis.Application.DTOs.Reservas;
 using LocacaoImoveis.Domain.Entities;
 using LocacaoImoveis.Domain.Enums;
 using LocacaoImoveis.Domain.Policies;
+using LocacaoImoveis.Domain.Policies.Desconto;
+using LocacaoImoveis.Domain.Policies.Reembolso;
 using LocacaoImoveis.Infrastructure;
 using LocacaoImoveis.Infrastructure.Repositories;
 using Microsoft.Data.Sqlite;
@@ -91,6 +93,7 @@ public class ReservaPersistenciaTest
 
         var service = new ReservaService(
             new ReservaRepository(context),
+            new DescontoPorDuracao(7, 10m),
             new ImovelRepository(context),
             new ClienteRepository(context),
             new PoliticaDeReembolso(),
@@ -156,6 +159,7 @@ public class ReservaPersistenciaTest
         // Cria o serviço utilizando os repositórios reais com o banco em memória.
         var service = new ReservaService(
             new ReservaRepository(context),
+            new DescontoPorDuracao(7, 10m),
             new ImovelRepository(context),
             new ClienteRepository(context),
             new PoliticaDeReembolso(),
@@ -214,6 +218,7 @@ public class ReservaPersistenciaTest
         // Cria o serviço utilizando os repositórios reais com o banco em memória.
         var service = new ReservaService(
             new ReservaRepository(context),
+            new DescontoPorDuracao(7, 10m),
             new ImovelRepository(context),
             new ClienteRepository(context),
             new PoliticaDeReembolso(),
@@ -275,6 +280,7 @@ public class ReservaPersistenciaTest
         // Cria o serviço utilizando os repositórios reais com o banco em memória.
         var service = new ReservaService(
             new ReservaRepository(context),
+            new DescontoPorDuracao(7, 10m),
             new ImovelRepository(context),
             new ClienteRepository(context),
             new PoliticaDeReembolso(),
@@ -539,6 +545,7 @@ public class ReservaPersistenciaTest
         // Cria o serviço para testar a conversão para ReservaResponse.
         var service = new ReservaService(
             new ReservaRepository(context),
+            new DescontoPorDuracao(7, 10m),
             new ImovelRepository(context),
             new ClienteRepository(context),
             new PoliticaDeReembolso(),
@@ -574,6 +581,7 @@ public class ReservaPersistenciaTest
         // Cria o serviço sem inserir reservas no banco.
         var service = new ReservaService(
             new ReservaRepository(context),
+            new DescontoPorDuracao(7, 10m),
             new ImovelRepository(context),
             new ClienteRepository(context),
             new PoliticaDeReembolso(),
@@ -616,12 +624,14 @@ public class ReservaPersistenciaTest
         // Os dois serviços tentam reservar o mesmo imóvel no mesmo período.
         var service1 = new ReservaService(
             new ReservaRepository(contexto1),
+            new DescontoPorDuracao(7, 10m),
             new ImovelRepository(contexto1),
             new ClienteRepository(contexto1),
             new PoliticaDeReembolso(),
             NullLogger<ReservaService>.Instance);
         var service2 = new ReservaService(
             new ReservaRepository(contexto2),
+            new DescontoPorDuracao(7, 10m),
             new ImovelRepository(contexto2),
             new ClienteRepository(contexto2),
             new PoliticaDeReembolso(),

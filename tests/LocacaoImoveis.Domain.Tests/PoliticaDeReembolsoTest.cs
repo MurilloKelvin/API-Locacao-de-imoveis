@@ -1,5 +1,4 @@
-﻿using LocacaoImoveis.Domain.Policies;
-
+﻿using LocacaoImoveis.Domain.Policies.Reembolso;
 public class PoliticaDeReembolsoTests
 {
 

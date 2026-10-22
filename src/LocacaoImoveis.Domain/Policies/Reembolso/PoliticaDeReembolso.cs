@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace LocacaoImoveis.Domain.Policies
+namespace LocacaoImoveis.Domain.Policies.Reembolso
 {
     public class PoliticaDeReembolso
     {
