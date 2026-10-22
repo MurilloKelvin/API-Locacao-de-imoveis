@@ -55,6 +55,9 @@ builder.Services.AddDbContext<AppDbContext>((ServiceProvider, options) =>
     options.UseSqlite(connection);
 });
 
+
+// adiciona health checks e openapi para documentação da API
+builder.Services.AddHealthChecks();
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
@@ -84,6 +87,9 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+
+// health check endopoint :5088
+app.MapHealthChecks("/health");
 
 // garante que o banco de dados seja criado e que os dados iniciais sejam inseridos (seed)
 using (var scope = app.Services.CreateScope())
