@@ -92,9 +92,12 @@ using (var scope = app.Services.CreateScope())
         .GetRequiredService<AppDbContext>();
 
     await context.Database.EnsureCreatedAsync();
+    // pega a politica de desconto pra usar no seed
+    var politicaDesconto = scope.ServiceProvider
+        .GetRequiredService<IPoliticaDesconto>();
 
     // chama o método de seed para popular o banco de dados com dados iniciais
-    await DbInitializer.SeedAsync(context);
+    await DbInitializer.SeedAsync(context, politicaDesconto);
 }
 
 app.Run();

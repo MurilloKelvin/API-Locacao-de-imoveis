@@ -1,11 +1,12 @@
 ﻿using LocacaoImoveis.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using LocacaoImoveis.Domain.Policies.Desconto;
 
 namespace LocacaoImoveis.Infrastructure;
 
 public static class DbInitializer
 {
-    public static async Task SeedAsync(AppDbContext context)
+    public static async Task SeedAsync(AppDbContext context, IPoliticaDesconto politicaDesconto)
     {
         if (await context.Clientes.AnyAsync())
             return;
@@ -82,13 +83,18 @@ public static class DbInitializer
 
         var entrada2 = DateOnly.FromDateTime(agora.DateTime).AddDays(2);
         var saida2 = entrada.AddDays(3);
+        var quantidadeNoites2 = saida2.DayNumber - entrada2.DayNumber;
+
+        var subTotal2 = imovel2.ValorDiaria * quantidadeNoites2;
+        var valorTotal2 = politicaDesconto.CalcularTotal(subTotal2, quantidadeNoites2);
+
         var reserva2 = new Reserva(
             cliente2.Id,
             imovel2.Id,
             entrada2,
             saida2,
             2,
-            valorTotal,
+            valorTotal2,
             agora
         );
 
