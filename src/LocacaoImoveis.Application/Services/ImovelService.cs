@@ -11,6 +11,7 @@ namespace LocacaoImoveis.Application.Services
     {
         private readonly IImovelRepository _imovelRepository;
         private readonly IReservaRepository _reservaRepository;
+
         private readonly ILogger<ImovelService> _logger;
 
         public ImovelService(IImovelRepository imovelRepository, IReservaRepository reservaRepository, ILogger<ImovelService> logger)
@@ -130,12 +131,18 @@ namespace LocacaoImoveis.Application.Services
             if (imovel is null)
                 throw new RecursoNaoEncontradoException("Imóvel", id);
 
-            if(request.Status == ImovelStatus.Indisponivel) // verifica se o status é indisponível
-            {
-                var reservasAtivas = await _reservaRepository.ContarReservasAtivas(id, cancellationToken);
-                if (reservasAtivas > 0) // verifica se existem reservas ativas
-                    throw new InvalidOperationException("Não é possível alterar o status do imóvel para indisponível, pois existem reservas ativas.");
 
+            // se for indisponível ou em manutenção, verifica se há reservas ativas, caso sim lança exceçao barrando a alteração de status
+            if (request.Status == ImovelStatus.Indisponivel ||
+                request.Status == ImovelStatus.EmManutencao)
+            {
+                var reservasAtivas = await _reservaRepository
+                    .ContarReservasAtivas(id, cancellationToken);
+
+                if (reservasAtivas > 0)
+                    throw new InvalidOperationException(
+                        "Não é possível deixar o imóvel indisponível ou em manutenção "
+                        + "enquanto houver reservas ativas.");
             }
 
             imovel.AlterarStatusImovel(request.Status.Value); // altera o status 

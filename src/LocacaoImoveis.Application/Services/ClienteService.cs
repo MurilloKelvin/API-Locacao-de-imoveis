@@ -3,18 +3,21 @@ using LocacaoImoveis.Application.Exceptions;
 using LocacaoImoveis.Application.Interfaces;
 using LocacaoImoveis.Domain.Entities;
 using Microsoft.Extensions.Logging;
+using LocacaoImoveis.Application.Services;
 
 namespace LocacaoImoveis.Application.Services
 {
     public class ClienteService
     {
         private readonly IClienteRepository _clienteRepository; // dependencia
+        private readonly IReservaRepository _reservaRepository; // dependencia
         private readonly ILogger<ClienteService> _logger; 
 
-        public ClienteService(IClienteRepository clienteRepository, ILogger<ClienteService> logger)
+        public ClienteService(IClienteRepository clienteRepository, ILogger<ClienteService> logger, IReservaRepository reservaRepository)
         {
             _clienteRepository = clienteRepository;
             _logger = logger;
+            _reservaRepository = reservaRepository;
         }
 
         public async Task<Guid> CriarClienteAsync(CriarClienteRequestDTO request, CancellationToken cancellationToken = default)
@@ -128,6 +131,11 @@ namespace LocacaoImoveis.Application.Services
             var cliente = await _clienteRepository.ObterPorIdAsync(id); 
             if(cliente == null)
                 throw new RecursoNaoEncontradoException("Cliente", id);
+
+            // Verifica se o cliente possui reservas ativas
+            var imoveisAtivos = await _reservaRepository.ContarReservasAtivasPorCliente(id); 
+            if (imoveisAtivos > 0)
+                throw new InvalidOperationException("Não é possível inativar um cliente com reservas ativas.");
 
             cliente.InativarCliente();
 

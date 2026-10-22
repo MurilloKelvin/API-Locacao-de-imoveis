@@ -32,7 +32,7 @@ namespace LocacaoImoveis.Infrastructure.Repositories
             await _context.SaveChangesAsync(cancellationToken);
         }
 
-        public async Task<int> ContarReservasAtivas(
+        public async Task<int> ContarReservasAtivas( //imovel
             Guid imovelId,
             CancellationToken cancellationToken = default)
         {
