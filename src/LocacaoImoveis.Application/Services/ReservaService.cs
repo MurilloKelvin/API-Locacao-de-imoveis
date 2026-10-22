@@ -195,10 +195,20 @@ namespace LocacaoImoveis.Application.Services
             if (reserva is null)
                 throw new RecursoNaoEncontradoException("Reserva", id);
 
-            var cancelamento = DateTimeOffset.UtcNow;
+            var fuso = TimeSpan.FromHours(-3); // fuso horario de brasília
 
-            var entrada = new DateTimeOffset(reserva.DataEntrada.ToDateTime(TimeOnly.MinValue), TimeSpan.Zero);
+            var cancelamento = DateTimeOffset.UtcNow.ToOffset(fuso); // pega a data e hora atual no fuso horario de brasília
 
+
+            // pega a data e hora de entrada da reserva no fuso horario de brasília
+            var dataHoraEntrada = reserva.DataEntrada.ToDateTime(
+                new TimeOnly(14, 0),
+                DateTimeKind.Unspecified);
+
+            // cria um DateTimeOffset com a data e hora de entrada da reserva no fuso horario de brasília
+            var entrada = new DateTimeOffset(dataHoraEntrada, fuso);
+
+            // calcula o reembolso considerando o horario de 14h do dia de entrada da reserva, e a data e hora atual no fuso horario de brasília
             var valorReembolso = _politicaDeReembolso.CalcularReembolso(reserva.ValorTotalPreco,
                 entrada,
                 cancelamento
