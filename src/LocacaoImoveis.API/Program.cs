@@ -7,6 +7,7 @@ using LocacaoImoveis.Infrastructure.Repositories;
 using Microsoft.Data.Sqlite;
 using LocacaoImoveis.Domain.Policies.Desconto;
 using Microsoft.EntityFrameworkCore;
+using LocacaoImoveis.API.OpenApi;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,7 +17,7 @@ builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 
 
-// mantem a conexão com o banco de dados em memória aberta durante toda a execução da aplicação
+// mantem a conexÃ£o com o banco de dados em memÃ³ria aberta durante toda a execuÃ§Ã£o da aplicaÃ§Ã£o
 builder.Services.AddSingleton<SqliteConnection>(_ =>
 {
  var connection = new SqliteConnection("Data Source=:memory:");
@@ -24,7 +25,7 @@ builder.Services.AddSingleton<SqliteConnection>(_ =>
     return connection;
 });
 
-// registra o repositório e o serviço de cliente para injeção de dependência
+// registra o repositÃ³rio e o serviÃ§o de cliente para injeÃ§Ã£o de dependÃªncia
 builder.Services.AddScoped<IClienteRepository, ClienteRepository>();
 builder.Services.AddScoped<ClienteService>();
 
@@ -37,7 +38,7 @@ builder.Services.AddScoped<ReservaService>();
 
 builder.Services.AddScoped<PoliticaDeReembolso>();
 
-//configuraçao do desconto 7 dias ou mais, 10% de desconto (VALOR PADRAO caso nao tenha no appsettings)
+//configuraÃ§ao do desconto 7 dias ou mais, 10% de desconto (VALOR PADRAO caso nao tenha no appsettings)
 var minimoNoites = builder.Configuration.GetValue<int>("Desconto:MinimoNoites", 7);
 var percentual = builder.Configuration.GetValue<decimal>("Desconto:Percentual", 10m);
 
@@ -56,13 +57,17 @@ builder.Services.AddDbContext<AppDbContext>((ServiceProvider, options) =>
 });
 
 
-// adiciona health checks e openapi para documentação da API
+// adiciona health checks e openapi para documentaÃ§Ã£o da API
 builder.Services.AddHealthChecks();
-builder.Services.AddOpenApi();
+
+builder.Services.AddOpenApi(options =>
+{
+    options.AddOperationTransformer<OpenApiExamplesTransformer>();
+});
 
 var app = builder.Build();
 
-// configura o middleware de tratamento de exceções
+// configura o middleware de tratamento de exceÃ§Ãµes
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 // garante que o banco exista e que as tabelas sejam criadas
@@ -78,7 +83,7 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
     app.UseSwaggerUI(options =>
     {
-        options.SwaggerEndpoint("/openapi/v1.json", "API de Locação de Imóveis V1");
+        options.SwaggerEndpoint("/openapi/v1.json", "API de LocaÃ§Ã£o de ImÃ³veis V1");
     });
 }
 
@@ -87,9 +92,6 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
-
-// health check endopoint :5088
-app.MapHealthChecks("/health");
 
 // garante que o banco de dados seja criado e que os dados iniciais sejam inseridos (seed)
 using (var scope = app.Services.CreateScope())
@@ -101,7 +103,7 @@ using (var scope = app.Services.CreateScope())
     var politicaDesconto = scope.ServiceProvider
         .GetRequiredService<IPoliticaDesconto>();
 
-    // chama o método de seed para popular o banco de dados com dados iniciais
+    // chama o mÃ©todo de seed para popular o banco de dados com dados iniciais
     await DbInitializer.SeedAsync(context, politicaDesconto);
 }
 

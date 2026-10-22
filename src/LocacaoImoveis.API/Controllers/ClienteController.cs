@@ -40,7 +40,7 @@ namespace LocacaoImoveis.API.Controllers
         [HttpGet("{id:guid}/detalhes")]
         [EndpointSummary("Busca um cliente pelo ID")]
         [EndpointDescription("Retorna os dados do cliente identificado pelo GUID informado.")]
-        [ProducesResponseType(StatusCodes.Status200OK)] // Indica que a resposta será 200 OK
+        [ProducesResponseType(typeof(ClienteResponse), StatusCodes.Status200OK)] // Indica que a resposta será 200 OK
         [ProducesResponseType(StatusCodes.Status404NotFound)] // Indica que a resposta será 404 Not Found
         public async Task<IActionResult> ObterClientePorId(Guid id)
         {
@@ -51,7 +51,7 @@ namespace LocacaoImoveis.API.Controllers
         [HttpGet("{cpf}/detalhes")]
         [EndpointSummary("Busca um cliente pelo CPF")]
         [EndpointDescription("Retorna os dados do cliente identificado pelo CPF informado.")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ClienteResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> ObterPorCpfAsync(string cpf)
         {
@@ -65,7 +65,7 @@ namespace LocacaoImoveis.API.Controllers
         [Route("obterTodosClientes")]
         [EndpointSummary("Lista todos os clientes")]
         [EndpointDescription("Retorna todos os clientes cadastrados.")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(List<ClienteResponse>), StatusCodes.Status200OK)]
         public async Task<IActionResult> ObterTodosClientes()
         {
 

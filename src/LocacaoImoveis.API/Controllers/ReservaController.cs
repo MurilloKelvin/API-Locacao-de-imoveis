@@ -39,7 +39,7 @@ namespace LocacaoImoveis.API.Controllers
         [HttpGet]
         [EndpointSummary("Lista todas as reservas")]
         [EndpointDescription("Retorna todas as reservas cadastradas.")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(List<ReservaResponse>), StatusCodes.Status200OK)]
         public async Task<IActionResult> ObterTodasReservasAsync(CancellationToken cancellationToken = default)
         {
             var reservas = await _reservaService.ObterTodasReservasAsync();
@@ -50,7 +50,7 @@ namespace LocacaoImoveis.API.Controllers
         [Route("{id:guid}/detalhes")]
         [EndpointSummary("Busca uma reserva pelo ID")]
         [EndpointDescription("Retorna os dados da reserva identificada pelo GUID informado.")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ReservaResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> ObterReservaPorIdAsync(Guid id, CancellationToken cancellationToken)
         {
