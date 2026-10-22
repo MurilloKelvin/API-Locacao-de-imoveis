@@ -83,7 +83,7 @@ public static class DbInitializer
 
 
         var entrada2 = DateOnly.FromDateTime(agora.DateTime).AddDays(2);
-        var saida2 = entrada.AddDays(3);
+        var saida2 = entrada2.AddDays(3);
         var quantidadeNoites2 = saida2.DayNumber - entrada2.DayNumber;
 
         var subTotal2 = imovel2.ValorDiaria * quantidadeNoites2;
