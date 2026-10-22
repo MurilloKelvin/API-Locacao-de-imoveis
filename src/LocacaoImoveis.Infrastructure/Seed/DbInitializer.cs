@@ -53,6 +53,7 @@ public static class DbInitializer
         //add os clientes
         context.Clientes.Add(cliente);
         context.Clientes.Add(cliente2);
+        context.Clientes.Add(cliente3);
 
         // add os imoveis ao context(db
         context.Imoveis.Add(imovel);
