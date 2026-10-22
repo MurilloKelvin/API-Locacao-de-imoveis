@@ -1,5 +1,6 @@
 ﻿using LocacaoImoveis.Application.DTOs.Imoveis;
 using LocacaoImoveis.Application.Services;
+using Microsoft.AspNetCore.Http.Metadata;
 using Microsoft.AspNetCore.Mvc;
 
 
@@ -17,6 +18,8 @@ namespace LocacaoImoveis.API.Controllers
         }
 
         [HttpPost]
+        [EndpointSummary("Cadastra um novo imovel")]
+        [EndpointDescription("Cria um imovel com os dados informados.")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> CriarImovel([FromBody] CriarImovelRequest request, CancellationToken cancellationToken)
@@ -32,6 +35,8 @@ namespace LocacaoImoveis.API.Controllers
         }
 
         [HttpGet("{id:guid}/detalhes")]
+        [EndpointSummary("Busca um imovel pelo ID")]
+        [EndpointDescription("Retorna os dados do imovel identificado pelo GUID informado.")]
         [ProducesResponseType(typeof(ImovelResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> ObterImovelPorId(Guid id, CancellationToken cancellationToken)
@@ -43,6 +48,8 @@ namespace LocacaoImoveis.API.Controllers
 
         [HttpGet]
         [Route("listar")]
+        [EndpointSummary("Lista imoveis")]
+        [EndpointDescription("Lista imoveis aplicando os filtros e a paginacao informados.")]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(List<ImovelResponse>), StatusCodes.Status200OK)]
         public async Task<IActionResult> ListarImoveis(
@@ -58,6 +65,8 @@ namespace LocacaoImoveis.API.Controllers
         }
 
         [HttpGet("imoveisDisponiveis")]
+        [EndpointSummary("Lista imoveis disponiveis")]
+        [EndpointDescription("Retorna imoveis disponiveis para o periodo, capacidade e faixa de preco informados.")]
         [ProducesResponseType(typeof(List<ImovelResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         public async Task<IActionResult> ListarImoveisDisponiveis(
@@ -74,6 +83,8 @@ namespace LocacaoImoveis.API.Controllers
 
 
         [HttpPut("{id:guid}/atualizarImovel")]
+        [EndpointSummary("Atualiza um imovel")]
+        [EndpointDescription("Atualiza os dados do imovel identificado pelo GUID informado.")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -89,6 +100,8 @@ namespace LocacaoImoveis.API.Controllers
         }
 
         [HttpPut("{id:guid}/atualizarStatus")]
+        [EndpointSummary("Altera o status de um imovel")]
+        [EndpointDescription("Altera o status do imovel respeitando as regras de negocio.")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]

@@ -1,5 +1,6 @@
 ﻿using LocacaoImoveis.Application.DTOs.Clientes;
 using LocacaoImoveis.Application.Services;
+using Microsoft.AspNetCore.Http.Metadata;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LocacaoImoveis.API.Controllers
@@ -17,6 +18,8 @@ namespace LocacaoImoveis.API.Controllers
 
         [HttpPost]
         [Route("criarCliente")]
+        [EndpointSummary("Cadastra um novo cliente")]
+        [EndpointDescription("Cria um cliente validando CPF, email e os dados obrigatorios.")]
         [ProducesResponseType(StatusCodes.Status201Created)] // Indica que a resposta será 201 Created
         [ProducesResponseType(StatusCodes.Status400BadRequest)] // Indica que a resposta será 400 Bad Request
         [ProducesResponseType(StatusCodes.Status409Conflict)] // caso de 2 cpfs iguais
@@ -35,6 +38,8 @@ namespace LocacaoImoveis.API.Controllers
         }
 
         [HttpGet("{id:guid}/detalhes")]
+        [EndpointSummary("Busca um cliente pelo ID")]
+        [EndpointDescription("Retorna os dados do cliente identificado pelo GUID informado.")]
         [ProducesResponseType(StatusCodes.Status200OK)] // Indica que a resposta será 200 OK
         [ProducesResponseType(StatusCodes.Status404NotFound)] // Indica que a resposta será 404 Not Found
         public async Task<IActionResult> ObterClientePorId(Guid id)
@@ -44,6 +49,8 @@ namespace LocacaoImoveis.API.Controllers
         }
 
         [HttpGet("{cpf}/detalhes")]
+        [EndpointSummary("Busca um cliente pelo CPF")]
+        [EndpointDescription("Retorna os dados do cliente identificado pelo CPF informado.")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> ObterPorCpfAsync(string cpf)
@@ -56,6 +63,8 @@ namespace LocacaoImoveis.API.Controllers
 
         [HttpGet]
         [Route("obterTodosClientes")]
+        [EndpointSummary("Lista todos os clientes")]
+        [EndpointDescription("Retorna todos os clientes cadastrados.")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> ObterTodosClientes()
         {
@@ -71,6 +80,8 @@ namespace LocacaoImoveis.API.Controllers
         }
 
         [HttpPut("{id:guid}/atualizar")]
+        [EndpointSummary("Atualiza um cliente")]
+        [EndpointDescription("Atualiza os dados do cliente identificado pelo GUID informado.")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -86,6 +97,8 @@ namespace LocacaoImoveis.API.Controllers
 
         // altera somente o status do cliente
         [HttpPut("{id:guid}/ativar")]
+        [EndpointSummary("Ativa um cliente")]
+        [EndpointDescription("Altera o status do cliente para ativo.")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> AtivarCliente(Guid id)
@@ -97,6 +110,8 @@ namespace LocacaoImoveis.API.Controllers
 
         // altera somente o status do cliente para inativo
         [HttpPut("{id:guid}/inativar")]
+        [EndpointSummary("Inativa um cliente")]
+        [EndpointDescription("Altera o status do cliente para inativo.")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> InativarCliente(Guid id)
