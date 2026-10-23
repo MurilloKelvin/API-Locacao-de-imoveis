@@ -1,5 +1,6 @@
 ﻿using LocacaoImoveis.Domain.Entities;
 using System;
+using LocacaoImoveis.Application.DTOs.Reservas;
 using System.Collections.Generic;
 using System.Text;
 
@@ -9,7 +10,7 @@ namespace LocacaoImoveis.Application.Interfaces
     {
         Task AdicionarAsync(Reserva reserva, CancellationToken cancellationToken = default);
 
-        Task<List<Reserva>> ObterTodasReservasAsync();
+        Task<List<Reserva>> ObterTodasReservasAsync(ListarReservasRequest filtro, CancellationToken cancellationToken = default);
 
         Task<Reserva?> ObterIdAsync(Guid id, CancellationToken cancellationToken = default);
 

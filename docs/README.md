@@ -96,6 +96,15 @@ O OpenAPI e o arquivo que descreve os endpoints, os dados de entrada e as respos
 
 O arquivo `OpenApiExamplesTransformer.cs` adiciona exemplos de request e response ao OpenAPI. Assim, o Swagger mostra modelos prontos para criar clientes, imoveis e reservas. Esses exemplos servem apenas como modelo e nao sao executados automaticamente.
 
+## Filtros e paginação de clientes e reservas
+
+As duas listagens aceitam `Pagina` (padrão 1) e `TamanhoPagina` (padrão 10, entre 1 e 100). Os filtros são opcionais e podem ser combinados. A resposta continua sendo uma lista, sem total de registros; páginas sem resultados retornam `[]`.
+
+- Clientes: `GET /api/v1/clientes/obterTodosClientes?Nome=ana&Status=1&Pagina=1&TamanhoPagina=10`. Busca por parte do nome e status (0 inativo, 1 ativo), ordenada por nome e ID.
+- Reservas: `GET /api/v1/reservas?Status=0&Pagina=1&TamanhoPagina=10`. Também aceita `ClienteId` e `ImovelId`. Status: 0 pendente, 1 confirmada, 2 concluída, 3 cancelada. Ordenação por data de entrada e ID.
+
+Parâmetros de paginação ou status inválidos retornam HTTP 400. Os filtros e a paginação são aplicados no banco antes de carregar os registros.
+
 ## Regras de negócio principais
 
 - CPF deve ser válido e conter apenas números; CPF e e-mail não podem ser duplicados.
@@ -133,6 +142,6 @@ Nesse exemplo, reservas com pelo menos sete noites recebem dez por cento de desc
 ## Limitações atuais
 
 - A persistência é temporária porque o banco é SQLite em memória.
-- Não há autenticação, autorização, paginação HTTP completa ou configuração de produção.
+- Não há autenticação, autorização ou configuração de produção. As listagens paginadas retornam somente os itens, sem total de registros ou páginas.
 - O seed é destinado ao desenvolvimento e aos testes locais.
 - O comportamento implementado deve ser conferido junto ao código e aos testes; os diagramas e o PDF descrevem o desafio e podem conter requisitos ainda não implementados.

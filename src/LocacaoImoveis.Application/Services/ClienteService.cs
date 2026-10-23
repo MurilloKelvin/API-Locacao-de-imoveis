@@ -82,9 +82,17 @@ namespace LocacaoImoveis.Application.Services
             };
         }
 
-        public async Task<List<ClienteResponse>> ObterTodosClientesAsync(CancellationToken cancellationToken = default)
+        public async Task<List<ClienteResponse>> ObterTodosClientesAsync(ListarClientesRequest filtro, CancellationToken cancellationToken = default)
         {
-            var clientes = await _clienteRepository.ObterTodosClientesAsync();
+            if (filtro.Pagina < 1 || filtro.TamanhoPagina < 1 || filtro.TamanhoPagina > 100
+                || ((long)filtro.Pagina - 1) * filtro.TamanhoPagina > int.MaxValue)
+                throw new ArgumentException("Página inválida ou tamanho da página fora do intervalo de 1 a 100.");
+
+            if (filtro.Status.HasValue && !Enum.IsDefined(filtro.Status.Value))
+                throw new ArgumentException("Status de cliente inválido.");
+
+            // busca os clientes no repositório com base nos filtros fornecidos
+            var clientes = await _clienteRepository.ObterTodosClientesAsync(filtro, cancellationToken);
             return clientes.Select(cliente => new ClienteResponse
             {
                 Id = cliente.Id,

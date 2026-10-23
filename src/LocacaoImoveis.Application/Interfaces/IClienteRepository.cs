@@ -1,5 +1,7 @@
 ﻿using LocacaoImoveis.Domain.Entities;
 
+using LocacaoImoveis.Application.DTOs.Clientes;
+
 namespace LocacaoImoveis.Application.Interfaces
 {
     public interface IClienteRepository
@@ -8,7 +10,7 @@ namespace LocacaoImoveis.Application.Interfaces
         Task<Cliente?> ObterPorIdAsync(Guid id);
         Task<Cliente?> ObterPorCpfAsync(string cpf);
         Task<Cliente?> ObterPorEmailAsync(string email);
-        Task<List<Cliente>> ObterTodosClientesAsync();
+        Task<List<Cliente>> ObterTodosClientesAsync(ListarClientesRequest filtro, CancellationToken cancellationToken = default);
 
         Task AtualizarClienteAsync(Cliente cliente, CancellationToken cancellationToken = default);
 

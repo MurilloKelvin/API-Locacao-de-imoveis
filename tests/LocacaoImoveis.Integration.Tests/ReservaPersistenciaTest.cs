@@ -552,7 +552,7 @@ public class ReservaPersistenciaTest
             NullLogger<ReservaService>.Instance);
 
         // Solicita a listagem de reservas.
-        var reservas = await service.ObterTodasReservasAsync();
+        var reservas = await service.ObterTodasReservasAsync(new LocacaoImoveis.Application.DTOs.Reservas.ListarReservasRequest());
 
         // Confirma que as duas reservas foram retornadas.
         Assert.Equal(2, reservas.Count);
@@ -588,7 +588,7 @@ public class ReservaPersistenciaTest
             NullLogger<ReservaService>.Instance);
 
         // Solicita a listagem de reservas.
-        var reservas = await service.ObterTodasReservasAsync();
+        var reservas = await service.ObterTodasReservasAsync(new LocacaoImoveis.Application.DTOs.Reservas.ListarReservasRequest());
 
         // Uma consulta sem registros deve retornar uma lista vazia.
         Assert.Empty(reservas);

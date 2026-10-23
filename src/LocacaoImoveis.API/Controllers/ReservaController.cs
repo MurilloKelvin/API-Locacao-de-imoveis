@@ -37,12 +37,13 @@ namespace LocacaoImoveis.API.Controllers
         }
 
         [HttpGet]
-        [EndpointSummary("Lista todas as reservas")]
-        [EndpointDescription("Retorna todas as reservas cadastradas.")]
+        [EndpointSummary("Lista reservas com filtros e paginação")]
+        [EndpointDescription("Filtra por cliente, imóvel e status. Página padrão 1, tamanho padrão 10 e máximo 100. Ordena por data de entrada e ID.")]
         [ProducesResponseType(typeof(List<ReservaResponse>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> ObterTodasReservasAsync(CancellationToken cancellationToken = default)
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> ObterTodasReservasAsync([FromQuery] ListarReservasRequest filtro, CancellationToken cancellationToken = default)
         {
-            var reservas = await _reservaService.ObterTodasReservasAsync();
+            var reservas = await _reservaService.ObterTodasReservasAsync(filtro, cancellationToken);
             return Ok(reservas);
         }
 

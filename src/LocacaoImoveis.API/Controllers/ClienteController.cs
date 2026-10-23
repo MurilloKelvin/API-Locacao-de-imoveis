@@ -63,16 +63,14 @@ namespace LocacaoImoveis.API.Controllers
 
         [HttpGet]
         [Route("obterTodosClientes")]
-        [EndpointSummary("Lista todos os clientes")]
-        [EndpointDescription("Retorna todos os clientes cadastrados.")]
+        [EndpointSummary("Lista clientes com filtros e paginação")]
+        [EndpointDescription("Filtra por parte do nome e status. Página padrão 1, tamanho padrão 10 e máximo 100. Ordena por nome e ID.")]
         [ProducesResponseType(typeof(List<ClienteResponse>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> ObterTodosClientes()
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> ObterTodosClientes([FromQuery] ListarClientesRequest filtro, CancellationToken cancellationToken)
         {
 
-            var clientes = await _clienteService.ObterTodosClientesAsync();
-
-            if (clientes.Count == 0)
-                return Ok(new { message = "Nenhum cliente encontrado no banco de dados." });
+            var clientes = await _clienteService.ObterTodosClientesAsync(filtro, cancellationToken);
 
 
             return Ok(clientes);

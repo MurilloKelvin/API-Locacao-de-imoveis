@@ -1,5 +1,6 @@
 ﻿using LocacaoImoveis.Application.Interfaces;
 using LocacaoImoveis.Domain.Entities;
+using LocacaoImoveis.Application.DTOs.Clientes;
 using LocacaoImoveis.Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Data.Sqlite;
@@ -45,11 +46,23 @@ namespace LocacaoImoveis.Infrastructure.Repositories
            return await _context.Clientes.FirstOrDefaultAsync(c => c.Cpf == cpfValidado);
         }
 
-        public async Task<List<Cliente>> ObterTodosClientesAsync()
+        public async Task<List<Cliente>> ObterTodosClientesAsync(ListarClientesRequest filtro, CancellationToken cancellationToken = default)
         {
-            return await _context.Clientes
-                .OrderBy(Cliente => Cliente.Nome) // traz a lista ordenada pelo nome do cliente
-                .ToListAsync();
+            var query = _context.Clientes.AsNoTracking();
+            if (!string.IsNullOrWhiteSpace(filtro.Nome))
+            {
+                var nome = filtro.Nome.Trim().ToLower();
+                query = query.Where(cliente => cliente.Nome.ToLower().Contains(nome));
+            }
+            if (filtro.Status.HasValue)
+                query = query.Where(cliente => cliente.Status == filtro.Status.Value);
+
+            return await query
+                .OrderBy(cliente => cliente.Nome)
+                .ThenBy(cliente => cliente.Id)
+                .Skip((filtro.Pagina - 1) * filtro.TamanhoPagina)
+                .Take(filtro.TamanhoPagina)
+                .ToListAsync(cancellationToken);
         }
 
         public async Task AtualizarClienteAsync(Cliente cliente, CancellationToken cancellationToken = default)

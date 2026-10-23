@@ -85,14 +85,22 @@ namespace LocacaoImoveis.Infrastructure.Repositories
                 cancellationToken);
         }
 
-        public async Task<List<Reserva>> ObterTodasReservasAsync()
+        public async Task<List<Reserva>> ObterTodasReservasAsync(ListarReservasRequest filtro, CancellationToken cancellationToken = default)
         {
-            var reservas = await _context.Reservas.ToListAsync();
+            var query = _context.Reservas.AsNoTracking();
+            if (filtro.ClienteId.HasValue)
+                query = query.Where(reserva => reserva.ClienteId == filtro.ClienteId.Value);
+            if (filtro.ImovelId.HasValue)
+                query = query.Where(reserva => reserva.ImovelId == filtro.ImovelId.Value);
+            if (filtro.Status.HasValue)
+                query = query.Where(reserva => reserva.Status == filtro.Status.Value);
 
-            // Ordena as reservas pela data de criação (CriadaEm) antes de retornar
-            return reservas
-                .OrderBy(reserva => reserva.CriadaEm)
-                .ToList();
+            return await query
+                .OrderBy(reserva => reserva.DataEntrada)
+                .ThenBy(reserva => reserva.Id)
+                .Skip((filtro.Pagina - 1) * filtro.TamanhoPagina)
+                .Take(filtro.TamanhoPagina)
+                .ToListAsync(cancellationToken);
         }
 
 

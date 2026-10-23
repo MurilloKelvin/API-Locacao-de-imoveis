@@ -118,9 +118,16 @@ namespace LocacaoImoveis.Application.Services
 
         }
 
-        public async Task<List<ReservaResponse>> ObterTodasReservasAsync()
+        public async Task<List<ReservaResponse>> ObterTodasReservasAsync(ListarReservasRequest filtro, CancellationToken cancellationToken = default)
         {
-            var reservas = await _reservaRepository.ObterTodasReservasAsync();
+            if (filtro.Pagina < 1 || filtro.TamanhoPagina < 1 || filtro.TamanhoPagina > 100
+                || ((long)filtro.Pagina - 1) * filtro.TamanhoPagina > int.MaxValue)
+                throw new ArgumentException("Página inválida ou tamanho da página fora do intervalo de 1 a 100.");
+
+            if (filtro.Status.HasValue && !Enum.IsDefined(filtro.Status.Value))
+                throw new ArgumentException("Status de reserva inválido.");
+
+            var reservas = await _reservaRepository.ObterTodasReservasAsync(filtro, cancellationToken);
 
             // mapeia as reservas para o DTO de resposta
             return reservas.Select(r => new ReservaResponse
