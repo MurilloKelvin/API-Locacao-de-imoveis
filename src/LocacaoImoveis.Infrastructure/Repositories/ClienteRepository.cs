@@ -22,16 +22,7 @@ namespace LocacaoImoveis.Infrastructure.Repositories
         {
             _context.Clientes.Add(cliente);
 
-            try
-            {
                 await _context.SaveChangesAsync(cancellationToken);
-            }
-            catch (DbUpdateException exception)
-                when (exception.InnerException is SqliteException sqlite
-                    && sqlite.SqliteExtendedErrorCode == 2067)
-            {
-                throw new CpfJaCadastradoException();
-            }
         }
 
         public async Task<Cliente?> ObterPorIdAsync(Guid id)
