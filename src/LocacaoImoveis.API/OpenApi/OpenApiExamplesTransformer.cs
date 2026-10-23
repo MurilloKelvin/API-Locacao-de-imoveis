@@ -4,8 +4,13 @@ using System.Text.Json.Nodes;
 
 namespace LocacaoImoveis.API.OpenApi;
 
+/// <summary>Adiciona exemplos de requisição e resposta ao documento OpenAPI.</summary>
 public sealed class OpenApiExamplesTransformer : IOpenApiOperationTransformer
 {
+    /// <summary>Aplica os exemplos correspondentes à rota e ao método HTTP.</summary>
+    /// <param name="operation">Operação OpenAPI a documentar.</param>
+    /// <param name="context">Metadados do endpoint.</param>
+    /// <param name="cancellationToken">Token de cancelamento da geração.</param>
     public Task TransformAsync(
         OpenApiOperation operation,
         OpenApiOperationTransformerContext context,

@@ -5,17 +5,25 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace LocacaoImoveis.API.Controllers
 {
+    /// <summary>Operações HTTP de clientes.</summary>
     [ApiController]
     [Route("api/v1/clientes")]
     public class ClienteController : ControllerBase
     {
 
         private readonly ClienteService _clienteService; // dependência do serviço de cliente
+        /// <summary>Inicializa o controller com o serviço de aplicação.</summary>
+        /// <param name="clienteService">Serviço responsável pelas operações do recurso.</param>
         public ClienteController(ClienteService clienteService)
         {
             _clienteService = clienteService;
         }
 
+        /// <summary>Cadastra um cliente com CPF e e-mail únicos.</summary>
+        /// <param name="request">Nome, telefone, e-mail e CPF do cliente.</param>
+        /// <response code="201">Cliente criado; retorna o ID e o endereço de consulta.</response>
+        /// <response code="400">Dados inválidos.</response>
+        /// <response code="409">CPF ou e-mail já cadastrado.</response>
         [HttpPost]
         [Route("criarCliente")]
         [EndpointSummary("Cadastra um novo cliente")]
@@ -37,6 +45,10 @@ namespace LocacaoImoveis.API.Controllers
 
         }
 
+        /// <summary>Consulta um cliente pelo ID.</summary>
+        /// <param name="id">Identificador do cliente.</param>
+        /// <response code="200">Dados do cliente.</response>
+        /// <response code="404">Cliente não encontrado.</response>
         [HttpGet("{id:guid}/detalhes")]
         [EndpointSummary("Busca um cliente pelo ID")]
         [EndpointDescription("Retorna os dados do cliente identificado pelo GUID informado.")]
@@ -48,6 +60,11 @@ namespace LocacaoImoveis.API.Controllers
             return Ok(cliente);
         }
 
+        /// <summary>Consulta um cliente pelo CPF.</summary>
+        /// <param name="cpf">CPF do cliente.</param>
+        /// <response code="200">Dados do cliente.</response>
+        /// <response code="400">CPF inválido.</response>
+        /// <response code="404">Cliente não encontrado.</response>
         [HttpGet("{cpf}/detalhes")]
         [EndpointSummary("Busca um cliente pelo CPF")]
         [EndpointDescription("Retorna os dados do cliente identificado pelo CPF informado.")]
@@ -61,6 +78,11 @@ namespace LocacaoImoveis.API.Controllers
 
         }
 
+        /// <summary>Lista clientes com filtros e paginação.</summary>
+        /// <param name="filtro">Parte do nome, status, página e tamanho da página.</param>
+        /// <param name="cancellationToken">Token de cancelamento da requisição.</param>
+        /// <response code="200">Clientes da página solicitada; lista vazia quando não há resultados.</response>
+        /// <response code="400">Filtros ou paginação inválidos.</response>
         [HttpGet]
         [Route("obterTodosClientes")]
         [EndpointSummary("Lista clientes com filtros e paginação")]
@@ -77,6 +99,12 @@ namespace LocacaoImoveis.API.Controllers
 
         }
 
+        /// <summary>Atualiza o nome e o telefone de um cliente.</summary>
+        /// <param name="id">Identificador do cliente.</param>
+        /// <param name="request">Novo nome e telefone.</param>
+        /// <response code="204">Cliente atualizado.</response>
+        /// <response code="400">Dados inválidos.</response>
+        /// <response code="404">Cliente não encontrado.</response>
         [HttpPut("{id:guid}/atualizar")]
         [EndpointSummary("Atualiza um cliente")]
         [EndpointDescription("Atualiza os dados do cliente identificado pelo GUID informado.")]
@@ -94,6 +122,10 @@ namespace LocacaoImoveis.API.Controllers
         }
 
         // altera somente o status do cliente
+        /// <summary>Ativa um cliente.</summary>
+        /// <param name="id">Identificador do cliente.</param>
+        /// <response code="204">Cliente ativado.</response>
+        /// <response code="404">Cliente não encontrado.</response>
         [HttpPut("{id:guid}/ativar")]
         [EndpointSummary("Ativa um cliente")]
         [EndpointDescription("Altera o status do cliente para ativo.")]
@@ -107,6 +139,11 @@ namespace LocacaoImoveis.API.Controllers
         }
 
         // altera somente o status do cliente para inativo
+        /// <summary>Inativa um cliente sem reservas ativas.</summary>
+        /// <param name="id">Identificador do cliente.</param>
+        /// <response code="204">Cliente inativado.</response>
+        /// <response code="404">Cliente não encontrado.</response>
+        /// <response code="409">Cliente possui reservas ativas.</response>
         [HttpPut("{id:guid}/inativar")]
         [EndpointSummary("Inativa um cliente")]
         [EndpointDescription("Altera o status do cliente para inativo.")]

@@ -6,17 +6,26 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace LocacaoImoveis.API.Controllers
 {
+    /// <summary>Operações HTTP de reservas.</summary>
     [ApiController]
     [Route("api/v1/reservas")]
     public class ReservaController : ControllerBase
     {
         private readonly ReservaService _reservaService;
 
+        /// <summary>Inicializa o controller com o serviço de aplicação.</summary>
+        /// <param name="reservaService">Serviço responsável pelas operações do recurso.</param>
         public ReservaController(ReservaService reservaService)
         {
             _reservaService = reservaService;
         }
 
+        /// <summary>Cria uma reserva após validar cliente, imóvel e disponibilidade.</summary>
+        /// <param name="request">Cliente, imóvel, datas de entrada e saída e quantidade de hóspedes.</param>
+        /// <param name="cancellationToken">Token de cancelamento da requisição.</param>
+        /// <response code="201">Reserva criada; retorna o ID e o endereço de consulta.</response>
+        /// <response code="400">Dados inválidos ou cliente/imóvel inexistente.</response>
+        /// <response code="409">Conflito de período ou regra de negócio violada.</response>
         [HttpPost]
         [EndpointSummary("Cria uma reserva")]
         [EndpointDescription("Cria uma reserva validando cliente, imovel, periodo e conflitos de disponibilidade.")]
@@ -36,6 +45,11 @@ namespace LocacaoImoveis.API.Controllers
 
         }
 
+        /// <summary>Lista reservas com filtros e paginação.</summary>
+        /// <param name="filtro">Cliente, imóvel, status, página e tamanho da página.</param>
+        /// <param name="cancellationToken">Token de cancelamento da requisição.</param>
+        /// <response code="200">Reservas da página solicitada; lista vazia quando não há resultados.</response>
+        /// <response code="400">Filtros ou paginação inválidos.</response>
         [HttpGet]
         [EndpointSummary("Lista reservas com filtros e paginação")]
         [EndpointDescription("Filtra por cliente, imóvel e status. Página padrão 1, tamanho padrão 10 e máximo 100. Ordena por data de entrada e ID.")]
@@ -47,6 +61,11 @@ namespace LocacaoImoveis.API.Controllers
             return Ok(reservas);
         }
 
+        /// <summary>Consulta uma reserva pelo ID.</summary>
+        /// <param name="id">Identificador da reserva.</param>
+        /// <param name="cancellationToken">Token de cancelamento da requisição.</param>
+        /// <response code="200">Dados da reserva, incluindo valores e status.</response>
+        /// <response code="404">Reserva não encontrada.</response>
         [HttpGet]
         [Route("{id:guid}/detalhes")]
         [EndpointSummary("Busca uma reserva pelo ID")]
@@ -60,6 +79,13 @@ namespace LocacaoImoveis.API.Controllers
             return Ok(reserva);
         }
 
+        /// <summary>Cancela uma reserva e persiste o reembolso calculado.</summary>
+        /// <param name="id">Identificador da reserva.</param>
+        /// <param name="cancellationToken">Token de cancelamento da requisição.</param>
+        /// <response code="204">Reserva cancelada; consulte os detalhes para obter o reembolso.</response>
+        /// <response code="400">Requisição inválida.</response>
+        /// <response code="404">Reserva não encontrada.</response>
+        /// <response code="409">O status atual não permite esta operação.</response>
         [HttpPut]
         [Route("{id:guid}/cancelar")]
         [EndpointSummary("Cancela uma reserva")]
@@ -80,6 +106,13 @@ namespace LocacaoImoveis.API.Controllers
 
         }
 
+        /// <summary>Confirma uma reserva pendente.</summary>
+        /// <param name="id">Identificador da reserva.</param>
+        /// <param name="cancellationToken">Token de cancelamento da requisição.</param>
+        /// <response code="204">Reserva confirmada.</response>
+        /// <response code="400">Requisição inválida.</response>
+        /// <response code="404">Reserva não encontrada.</response>
+        /// <response code="409">O status atual não permite esta operação.</response>
         [HttpPut]
         [Route("{id:guid}/confirmar")]
         [EndpointSummary("Confirma uma reserva")]
@@ -97,6 +130,13 @@ namespace LocacaoImoveis.API.Controllers
 
         }
 
+        /// <summary>Conclui uma reserva confirmada.</summary>
+        /// <param name="id">Identificador da reserva.</param>
+        /// <param name="cancellationToken">Token de cancelamento da requisição.</param>
+        /// <response code="204">Reserva concluída.</response>
+        /// <response code="400">Requisição inválida.</response>
+        /// <response code="404">Reserva não encontrada.</response>
+        /// <response code="409">O status atual não permite esta operação.</response>
         [HttpPut]
         [Route("{id:guid}/concluir")]
         [EndpointSummary("Conclui uma reserva")]

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace LocacaoImoveis.API.Middleware;
 
+/// <summary>Converte exceções em respostas padronizadas com ProblemDetails.</summary>
 public sealed class ExceptionHandlingMiddleware
 {
     // Representa o próximo componente da pipeline HTTP.
@@ -11,6 +12,9 @@ public sealed class ExceptionHandlingMiddleware
     // Registra detalhes dos erros para diagnóstico interno da aplicação.
     private readonly ILogger<ExceptionHandlingMiddleware> _logger;
 
+    /// <summary>Inicializa o tratamento global de exceções.</summary>
+    /// <param name="next">Próximo componente da pipeline HTTP.</param>
+    /// <param name="logger">Logger dos erros da requisição.</param>
     public ExceptionHandlingMiddleware(
         RequestDelegate next,
         ILogger<ExceptionHandlingMiddleware> logger)
@@ -20,6 +24,8 @@ public sealed class ExceptionHandlingMiddleware
     }
 
 
+    /// <summary>Executa a requisição e trata exceções não capturadas.</summary>
+    /// <param name="context">Contexto da requisição HTTP.</param>
     public async Task InvokeAsync(HttpContext context)
     {
         try

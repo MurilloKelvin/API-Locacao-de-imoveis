@@ -111,6 +111,7 @@ app.Run();
 
 
 // e usado pelo apiFactory para fazer os testes htpp usando o mesmo Program da API real
+/// <summary>Ponto de entrada da API, exposto para os testes de integração.</summary>
 public partial class Program
 {
 }
