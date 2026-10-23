@@ -1,0 +1,28 @@
+@startuml
+!include estilo.iuml
+hide footbox
+autonumber
+
+title Listar clientes com filtros e paginação
+actor "Consumidor" as A
+participant "controller:\nClienteController" as C
+participant "service:\nClienteService" as S
+participant "repository:\nClienteRepository" as R
+database "SQLite" as B
+
+A -> C : GET /api/v1/clientes/obterTodosClientes?Nome=ana&Pagina=1
+C -> S : ObterTodosClientesAsync(filtro, token)
+alt página, tamanho ou status inválido
+ S --> C : ArgumentException
+ C --> A : 400 ProblemDetails
+else filtro válido
+ S -> R : ObterTodosClientesAsync(filtro, token)
+ R -> B : filtrar nome/status, ordenar nome/ID, Skip/Take
+ B --> R : até TamanhoPagina clientes
+ R --> S : lista de Cliente
+ S --> C : lista de ClienteResponse
+ C --> A : 200 com lista (ou [])
+end
+
+note over C,R : Padrão: página 1, tamanho 10; máximo 100.\nSem total de registros na resposta.
+@enduml

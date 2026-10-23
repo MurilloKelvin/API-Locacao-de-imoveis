@@ -31,6 +31,16 @@ API -> Cliente: 200 ou 404
 
 Consulta por CPF normaliza o CPF antes da busca. O framework rejeita valores que nao podem ser convertidos para Guid.
 
+## Listar clientes
+
+O controller recebe `ListarClientesRequest`, o serviço valida página, tamanho (1 a 100) e status, e o repositório filtra por parte do nome e status. O SQLite ordena por nome e ID e aplica `Skip`/`Take`. O serviço transforma as entidades em `ClienteResponse`. A API retorna `200` com a lista (ou `[]`) e `400` para filtros inválidos. Veja o diagrama `20-sequencia-listar-clientes`.
+
+## Listar reservas
+
+O controller recebe `ListarReservasRequest`, o serviço valida página, tamanho (1 a 100) e status, e o repositório filtra por cliente, imóvel e status. O SQLite ordena por data de entrada e ID e aplica `Skip`/`Take`. O serviço transforma as entidades em `ReservaResponse`. A API retorna `200` com a lista (ou `[]`) e `400` para filtros inválidos. Veja o diagrama `21-sequencia-listar-reservas`.
+
+As duas listagens usam página 1 e tamanho 10 por padrão e não retornam a contagem total.
+
 ## Listar imoveis
 
 ```text

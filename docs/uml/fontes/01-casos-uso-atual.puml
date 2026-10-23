@@ -6,7 +6,7 @@ actor "Consumidor da API" as ator
 rectangle "API de Locacao de Imoveis\nClientes, imoveis, reservas e health" {
   package "Clientes" {
     usecase "Cadastrar cliente" as c1
-    usecase "Consultar e listar clientes" as c2
+    usecase "Consultar e listar clientes\ncom filtros e paginas" as c2
     usecase "Atualizar nome e telefone" as c3
     usecase "Ativar ou inativar cliente" as c4
   }
@@ -18,7 +18,7 @@ rectangle "API de Locacao de Imoveis\nClientes, imoveis, reservas e health" {
   }
   package "Reservas" {
     usecase "Criar reserva" as r1
-    usecase "Consultar reservas" as r2
+    usecase "Consultar e listar reservas\ncom filtros e paginas" as r2
     usecase "Confirmar, concluir ou cancelar" as r3
   }
   usecase "Verificar saude da API" as h1

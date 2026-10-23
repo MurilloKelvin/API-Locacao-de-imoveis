@@ -1,0 +1,51 @@
+@startuml
+!include estilo.iuml
+!pragma layout smetana
+
+title Reservas: dados de entrada e saída
+
+package Application {
+  class CriarReservaRequest <<DTO>> {
+    +ClienteId : Guid {get; set;}
+    +ImovelId : Guid {get; set;}
+    +DataEntrada : DateOnly {get; set;}
+    +DataSaida : DateOnly {get; set;}
+    +QuantidadeHospedes : int {get; set;}
+  }
+  class ListarReservasRequest <<DTO>> {
+    +Pagina : int = 1 {get; set;}
+    +TamanhoPagina : int = 10 {get; set;}
+    +ClienteId : Guid? {get; set;}
+    +ImovelId : Guid? {get; set;}
+    +Status : ReservaStatus? {get; set;}
+  }
+  class ReservaResponse <<DTO>> {
+    +Id : Guid {get; set;}
+    +ClienteId : Guid {get; set;}
+    +ImovelId : Guid {get; set;}
+    +DataEntrada : DateOnly {get; set;}
+    +DataSaida : DateOnly {get; set;}
+    +QuantidadeDeNoites : int {get; set;}
+    +QuantidadeHospedes : int {get; set;}
+    +ValorTotalPreco : decimal {get; set;}
+    +Status : ReservaStatus {get; set;}
+    +CriadaEm : DateTimeOffset {get; set;}
+    +CanceladaEm : DateTimeOffset? {get; set;}
+    +ValorReembolso : decimal? {get; set;}
+  }
+  CriarReservaRequest -[hidden]right- ListarReservasRequest
+  ListarReservasRequest -[hidden]down- ReservaResponse
+}
+package Domain {
+  enum ReservaStatus <<enumeration>> {
+    Pendente = 0
+    Confirmada = 1
+    Concluida = 2
+    Cancelada = 3
+  }
+}
+ListarReservasRequest ..right> ReservaStatus : filtro opcional
+ReservaResponse ..right> ReservaStatus : tipo de Status
+
+caption A listagem aceita cliente, imóvel e status; ainda não filtra por período.
+@enduml

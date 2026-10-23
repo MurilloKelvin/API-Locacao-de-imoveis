@@ -47,7 +47,9 @@ O e-mail normaliza espacos e letras maiusculas e usa `MailAddress.TryCreate`. O 
 
 ## Application
 
-Os DTOs evitam expor diretamente as entidades. Existem requests para criar e atualizar clientes e imoveis, filtrar imoveis, consultar disponibilidade e criar reservas. As respostas `ClienteResponse`, `ImovelResponse` e `ReservaResponse` definem os dados que saem da API.
+Os DTOs evitam expor diretamente as entidades. Existem requests para criar e atualizar clientes e imoveis, filtrar as listagens de clientes, imoveis e reservas, consultar disponibilidade e criar reservas. As respostas `ClienteResponse`, `ImovelResponse` e `ReservaResponse` definem os dados que saem da API.
+
+`ListarClientesRequest` aceita parte do nome, status, página e tamanho da página. `ListarReservasRequest` aceita IDs de cliente e imóvel, status, página e tamanho da página. As duas listagens usam página 1 e tamanho 10 por padrão, com máximo de 100 itens. Os serviços validam os valores; os repositórios aplicam filtros, ordenação e `Skip`/`Take` no SQLite antes de materializar os resultados. Clientes são ordenados por nome e ID; reservas, por data de entrada e ID. As respostas são listas, sem contagem total.
 
 `ClienteService`, `ImovelService` e `ReservaService` coordenam validacoes, consultas, regras e mapeamento para DTOs. Eles recebem interfaces de repositorio por injecao de dependencia.
 

@@ -34,8 +34,8 @@ else unicidade violada ao gravar
  note over S, R : Consulta prévia sem registro; tentativa de inclusão
  S -> R : AdicionarClienteAsync(cliente) [await]
  activate R
- note over R : SaveChangesAsync lança DbUpdateException\nInnerException: SqliteException, código 2067
- R --> S : CpfJaCadastradoException
+ note over R : SaveChangesAsync lança DbUpdateException
+ R --> S : CpfJaCadastradoException ou emailJaCadastradoException
  deactivate R
  S --> C : propaga exceção
  C --> A : 409 { message }

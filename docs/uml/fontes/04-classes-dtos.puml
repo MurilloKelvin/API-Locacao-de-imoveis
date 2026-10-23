@@ -13,6 +13,12 @@ package Application {
     +Nome : string {get; set;}
     +Telefone : string {get; set;}
   }
+  class ListarClientesRequest <<DTO>> {
+    +Pagina : int = 1 {get; set;}
+    +TamanhoPagina : int = 10 {get; set;}
+    +Nome : string? {get; set;}
+    +Status : ClienteStatus? {get; set;}
+  }
   class ClienteResponse <<DTO>> {
     +Id : Guid {get; set;}
     +Nome : string {get; set;}
@@ -29,6 +35,8 @@ package Domain {
   }
 }
 CriarClienteRequestDTO -[hidden]right- AtualizarClienteRequest
-AtualizarClienteRequest -[hidden]right- ClienteResponse
+AtualizarClienteRequest -[hidden]right- ListarClientesRequest
+ListarClientesRequest -[hidden]down- ClienteResponse
 ClienteResponse ..right> ClienteStatus : tipo de Status
+ListarClientesRequest ..right> ClienteStatus : filtro opcional
 @enduml

@@ -7,7 +7,7 @@ package API {
   +CriarCliente(...) : Task<IActionResult>
   +ObterClientePorId(...) : Task<IActionResult>
   +ObterPorCpfAsync(...) : Task<IActionResult>
-  +ObterTodosClientes() : Task<IActionResult>
+  +ObterTodosClientes(filtro: ListarClientesRequest, token: CancellationToken) : Task<IActionResult>
   +AtualizarClienteRequest(...) : Task<IActionResult>
   +AtivarCliente(...) : Task<IActionResult>
   +InativarCliente(...) : Task<IActionResult>
@@ -22,7 +22,7 @@ package API {
  }
  class ReservaController <<controller>> {
   +CriarReservaAsync(...) : Task<IActionResult>
-  +ObterTodasReservasAsync(...) : Task<IActionResult>
+  +ObterTodasReservasAsync(filtro: ListarReservasRequest, token: CancellationToken) : Task<IActionResult>
   +ObterReservaPorIdAsync(...) : Task<IActionResult>
   +ConfirmarReservaAsync(...) : Task<IActionResult>
   +ConcluirReservaAsync(...) : Task<IActionResult>

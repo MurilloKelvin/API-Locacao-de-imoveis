@@ -7,7 +7,7 @@ package Application {
   +CriarClienteAsync(...) : Task<Guid>
   +ObterClientePorIdAsync(...) : Task<ClienteResponse>
   +ObterClientePorCpfAsync(...) : Task<ClienteResponse>
-  +ObterTodosClientesAsync() : Task<List<ClienteResponse>>
+  +ObterTodosClientesAsync(filtro: ListarClientesRequest, token: CancellationToken) : Task<List<ClienteResponse>>
   +AtualizarClienteAsync(...) : Task
   +AtivarClienteAsync(...) : Task
   +InativarClienteAsync(...) : Task
@@ -21,15 +21,19 @@ package Application {
  }
  class ReservaService <<service>> {
   +CriarReservaAsync(...) : Task<Guid>
-  +ObterTodasReservasAsync() : Task<List<ReservaResponse>>
+  +ObterTodasReservasAsync(filtro: ListarReservasRequest, token: CancellationToken) : Task<List<ReservaResponse>>
   +ObterReservaPorIdAsync(...) : Task<ReservaResponse>
   +ConfirmarReservaAsync(...) : Task
   +ConcluirReservaAsync(...) : Task
   +CancelarReservaAsync(...) : Task
  }
- interface IClienteRepository
+ interface IClienteRepository {
+  +ObterTodosClientesAsync(filtro: ListarClientesRequest, token: CancellationToken) : Task<List<Cliente>>
+ }
  interface IImovelRepository
- interface IReservaRepository
+ interface IReservaRepository {
+  +ObterTodasReservasAsync(filtro: ListarReservasRequest, token: CancellationToken) : Task<List<Reserva>>
+ }
 }
 ClienteService --> IClienteRepository
 ImovelService --> IImovelRepository
