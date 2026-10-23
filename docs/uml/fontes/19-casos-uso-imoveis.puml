@@ -1,0 +1,21 @@
+@startuml
+!include estilo.iuml
+left to right direction
+title Imoveis: operacoes implementadas
+actor "Consumidor da API" as A
+rectangle "API de Locacao de Imoveis\nModulo de imoveis" {
+ usecase "Cadastrar imovel" as U1
+ usecase "Consultar imovel por ID" as U2
+ usecase "Listar com filtros e paginas" as U3
+ usecase "Consultar disponibilidade" as U4
+ usecase "Atualizar imovel" as U5
+ usecase "Alterar status" as U6
+}
+A -- U1
+A -- U2
+A -- U3
+A -- U4
+A -- U5
+A -- U6
+caption A disponibilidade considera periodo, capacidade, preco e reservas ativas.
+@enduml

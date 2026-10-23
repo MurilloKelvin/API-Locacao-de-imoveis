@@ -1,0 +1,19 @@
+@startuml
+!include estilo.iuml
+!pragma layout smetana
+title Colaboração entre as camadas
+skinparam ranksep 80
+skinparam nodesep 90
+
+rectangle "<b>API</b>\n\nClienteController\nImoveisController\nReservaController\nHealthController" as API #F1F6FC
+rectangle "<b>Application</b>\n\n<b>Serviços</b>\nClienteService\nImovelService\nReservaService\n\n<b>Contratos de persistência</b>\nIClienteRepository\nIImovelRepository\nIReservaRepository" as Application #F0F8F6
+rectangle "<b>Infrastructure</b>\n\nClienteRepository\nImovelRepository\nReservaRepository\n\nAppDbContext" as Infrastructure #F7F5FC
+rectangle "<b>Domain</b>\n\n<b>Entidades</b>\nCliente\nImovel\nReserva\n\n<b>Objetos de valor</b>\nCpf\nEmail" as Domain #F3F8F4
+
+API -down-> Application : controllers chamam serviços
+Application -right-> Domain : serviços usam entidades
+Application <..down- Infrastructure : repositórios implementam contratos
+Infrastructure -right-> Domain : AppDbContext mapeia entidades
+
+caption Visão resumida: as setas representam relações entre camadas, não chamadas de cada classe.
+@enduml

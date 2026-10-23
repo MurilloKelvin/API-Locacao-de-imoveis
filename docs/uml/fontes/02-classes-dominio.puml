@@ -1,0 +1,39 @@
+@startuml
+!include estilo.iuml
+!pragma layout smetana
+title Clientes: domínio implementado
+package Domain {
+  class Cliente <<entity>> {
+    +Id : Guid {get; private set;}
+    +Nome : string {get; private set;}
+    +Telefone : string {get; private set;}
+    +Status : ClienteStatus {get; private set;}
+    +Email : Email {get; private set;}
+    +Cpf : Cpf {get; private set;}
+    -Cliente()
+    +Cliente(nome: string, telefone: string, email: string, cpf: string)
+    +AtualizarDadosCliente(nome: string, telefone: string) : void
+    +AtivarCliente() : void
+    +InativarCliente() : void
+  }
+  class Email <<value object>> {
+    +Valor : string {get;}
+    +Email(valor: string)
+  }
+  class Cpf <<value object>> {
+    +Valor : string {get;}
+    +Cpf(valor: string)
+  }
+  enum ClienteStatus <<enumeration>> {
+    Inativo = 0
+    Ativo = 1
+  }
+  class ValidaCPF <<utility>> {
+    {static} +IsCpf(cpf: string) : bool
+  }
+  Cliente --> "1" Email : Email
+  Cliente --> "1" Cpf : Cpf
+  Cliente ..> ClienteStatus : tipo de Status
+  Cpf ..> ValidaCPF : valida dígitos
+}
+@enduml

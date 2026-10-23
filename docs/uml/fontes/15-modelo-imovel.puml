@@ -1,0 +1,66 @@
+@startuml
+!include estilo.iuml
+!pragma layout smetana
+title Imóveis: modelo e dados de entrada/saída
+package Domain #F0F8F6 {
+ class Imovel <<entity>> {
+  +Id : Guid {get; private set;}
+  +Endereco : string {get; private set;}
+  +Titulo : string {get; private set;}
+  +CapacidadeDeHospedes : int {get; private set;}
+  +ValorDiaria : decimal {get; private set;}
+  +Status : ImovelStatus {get; private set;}
+  +AtualizarImovel(endereco: string, titulo: string, capacidadeDeHospedes: int, valorDiaria: decimal) : void
+  +AlterarStatusImovel(novoStatus: ImovelStatus) : void
+  -Imovel()
+  +Imovel(endereco: string, titulo: string, capacidadeDeHospedes: int, valorDiaria: decimal)
+ }
+ enum ImovelStatus <<enumeration>> {
+  Indisponivel = 0
+  Disponivel = 1
+  EmManutencao = 2
+ }
+ Imovel ..> ImovelStatus : tipo de Status
+}
+package Application #F1F6FC {
+ class CriarImovelRequest <<DTO>> {
+  +Endereco : string {get; set;}
+  +Titulo : string {get; set;}
+  +CapacidadeDeHospedes : int {get; set;}
+  +ValorDiaria : decimal {get; set;}
+ }
+ class ImovelResponse <<DTO>> {
+  +Id : Guid {get; set;}
+  +Endereco : string {get; set;}
+  +Titulo : string {get; set;}
+  +CapacidadeHospedes : int {get; set;}
+  +ValorDiaria : decimal {get; set;}
+  +Status : ImovelStatus {get; set;}
+ }
+ class AtualizarImovelRequest <<DTO>> {
+  +Endereco : string {get; set;}
+  +Titulo : string {get; set;}
+  +CapacidadeDeHospedes : int {get; set;}
+  +ValorDiaria : decimal {get; set;}
+ }
+ class AlterarStatusImovelRequest <<DTO>> {
+  +Status : ImovelStatus? {get; set;}
+ }
+ class ListarImoveisRequest <<DTO>> {
+  +Pagina : int = 1 {get; set;}
+  +TamanhoPagina : int = 10 {get; set;}
+  +Status : ImovelStatus? {get; set;}
+  +CapacidadeMinima : int? {get; set;}
+  +CapacidadeMaxima : int? {get; set;}
+  +ValorDiarioMinimo : decimal? {get; set;}
+  +ValorDiarioMaximo : decimal? {get; set;}
+ }
+ CriarImovelRequest -[hidden]right- AtualizarImovelRequest
+ CriarImovelRequest -[hidden]down- ListarImoveisRequest
+ AtualizarImovelRequest -[hidden]down- AlterarStatusImovelRequest
+ ListarImoveisRequest -[hidden]right- AlterarStatusImovelRequest
+ ImovelResponse -[hidden]down- CriarImovelRequest
+}
+ImovelResponse ..> ImovelStatus : tipo de Status
+caption Novo imóvel começa Disponível. Atualização valida dados; status rejeita valor indefinido ou repetido.
+@enduml

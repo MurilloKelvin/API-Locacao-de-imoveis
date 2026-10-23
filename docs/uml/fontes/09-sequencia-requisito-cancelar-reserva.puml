@@ -1,0 +1,33 @@
+@startuml
+!include estilo.iuml
+hide footbox
+autonumber
+title Cancelar reserva
+actor "Consumidor" as A
+participant "controller:\nReservaController" as C
+participant "service:\nReservaService" as S
+participant "repository:\nReservaRepository" as R
+participant "policy:\nPoliticaDeReembolso" as P
+participant "domain:\nReserva" as E
+A -> C : PUT /api/v1/reservas/{id}/cancelar
+activate C
+C -> S : CancelarReservaAsync(id, token)
+activate S
+S -> R : ObterIdAsync(id, token)
+R --> S : reserva ou null
+alt reserva inexistente
+ S --> C : RecursoNaoEncontradoException
+ C --> A : 404
+else reserva encontrada
+ S -> S : obter agora UTC-3 e entrada as 14:00
+ S -> P : CalcularReembolso(valor, entrada, agora)
+ P --> S : valor do reembolso
+ S -> E : Cancelar(agora, reembolso)
+ E --> S : status Cancelada
+ S -> R : AtualizarAsync(token)
+ S --> C : concluido
+ C --> A : 204 sem corpo
+end
+deactivate S
+deactivate C
+@enduml

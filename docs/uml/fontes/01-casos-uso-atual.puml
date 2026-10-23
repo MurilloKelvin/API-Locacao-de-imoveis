@@ -1,0 +1,38 @@
+@startuml
+!include estilo.iuml
+left to right direction
+title Casos de uso - API implementada
+actor "Consumidor da API" as ator
+rectangle "API de Locacao de Imoveis\nClientes, imoveis, reservas e health" {
+  package "Clientes" {
+    usecase "Cadastrar cliente" as c1
+    usecase "Consultar e listar clientes" as c2
+    usecase "Atualizar nome e telefone" as c3
+    usecase "Ativar ou inativar cliente" as c4
+  }
+  package "Imoveis" {
+    usecase "Cadastrar e consultar imovel" as i1
+    usecase "Listar com filtros e paginas" as i2
+    usecase "Consultar disponibilidade" as i3
+    usecase "Atualizar imovel e status" as i4
+  }
+  package "Reservas" {
+    usecase "Criar reserva" as r1
+    usecase "Consultar reservas" as r2
+    usecase "Confirmar, concluir ou cancelar" as r3
+  }
+  usecase "Verificar saude da API" as h1
+}
+ator -- c1
+ator -- c2
+ator -- c3
+ator -- c4
+ator -- i1
+ator -- i2
+ator -- i3
+ator -- i4
+ator -- r1
+ator -- r2
+ator -- r3
+ator -- h1
+@enduml

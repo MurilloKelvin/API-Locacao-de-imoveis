@@ -1,0 +1,34 @@
+@startuml
+!include estilo.iuml
+hide footbox
+autonumber
+title Criar reserva
+actor "Consumidor" as A
+participant "controller:\nReservaController" as C
+participant "service:\nReservaService" as S
+participant "repositories" as R
+participant "domain:\nReserva" as E
+participant "policy:\nDesconto" as P
+A -> C : POST /api/v1/reservas
+activate C
+C -> S : CriarReservaAsync(request, token)
+activate S
+S -> S : aguardar SemaphoreSlim
+S -> R : buscar cliente e contar reservas ativas
+S -> R : buscar imovel e verificar capacidade
+S -> R : verificar conflito do periodo
+alt regra invalida ou conflito
+ S --> C : excecao
+ C --> A : 400 ou 409 + mensagem do erro
+else dados validos
+ S -> P : calcular total por noites
+ S -> E : new Reserva(..., valorTotal, agora)
+ E --> S : status Pendente
+ S -> R : AdicionarAsync(reserva, token)
+ S --> C : reserva.Id
+ C --> A : 201 com id
+end
+S -> S : liberar SemaphoreSlim
+deactivate S
+deactivate C
+@enduml

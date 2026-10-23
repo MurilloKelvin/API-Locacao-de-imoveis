@@ -1,0 +1,18 @@
+@startuml
+!include estilo.iuml
+left to right direction
+title Casos de uso - reservas implementadas
+actor "Consumidor da API" as A
+rectangle "API de Locacao de Imoveis" {
+ usecase "Criar reserva" as R1
+ usecase "Consultar reservas" as R2
+ usecase "Confirmar reserva" as R3
+ usecase "Concluir reserva" as R4
+ usecase "Cancelar reserva e calcular reembolso" as R5
+}
+A -- R1
+A -- R2
+A -- R3
+A -- R4
+A -- R5
+@enduml

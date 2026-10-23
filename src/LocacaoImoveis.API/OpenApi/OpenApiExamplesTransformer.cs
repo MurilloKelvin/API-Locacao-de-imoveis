@@ -27,8 +27,8 @@ public sealed class OpenApiExamplesTransformer : IOpenApiOperationTransformer
             {
                 ["nome"] = "Pedro da Silva",
                 ["telefone"] = "31999999999",
-                ["email"] = "pedro.silva@email.com",
-                ["cpf"] = "52998224725"
+                ["email"] = "email@example.com",
+                ["cpf"] = "99999999999"
             };
             SetResponseExample(operation, "201", new JsonObject
             {

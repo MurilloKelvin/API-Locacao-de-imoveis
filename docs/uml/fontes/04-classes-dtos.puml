@@ -1,0 +1,34 @@
+@startuml
+!include estilo.iuml
+!pragma layout smetana
+title Clientes: dados de entrada e saída
+package Application {
+  class CriarClienteRequestDTO <<DTO>> {
+    +Nome : string {get; set;}
+    +Telefone : string {get; set;}
+    +Email : string {get; set;}
+    +Cpf : string {get; set;}
+  }
+  class AtualizarClienteRequest <<DTO>> {
+    +Nome : string {get; set;}
+    +Telefone : string {get; set;}
+  }
+  class ClienteResponse <<DTO>> {
+    +Id : Guid {get; set;}
+    +Nome : string {get; set;}
+    +Telefone : string {get; set;}
+    +Email : string {get; set;}
+    +Cpf : string {get; set;}
+    +Status : ClienteStatus {get; set;}
+  }
+}
+package Domain {
+  enum ClienteStatus <<enumeration>> {
+    Inativo = 0
+    Ativo = 1
+  }
+}
+CriarClienteRequestDTO -[hidden]right- AtualizarClienteRequest
+AtualizarClienteRequest -[hidden]right- ClienteResponse
+ClienteResponse ..right> ClienteStatus : tipo de Status
+@enduml

@@ -1,0 +1,21 @@
+@startuml
+!include estilo.iuml
+!pragma layout smetana
+title Repositorios e contexto
+package Infrastructure {
+ class ClienteRepository <<repository>>
+ class ImovelRepository <<repository>>
+ class ReservaRepository <<repository>>
+ class AppDbContext {
+  +Clientes : DbSet<Cliente>
+  +Imoveis : DbSet<Imovel>
+  +Reservas : DbSet<Reserva>
+ }
+}
+ClienteRepository --> AppDbContext
+ImovelRepository --> AppDbContext
+ReservaRepository --> AppDbContext
+AppDbContext --> Cliente
+AppDbContext --> Imovel
+AppDbContext --> Reserva
+@enduml

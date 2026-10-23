@@ -1,0 +1,55 @@
+@startuml
+!include estilo.iuml
+hide footbox
+autonumber
+title Cadastrar cliente
+caption Fluxo de sucesso implementado • exceções na vista 12
+actor "Consumidor" as A
+participant "controller:\nClienteController" as C
+participant "service:\nClienteService" as S
+participant "cliente:\nCliente" as E
+participant "repository:\nClienteRepository" as R
+participant "context:\nAppDbContext" as D
+database "SQLite" as B
+== 1. Receber e validar ==
+A -> C : POST /api/v1/clientes/criarCliente
+activate C
+C -> S : CriarClienteAsync(request) [await]
+activate S
+create E
+S -> E : new Cliente(nome, telefone, email, cpf)
+activate E
+E --> S : cliente válido, Ativo
+ deactivate E
+== 2. Verificar duplicidade ==
+S -> R : ObterPorCpfAsync(cpf) [await]
+activate R
+R -> R : new Cpf(cpf)
+R -> D : FirstOrDefaultAsync(...) [await]
+activate D
+D -> B : consultar CPF
+B --> D : nenhum registro
+D --> R : null
+ deactivate D
+R --> S : null
+ deactivate R
+== 3. Persistir e responder ==
+S -> R : AdicionarClienteAsync(cliente) [await]
+activate R
+R -> D : Clientes.Add(cliente)
+activate D
+D --> R : entidade rastreada
+ deactivate D
+R -> D : SaveChangesAsync() [await]
+activate D
+D -> B : inserir cliente
+B --> D : sucesso
+D --> R : conclusão
+ deactivate D
+R --> S : conclusão
+ deactivate R
+S --> C : cliente.Id
+ deactivate S
+C --> A : 201 { id }\nsem Location
+ deactivate C
+@enduml

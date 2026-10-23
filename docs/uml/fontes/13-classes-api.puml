@@ -1,0 +1,35 @@
+@startuml
+!include estilo.iuml
+!pragma layout smetana
+title Controllers da API
+package API {
+ class ClienteController <<controller>> {
+  +CriarCliente(...) : Task<IActionResult>
+  +ObterClientePorId(...) : Task<IActionResult>
+  +ObterPorCpfAsync(...) : Task<IActionResult>
+  +ObterTodosClientes() : Task<IActionResult>
+  +AtualizarClienteRequest(...) : Task<IActionResult>
+  +AtivarCliente(...) : Task<IActionResult>
+  +InativarCliente(...) : Task<IActionResult>
+ }
+ class ImoveisController <<controller>> {
+  +CriarImovel(...) : Task<IActionResult>
+  +ObterImovelPorId(...) : Task<IActionResult>
+  +ListarImoveis(...) : Task<IActionResult>
+  +ListarImoveisDisponiveis(...) : Task<IActionResult>
+  +AtualizarImovel(...) : Task<IActionResult>
+  +AlterarStatusImovel(...) : Task<IActionResult>
+ }
+ class ReservaController <<controller>> {
+  +CriarReservaAsync(...) : Task<IActionResult>
+  +ObterTodasReservasAsync(...) : Task<IActionResult>
+  +ObterReservaPorIdAsync(...) : Task<IActionResult>
+  +ConfirmarReservaAsync(...) : Task<IActionResult>
+  +ConcluirReservaAsync(...) : Task<IActionResult>
+  +CancelarReservaAsync(...) : Task<IActionResult>
+ }
+ class HealthController <<controller>> {
+  +Get(token: CancellationToken) : Task<IActionResult>
+ }
+}
+@enduml

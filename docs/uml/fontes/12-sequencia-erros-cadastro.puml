@@ -1,0 +1,45 @@
+@startuml
+!include estilo.iuml
+hide footbox
+autonumber
+title Cadastrar cliente — alternativas
+caption Complemento do fluxo de sucesso • chamadas intermediárias omitidas
+actor "Consumidor" as A
+participant "controller:\nClienteController" as C
+participant "service:\nClienteService" as S
+participant "repository:\nClienteRepository" as R
+A -> C : POST /api/v1/clientes/criarCliente
+activate C
+C -> S : CriarClienteAsync(request) [await]
+activate S
+alt nome, e-mail ou CPF inválido
+ note over S : Construção de Cliente rejeitada pelo domínio
+ S --> C : ArgumentException
+ C --> A : 400 { message }
+else e-mail já cadastrado
+ S -> R : ObterPorEmailAsync(email) [await]
+ activate R
+ R --> S : cliente existente
+ deactivate R
+ S --> C : EmailJaCadastradoException
+ C --> A : 409 { message }
+else CPF já cadastrado
+ S -> R : ObterPorCpfAsync(cpf) [await]
+ activate R
+ R --> S : cliente existente
+ deactivate R
+ S --> C : CpfJaCadastradoException
+ C --> A : 409 { message }
+else unicidade violada ao gravar
+ note over S, R : Consulta prévia sem registro; tentativa de inclusão
+ S -> R : AdicionarClienteAsync(cliente) [await]
+ activate R
+ note over R : SaveChangesAsync lança DbUpdateException\nInnerException: SqliteException, código 2067
+ R --> S : CpfJaCadastradoException
+ deactivate R
+ S --> C : propaga exceção
+ C --> A : 409 { message }
+end
+ deactivate S
+ deactivate C
+@enduml

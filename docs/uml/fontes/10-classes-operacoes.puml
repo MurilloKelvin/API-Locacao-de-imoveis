@@ -1,0 +1,40 @@
+@startuml
+!include estilo.iuml
+!pragma layout smetana
+title Servicos e contratos da aplicacao
+package Application {
+ class ClienteService <<service>> {
+  +CriarClienteAsync(...) : Task<Guid>
+  +ObterClientePorIdAsync(...) : Task<ClienteResponse>
+  +ObterClientePorCpfAsync(...) : Task<ClienteResponse>
+  +ObterTodosClientesAsync() : Task<List<ClienteResponse>>
+  +AtualizarClienteAsync(...) : Task
+  +AtivarClienteAsync(...) : Task
+  +InativarClienteAsync(...) : Task
+ }
+ class ImovelService <<service>> {
+  +CriarImovelAsync(...) : Task<Guid>
+  +ListarImoveisAsync(...) : Task<List<ImovelResponse>>
+  +ListarImoveisDisponiveisAsync(...) : Task<List<ImovelResponse>>
+  +AtualizarImovelAsync(...) : Task
+  +AlterarStatusImovelAsync(...) : Task
+ }
+ class ReservaService <<service>> {
+  +CriarReservaAsync(...) : Task<Guid>
+  +ObterTodasReservasAsync() : Task<List<ReservaResponse>>
+  +ObterReservaPorIdAsync(...) : Task<ReservaResponse>
+  +ConfirmarReservaAsync(...) : Task
+  +ConcluirReservaAsync(...) : Task
+  +CancelarReservaAsync(...) : Task
+ }
+ interface IClienteRepository
+ interface IImovelRepository
+ interface IReservaRepository
+}
+ClienteService --> IClienteRepository
+ImovelService --> IImovelRepository
+ImovelService --> IReservaRepository
+ReservaService --> IClienteRepository
+ReservaService --> IImovelRepository
+ReservaService --> IReservaRepository
+@enduml

@@ -1,0 +1,26 @@
+@startuml
+!include estilo.iuml
+hide footbox
+autonumber
+title Listar imoveis com filtros e paginas
+actor Consumidor as A
+participant "controller:\nImoveisController" as C
+participant "service:\nImovelService" as S
+participant "repository:\nImovelRepository" as R
+participant "context:\nAppDbContext" as D
+A -> C : GET /api/v1/imoveis/listar?filtros
+C -> S : ListarImoveisAsync(filtro, token)
+S -> S : validar pagina, tamanho e faixas
+alt filtro invalido
+ S --> C : ArgumentException
+ C --> A : 400
+else filtro valido
+ S -> R : ListarImoveisAsync(filtro, token)
+ R -> D : AsNoTracking, Where, OrderBy, Skip e Take
+ D --> R : lista
+ R --> S : imoveis
+ S -> S : mapear para ImovelResponse
+ S --> C : lista
+ C --> A : 200
+end
+@enduml

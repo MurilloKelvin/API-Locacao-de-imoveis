@@ -1,0 +1,24 @@
+@startuml
+!include estilo.iuml
+!pragma layout smetana
+title Tipos base usados pela aplicacao
+class ControllerBase <<framework>>
+class Exception <<framework>>
+class DbContext <<framework>>
+class ClienteController <<controller>>
+class ImoveisController <<controller>>
+class ReservaController <<controller>>
+class HealthController <<controller>>
+class AppDbContext
+class CpfJaCadastradoException
+class EmailJaCadastradoException
+class RecursoNaoEncontradoException
+ClienteController -down-|> ControllerBase
+ImoveisController -down-|> ControllerBase
+ReservaController -down-|> ControllerBase
+HealthController -down-|> ControllerBase
+AppDbContext -down-|> DbContext
+CpfJaCadastradoException -down-|> Exception
+EmailJaCadastradoException -down-|> Exception
+RecursoNaoEncontradoException -down-|> Exception
+@enduml

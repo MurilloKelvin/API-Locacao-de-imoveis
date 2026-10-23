@@ -1,0 +1,27 @@
+@startuml
+!include estilo.iuml
+hide footbox
+autonumber
+title Cadastrar imovel
+actor Consumidor as A
+participant "controller:\nImoveisController" as C
+participant "service:\nImovelService" as S
+participant "domain:\nImovel" as E
+participant "repository:\nImovelRepository" as R
+participant "context:\nAppDbContext" as D
+A -> C : POST /api/v1/imoveis
+C -> S : CriarImovelAsync(request, token)
+S -> E : new Imovel(endereco, titulo, capacidade, diaria)
+alt dados invalidos
+ E --> S : ArgumentException
+ S --> C : erro
+ C --> A : 400
+else dados validos
+ S -> R : AdicionarAsync(imovel, token)
+ R -> D : AddAsync e SaveChangesAsync
+ D --> R : salvo
+ R --> S : concluido
+ S --> C : imovel.Id
+ C --> A : 201 com id
+end
+@enduml

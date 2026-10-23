@@ -1,0 +1,33 @@
+@startuml
+!include estilo.iuml
+!pragma layout smetana
+title Imoveis: colaboracao entre camadas
+package API {
+ class ImoveisController <<controller>> {
+  +ListarImoveis(...)
+  +ListarImoveisDisponiveis(...)
+  +AlterarStatusImovel(...)
+ }
+}
+package Application {
+ class ImovelService <<service>> {
+  +ListarImoveisAsync(...)
+  +ListarImoveisDisponiveisAsync(...)
+  +AlterarStatusImovelAsync(...)
+ }
+ interface IImovelRepository
+ interface IReservaRepository
+}
+package Infrastructure {
+ class ImovelRepository <<repository>>
+ class ReservaRepository <<repository>>
+ class AppDbContext
+}
+ImoveisController --> ImovelService
+ImovelService --> IImovelRepository
+ImovelService --> IReservaRepository : conferir reservas ativas
+IImovelRepository <|.. ImovelRepository
+IReservaRepository <|.. ReservaRepository
+ImovelRepository --> AppDbContext
+ReservaRepository --> AppDbContext
+@enduml

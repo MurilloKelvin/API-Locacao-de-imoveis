@@ -1,0 +1,62 @@
+@startuml
+ !include estilo.iuml
+hide footbox
+autonumber
+title Atualizar dados do cliente
+caption Fluxo implementado • localização, validação e persistência
+actor "Consumidor" as A
+participant "controller:\nClienteController" as C
+participant "service:\nClienteService" as S
+participant "cliente:\nCliente" as E
+participant "repository:\nClienteRepository" as R
+participant "context:\nAppDbContext" as D
+database "SQLite" as B
+A -> C : PUT /api/v1/clientes/{id}/atualizar\nAtualizarClienteRequest(id, request)
+activate C
+C -> S : AtualizarClienteAsync(id, request) [await]
+activate S
+S -> R : ObterPorIdAsync(id) [await]
+activate R
+R -> D : Clientes.FindAsync(id) [await]
+activate D
+opt entidade não está no ChangeTracker
+  D -> B : consultar por chave [await]
+  B --> D : registro ou ausência
+end
+D --> R : Cliente rastreado ou null
+deactivate D
+R --> S : Cliente ou null
+deactivate R
+alt cliente não encontrado
+  S --> C : false
+  C --> A : 404 { message }
+else cliente encontrado
+  S -> E : AtualizarDadosCliente(nome, telefone)
+  activate E
+  E -> E : validar nome
+  opt dados válidos
+    E -> E : atribuir Nome.Trim() e Telefone
+  end
+  E --> S : void ou ArgumentException (antes das atribuições)
+  deactivate E
+  alt nome inválido
+    S --> C : propaga exceção
+    C --> A : 400 { message }
+  else dados válidos
+    S -> R : AtualizarClienteAsync(cliente) [await]
+    activate R
+    R -> D : SaveChangesAsync() [await]
+    activate D
+    D -> B : persistir alterações rastreadas [await]
+    B --> D : conclusão
+    D --> R : conclusão
+    deactivate D
+    R --> S : Task concluída
+    deactivate R
+    S --> C : true
+    C --> A : 204 sem corpo
+  end
+end
+deactivate S
+deactivate C
+@enduml
