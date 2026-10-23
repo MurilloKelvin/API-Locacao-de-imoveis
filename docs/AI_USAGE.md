@@ -38,5 +38,6 @@ Alguns testes, especialmente os testes HTTP e de reserva mencionados acima, fora
 |---|---|
 | Criacao do OpenAPI | A IA ajudou a criar a documentacao OpenAPI, os exemplos de request e response exibidos no Swagger e o transformer usado pela API. |
 | Explicacao do OpenAPI | A IA explicou o que e o OpenAPI, como ele e gerado e como os exemplos aparecem na documentacao do Swagger. |
+| Documentação XML da API | A IA habilitou a geração do XML, adicionou comentários aos endpoints e tipos públicos da API e criou um teste HTTP para verificar sua inclusão no OpenAPI. |
 | Criacao do README | A IA ajudou a organizar e escrever o README com instrucoes para executar o projeto, acessar o Swagger, consultar os endpoints e executar os testes. |
 | Criação da galeria de diagramas UML | A galeria personalizada em `docs/uml/galeria.html`, incluindo os recursos de navegação e zoom, foi criada com auxílio de IA. O HTML não é gerado pelo PlantUML: ele exibe as imagens SVG e PNG que o PlantUML gera a partir dos arquivos `.puml`. |
