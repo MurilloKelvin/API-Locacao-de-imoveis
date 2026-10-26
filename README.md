@@ -1,47 +1,17 @@
 # API de Locação de Imóveis
 
-API REST para cadastro de clientes e imóveis e para criação e acompanhamento de reservas. O projeto foi desenvolvido em ASP.NET Core com separação entre domínio, aplicação, infraestrutura e API.
+API REST para cadastro de clientes e imóveis e gerenciamento de reservas. Desenvolvida em .NET 10 com ASP.NET Core, Entity Framework Core e SQLite em memória, a solução separa domínio, casos de uso, persistência e interface HTTP em quatro projetos.
 
-## O que já existe
+## Funcionalidades
 
-- cadastro, consulta, atualização e ativação/inativação de clientes;
-- validação de CPF e e-mail como objetos de valor;
-- cadastro, consulta, filtros, atualização e alteração de status de imóveis;
-- criação, consulta e transição de status de reservas;
-- política de desconto por duração da reserva;
-- política de reembolso no cancelamento;
-- persistência com Entity Framework Core e SQLite em memória;
-- carga inicial de dados para facilitar o uso no Swagger;
-- documentacao dos endpoints com resumo, descricao e codigos de resposta no Swagger;
-- testes unitários, de persistência, de serviço e de HTTP.
-
-## Tecnologias
-
-- .NET 10;
-- ASP.NET Core Web API;
-- Entity Framework Core com SQLite;
-- Swagger/OpenAPI;
-- xUnit;
-- `WebApplicationFactory` nos testes HTTP.
-
-As versões dos pacotes estão nos arquivos `.csproj`.
-
-## Organização do código
-
-| Projeto | Responsabilidade |
-|---|---|
-| `src/LocacaoImoveis.Domain` | entidades, enums, objetos de valor, validações e políticas de negócio |
-| `src/LocacaoImoveis.Application` | DTOs, interfaces, serviços e exceções da aplicação |
-| `src/LocacaoImoveis.Infrastructure` | `DbContext`, repositórios e seed |
-| `src/LocacaoImoveis.API` | controllers, middleware, configuração e execução da API |
-| `tests/LocacaoImoveis.Domain.Tests` | testes das regras de domínio |
-| `tests/LocacaoImoveis.Integration.Tests` | testes de persistência, serviços e endpoints HTTP |
+- **Clientes:** cadastro, consulta por ID ou CPF, filtros, paginação, atualização e ativação/inativação.
+- **Imóveis:** cadastro, consulta, filtros, paginação, atualização, alteração de status e disponibilidade por período.
+- **Reservas:** criação, consulta, filtros, paginação, confirmação, conclusão e cancelamento com cálculo de reembolso.
+- **API:** documentação OpenAPI/Swagger, erros em formato `ProblemDetails` e endpoint `/health`.
 
 ## Executar localmente
 
-Pré-requisito: SDK do .NET 10 instalado.
-
-Na raiz do repositório:
+Requer o SDK do **.NET 10**. Na raiz do repositório:
 
 ```powershell
 dotnet restore LocacaoImoveis.slnx
@@ -49,16 +19,61 @@ dotnet build LocacaoImoveis.slnx
 dotnet run --project src/LocacaoImoveis.API/LocacaoImoveis.API.csproj --launch-profile http
 ```
 
-Com a API em execução:
+Com a API em execução no perfil `http`:
 
-- Swagger: <http://localhost:5088/swagger>
-- OpenAPI: <http://localhost:5088/openapi/v1.json>
-- HTTPS: <https://localhost:7216/swagger>
-- Health check: <http://localhost:5088/health>
+| Recurso | Endereço |
+|---|---|
+| Swagger UI | <http://localhost:5088/swagger> |
+| Especificação OpenAPI | <http://localhost:5088/openapi/v1.json> |
+| Health check | <http://localhost:5088/health> |
 
-O banco usa SQLite em memória. Ele é criado e populado pelo seed quando a aplicação inicia e é perdido quando a aplicação é encerrada.
+Swagger e OpenAPI são disponibilizados no ambiente `Development`, configurado pelo perfil acima. Os modelos, exemplos e códigos de resposta podem ser consultados no Swagger.
 
-O endpoint `/health` verifica se a API esta respondendo e retorna `200` quando esta saudavel ou `503` quando falha.
+### Dados iniciais
+
+Na inicialização, `EnsureCreated()` cria as tabelas e o seed insere três clientes, três imóveis e duas reservas. A conexão SQLite com `Data Source=:memory:` permanece aberta enquanto a aplicação está em execução. **Os dados são descartados ao encerrar o processo** e recriados na próxima inicialização.
+
+## Estrutura da solução
+
+| Projeto | Responsabilidade |
+|---|---|
+| `src/LocacaoImoveis.Domain` | Entidades, objetos de valor, enums e políticas de desconto e reembolso |
+| `src/LocacaoImoveis.Application` | Serviços, DTOs, contratos de repositório e exceções |
+| `src/LocacaoImoveis.Infrastructure` | `AppDbContext`, repositórios e carga inicial de dados |
+| `src/LocacaoImoveis.API` | Controllers, middleware, injeção de dependência e OpenAPI |
+| `tests/LocacaoImoveis.Domain.Tests` | Testes das entidades e políticas |
+| `tests/LocacaoImoveis.Integration.Tests` | Testes de persistência, serviços e endpoints HTTP |
+
+O `AppDbContext` mapeia CPF e e-mail como objetos de valor convertidos para texto, cria índices únicos para ambos e configura as chaves estrangeiras de reservas para clientes e imóveis.
+
+## API
+
+As rotas de clientes, imóveis e reservas usam o prefixo `/api/v1`.
+
+| Recurso | Rotas principais |
+|---|---|
+| Clientes | `POST /api/v1/clientes/criarCliente` · `GET /api/v1/clientes/obterTodosClientes` · `GET /api/v1/clientes/{id}/detalhes` |
+| Imóveis | `POST /api/v1/imoveis` · `GET /api/v1/imoveis/listar` · `GET /api/v1/imoveis/imoveisDisponiveis` |
+| Reservas | `POST /api/v1/reservas` · `GET /api/v1/reservas` · `GET /api/v1/reservas/{id}/detalhes` · `PUT /api/v1/reservas/{id}/cancelar` |
+
+As demais operações, os parâmetros e os corpos das requisições estão no [guia da API e casos de uso](docs/casos-de-uso.md).
+
+### Filtros e paginação
+
+As listagens usam `Pagina=1` e `TamanhoPagina=10` por padrão; o tamanho permitido vai de 1 a 100. Os filtros opcionais são aplicados antes da paginação no banco.
+
+```text
+GET /api/v1/clientes/obterTodosClientes?Nome=pedro&Status=1&Pagina=1&TamanhoPagina=10
+GET /api/v1/reservas?Status=0&Pagina=1&TamanhoPagina=10
+```
+
+Clientes aceitam nome e status; reservas aceitam cliente, imóvel e status; imóveis aceitam status, capacidade e faixa de preço. As respostas são listas, sem total de registros ou páginas. Uma página sem resultados retorna `[]`.
+
+### Regras de reserva
+
+Uma reserva exige cliente ativo, imóvel disponível, capacidade suficiente e período sem conflito com reservas pendentes ou confirmadas. A estadia deve ter de 1 a 30 noites; um cliente pode manter até três reservas ativas. Reservas novas começam como `Pendente` e seguem as transições `Pendente → Confirmada → Concluída` ou `Pendente/Confirmada → Cancelada`.
+
+O valor é calculado a partir das diárias. O desconto por duração é configurado em `src/LocacaoImoveis.API/appsettings.json`; a configuração atual aplica **10% a partir de sete noites**. No cancelamento, a política calcula e persiste o reembolso. O endpoint retorna `204`; o valor pode ser consultado nos detalhes da reserva.
 
 ## Testes
 
@@ -66,84 +81,12 @@ O endpoint `/health` verifica se a API esta respondendo e retorna `200` quando e
 dotnet test LocacaoImoveis.slnx
 ```
 
-## Endpoints principais
+Os testes incluem regras de domínio, persistência e chamadas HTTP com `WebApplicationFactory`, inclusive tentativas concorrentes de reservar o mesmo imóvel e período.
 
-Todos os endpoints usam o prefixo `/api/v1`.
+## Documentação
 
-| Recurso | Operações |
-|---|---|
-| Clientes | `POST /clientes/criarCliente`, `GET /clientes/{id}/detalhes`, `GET /clientes/{cpf}/detalhes`, `GET /clientes/obterTodosClientes`, `PUT /clientes/{id}/atualizar`, `PUT /clientes/{id}/ativar`, `PUT /clientes/{id}/inativar` |
-| Imóveis | `POST /imoveis`, `GET /imoveis/{id}/detalhes`, `GET /imoveis/listar`, `GET /imoveis/imoveisDisponiveis`, `PUT /imoveis/{id}/atualizarImovel`, `PUT /imoveis/{id}/atualizarStatus` |
-| Reservas | `POST /reservas`, `GET /reservas`, `GET /reservas/{id}/detalhes`, `PUT /reservas/{id}/cancelar`, `PUT /reservas/{id}/confirmar`, `PUT /reservas/{id}/concluir` |
-| Health | `GET /health` |
-
-Os modelos de request, os parâmetros de consulta e os exemplos de resposta estão disponíveis no Swagger.
-
-## Documentacao no Swagger
-
-Os controllers possuem metadados de documentacao para cada operacao. No Swagger, cada endpoint apresenta:
-
-- resumo da operacao;
-- descricao do comportamento;
-- parametros de rota, query string e corpo;
-- modelos de entrada e saida;
-- exemplos de request para clientes, imoveis e reservas;
-- codigos de resposta previstos.
-
-Para consultar, execute a API e abra <http://localhost:5088/swagger>.
-
-O OpenAPI e o arquivo que descreve os endpoints, os dados de entrada e as respostas da API. O Swagger usa esse arquivo para montar a tela de documentacao.
-
-O projeto da API habilita `GenerateDocumentationFile` para gerar `LocacaoImoveis.API.xml` junto da DLL durante o build. Os comentários `///` dos controllers descrevem operações, parâmetros e respostas. O `AddOpenApi()` incorpora esses comentários ao documento exibido pelo Swagger. Após editar os comentários, recompile e reinicie a API.
-
-O arquivo `OpenApiExamplesTransformer.cs` adiciona exemplos de request e response ao OpenAPI. Assim, o Swagger mostra modelos prontos para criar clientes, imoveis e reservas. Esses exemplos servem apenas como modelo e nao sao executados automaticamente.
-
-## Filtros e paginação de clientes e reservas
-
-As duas listagens aceitam `Pagina` (padrão 1) e `TamanhoPagina` (padrão 10, entre 1 e 100). Os filtros são opcionais e podem ser combinados. A resposta continua sendo uma lista, sem total de registros; páginas sem resultados retornam `[]`.
-
-- Clientes: `GET /api/v1/clientes/obterTodosClientes?Nome=ana&Status=1&Pagina=1&TamanhoPagina=10`. Busca por parte do nome e status (0 inativo, 1 ativo), ordenada por nome e ID.
-- Reservas: `GET /api/v1/reservas?Status=0&Pagina=1&TamanhoPagina=10`. Também aceita `ClienteId` e `ImovelId`. Status: 0 pendente, 1 confirmada, 2 concluída, 3 cancelada. Ordenação por data de entrada e ID.
-
-Parâmetros de paginação ou status inválidos retornam HTTP 400. Os filtros e a paginação são aplicados no banco antes de carregar os registros.
-
-## Regras de negócio principais
-
-- CPF deve ser válido e conter apenas números; CPF e e-mail não podem ser duplicados.
-- Clientes inativos não podem realizar reservas.
-- Uma reserva precisa respeitar o período permitido, a capacidade do imóvel e a disponibilidade do imóvel.
-- A reserva possui fluxo de status: pendente, confirmada, concluída ou cancelada.
-- O valor total considera a duração da estadia e a política de desconto configurada.
-- O cancelamento calcula o reembolso conforme a política de antecedência.
-- Alterações que deixariam um imóvel incompatível com reservas ativas são rejeitadas.
-
-## Configuração do desconto
-
-Em `src/LocacaoImoveis.API/appsettings.json`:
-
-```json
-"Desconto": {
-  "MinimoNoites": 7,
-  "Percentual": 10
-}
-```
-
-Nesse exemplo, reservas com pelo menos sete noites recebem dez por cento de desconto.
-
-## Documentação complementar
-
-- [Casos de uso e exemplos da API](docs/casos-de-uso.md)
 - [Arquitetura e classes](docs/classes-e-arquitetura.md)
+- [Casos de uso e exemplos HTTP](docs/casos-de-uso.md)
 - [Fluxos de execução](docs/sequencias.md)
-- [Rastreabilidade, testes e pendências](docs/rastreabilidade.md)
-- [Checklist de implementação](docs/CHECKLIST.md)
-- [Diagramas UML](docs/uml/galeria.html)
-- [Registro da documentação](docs/registro-da-documentacao.md)
-- [Uso de IA no projeto](AI_USAGE.md)
-
-## Limitações atuais
-
-- A persistência é temporária porque o banco é SQLite em memória.
-- Não há autenticação, autorização ou configuração de produção. As listagens paginadas retornam somente os itens, sem total de registros ou páginas.
-- O seed é destinado ao desenvolvimento e aos testes locais.
-- O comportamento implementado deve ser conferido junto ao código e aos testes; os diagramas e o PDF descrevem o desafio e podem conter requisitos ainda não implementados.
+- [Galeria UML](docs/uml/galeria.html) — fontes PlantUML em `docs/uml/fontes` e imagens em `docs/uml/imagens`
+- [Uso de inteligência artificial](docs/AI_USAGE.md)
