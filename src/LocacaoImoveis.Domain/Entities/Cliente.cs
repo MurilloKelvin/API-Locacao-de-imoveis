@@ -13,18 +13,17 @@ namespace LocacaoImoveis.Domain.Entities
 
         // Obj
         public Email Email { get; private set; }
-        public Cpf Cpf { get; private set; }
-
+        public DocumentoCliente DocumentoCliente { get; private set; }
         // Construtor privado para EF 
         private Cliente()
         {
             Nome = null!;
             Telefone = null!;
             Email = null!;
-            Cpf = null!;
+            DocumentoCliente = null!;
         }
 
-        public Cliente(string nome, string telefone, string email, string cpf)
+        public Cliente(string nome, string telefone, string email, string documento)
         {
             if (string.IsNullOrWhiteSpace(nome))
                 throw new ArgumentException("Nome não pode ser vazio.", nameof(nome));
@@ -34,7 +33,7 @@ namespace LocacaoImoveis.Domain.Entities
             Telefone = ValidaTelefone.ValidarTelefone(telefone); // valida usando o validator
             Status = ClienteStatus.Ativo;
             Email = new Email(email); // recebe o email e cria o Value Object Email
-            Cpf = new Cpf(cpf);
+            DocumentoCliente = new DocumentoCliente(documento);
         }
 
         public void AtualizarDadosCliente(string nome, string telefone)
