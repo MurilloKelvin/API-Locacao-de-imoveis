@@ -27,23 +27,23 @@ namespace LocacaoImoveis.Application.Services
                 request.Nome,
                 request.Telefone,
                 request.Email,
-                request.Cpf
+                request.Documento
                 );
 
             var emailClienteExiste = await _clienteRepository.ObterPorEmailAsync(request.Email);
-            var cpfClienteExiste = await _clienteRepository.ObterPorCpfAsync(request.Cpf);
+            var DocumentoClienteExiste = await _clienteRepository.ObterPorDocumentoAsync(request.Documento);
 
             if(emailClienteExiste != null)
                 throw new EmailJaCadastradoException();
 
-            if(cpfClienteExiste != null)
+            if(DocumentoClienteExiste != null)
                 throw new CpfJaCadastradoException();
 
             await _clienteRepository.AdicionarClienteAsync(cliente); // salva o cliente no repositório
 
             //log
-            _logger.LogInformation("Cliente criado com sucesso. Id: {Id}, Nome: {Nome}, Email: {Email}, Cpf: {Cpf}",
-                cliente.Id, cliente.Nome, cliente.Email.Valor, cliente.Cpf.Valor);
+            _logger.LogInformation("Cliente criado com sucesso. Id: {Id}, Nome: {Nome}, Email: {Email}, Documento: {Documento}",
+                cliente.Id, cliente.Nome, cliente.Email.Valor, cliente.DocumentoCliente.Valor);
 
             return cliente.Id;
         }
@@ -60,23 +60,23 @@ namespace LocacaoImoveis.Application.Services
                 Nome = cliente.Nome,
                 Telefone = cliente.Telefone,
                 Email = cliente.Email.Valor,
-                Cpf = cliente.Cpf.Valor,
+                Documento = cliente.DocumentoCliente.Valor,
                 Status = cliente.Status
             };
         }
 
-        public async Task<ClienteResponse> ObterClientePorCpfAsync(string cpf)
+        public async Task<ClienteResponse> ObterClientePorDocumentoAsync(string documento)
         {
-            var cliente = await _clienteRepository.ObterPorCpfAsync(cpf);
+            var cliente = await _clienteRepository.ObterPorDocumentoAsync(documento);
             if (cliente == null)
-                throw new RecursoNaoEncontradoException("Cliente", cpf);
+                throw new RecursoNaoEncontradoException("Cliente", documento);
             return new ClienteResponse
             {
                 Id = cliente.Id,
                 Nome = cliente.Nome,
                 Telefone = cliente.Telefone,
                 Email = cliente.Email.Valor,
-                Cpf = cliente.Cpf.Valor,
+                Documento = cliente.DocumentoCliente.Valor,
                 Status = cliente.Status
 
             };
@@ -99,7 +99,7 @@ namespace LocacaoImoveis.Application.Services
                 Nome = cliente.Nome,
                 Telefone = cliente.Telefone,
                 Email = cliente.Email.Valor,
-                Cpf = cliente.Cpf.Valor,
+                Documento = cliente.DocumentoCliente.Valor,
                 Status = cliente.Status
             }).ToList();
         }

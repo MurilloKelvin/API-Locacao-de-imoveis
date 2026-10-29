@@ -8,7 +8,7 @@ namespace LocacaoImoveis.Application.Interfaces
     {
         Task AdicionarClienteAsync(Cliente cliente, CancellationToken cancellationToken = default);
         Task<Cliente?> ObterPorIdAsync(Guid id);
-        Task<Cliente?> ObterPorCpfAsync(string cpf);
+        Task<Cliente?> ObterPorDocumentoAsync(string documento);
         Task<Cliente?> ObterPorEmailAsync(string email);
         Task<List<Cliente>> ObterTodosClientesAsync(ListarClientesRequest filtro, CancellationToken cancellationToken = default);
 

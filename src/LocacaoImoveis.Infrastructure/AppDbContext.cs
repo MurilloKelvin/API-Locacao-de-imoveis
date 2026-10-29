@@ -33,16 +33,18 @@ namespace LocacaoImoveis.Infrastructure
             cliente.Property(c => c.Telefone)
                 .IsRequired();
 
-            // cpf e email convertidos para string no banco de dados, mas mantidos como Value Objects na aplicação
-            cliente.Property(c => c.Cpf)
+
+            // documento e email convertidos para string no banco de dados, mas mantidos como Value Objects na aplicação
+            cliente.Property(c => c.DocumentoCliente)
                 .HasConversion(
-                cpf => cpf.Valor,
-                valor => new Cpf(valor))
-                .HasMaxLength(11)
+                documento => documento.Valor,
+                valor => new DocumentoCliente(valor))
+                .HasMaxLength(14)
                 .IsRequired();
 
-            // garante q ue o cpf seja único no banco de dados
-            cliente.HasIndex(c => c.Cpf)
+
+            // garante q ue o documento seja único no banco de dados
+            cliente.HasIndex(c => c.DocumentoCliente)
                 .IsUnique(); // 
 
             cliente.Property(c => c.Email)

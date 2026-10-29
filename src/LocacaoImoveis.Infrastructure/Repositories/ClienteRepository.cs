@@ -39,11 +39,11 @@ namespace LocacaoImoveis.Infrastructure.Repositories
 
         }
 
-        public async Task<Cliente?> ObterPorCpfAsync(string cpf)
+        public async Task<Cliente?> ObterPorDocumentoAsync(string documento)
         {
-            var cpfValidado = new Cpf(cpf);
+            var documentoValidado = new DocumentoCliente(documento);
 
-           return await _context.Clientes.FirstOrDefaultAsync(c => c.Cpf == cpfValidado);
+           return await _context.Clientes.FirstOrDefaultAsync(c => c.DocumentoCliente == documentoValidado);
         }
 
         public async Task<List<Cliente>> ObterTodosClientesAsync(ListarClientesRequest filtro, CancellationToken cancellationToken = default)

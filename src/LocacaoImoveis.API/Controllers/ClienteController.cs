@@ -20,14 +20,14 @@ namespace LocacaoImoveis.API.Controllers
         }
 
         /// <summary>Cadastra um cliente com CPF e e-mail únicos.</summary>
-        /// <param name="request">Nome, telefone, e-mail e CPF do cliente.</param>
+        /// <param name="request">Nome, telefone, e-mail e CPF ou CNPJ do cliente.</param>
         /// <response code="201">Cliente criado; retorna o ID e o endereço de consulta.</response>
         /// <response code="400">Dados inválidos.</response>
         /// <response code="409">CPF ou e-mail já cadastrado.</response>
         [HttpPost]
         [Route("criarCliente")]
         [EndpointSummary("Cadastra um novo cliente")]
-        [EndpointDescription("Cria um cliente validando CPF, email e os dados obrigatorios.")]
+        [EndpointDescription("Cria um cliente validando CPF ou CNPJ, email e os dados obrigatorios.")]
         [ProducesResponseType(StatusCodes.Status201Created)] // Indica que a resposta será 201 Created
         [ProducesResponseType(StatusCodes.Status400BadRequest)] // Indica que a resposta será 400 Bad Request
         [ProducesResponseType(StatusCodes.Status409Conflict)] // caso de 2 cpfs iguais
@@ -60,20 +60,20 @@ namespace LocacaoImoveis.API.Controllers
             return Ok(cliente);
         }
 
-        /// <summary>Consulta um cliente pelo CPF.</summary>
-        /// <param name="cpf">CPF do cliente.</param>
+        /// <summary>Consulta um cliente pelo DOCUMENTO.</summary>
+        /// <param name="documento">documento do cliente.</param>
         /// <response code="200">Dados do cliente.</response>
-        /// <response code="400">CPF inválido.</response>
+        /// <response code="400">DOCUMENTO inválido.</response>
         /// <response code="404">Cliente não encontrado.</response>
-        [HttpGet("{cpf}/detalhes")]
-        [EndpointSummary("Busca um cliente pelo CPF")]
-        [EndpointDescription("Retorna os dados do cliente identificado pelo CPF informado.")]
+        [HttpGet("{documento}/detalhes")]
+        [EndpointSummary("Busca um cliente pelo documento")]
+        [EndpointDescription("Retorna os dados do cliente identificado pelo documento informado.")]
         [ProducesResponseType(typeof(ClienteResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> ObterPorCpfAsync(string cpf)
+        public async Task<IActionResult> ObterPorDocumentoAsync([FromRoute] string documento)
         {
 
-            var cliente = await _clienteService.ObterClientePorCpfAsync(cpf);
+            var cliente = await _clienteService.ObterClientePorDocumentoAsync(documento);
             return Ok(cliente);
 
         }

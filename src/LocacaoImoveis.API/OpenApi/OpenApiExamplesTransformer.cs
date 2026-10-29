@@ -33,7 +33,7 @@ public sealed class OpenApiExamplesTransformer : IOpenApiOperationTransformer
                 ["nome"] = "Pedro da Silva",
                 ["telefone"] = "31999999999",
                 ["email"] = "email@example.com",
-                ["cpf"] = "99999999999"
+                ["documento"] = "99999999999"
             };
             SetResponseExample(operation, "201", new JsonObject
             {
