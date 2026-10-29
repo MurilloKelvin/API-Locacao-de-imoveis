@@ -45,7 +45,7 @@ namespace LocacaoImoveis.Integration.Tests
             Assert.Equal("teste da silva", clienteDoBanco.Nome);
             Assert.Equal("11999999999", clienteDoBanco.Telefone);
             Assert.Equal("testedasilva@hotmail.com", clienteDoBanco.Email.Valor); // 
-            Assert.Equal("52998224725", clienteDoBanco.Cpf.Valor);
+            Assert.Equal("52998224725", clienteDoBanco.DocumentoCliente.Valor);
 
         }
 

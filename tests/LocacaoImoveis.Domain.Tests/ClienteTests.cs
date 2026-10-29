@@ -1,5 +1,6 @@
 using LocacaoImoveis.Domain.Entities;
 using LocacaoImoveis.Domain.Enums;
+using LocacaoImoveis.Domain.ValueObjects;
 
 namespace LocacaoImoveis.Domain.Tests;
 
@@ -12,6 +13,16 @@ public class ClienteTests
             "Ana", "31999999999", "ana@email.com", "52998224725");
 
         Assert.Equal(ClienteStatus.Ativo, cliente.Status);
+    }
+
+    [Fact]
+    public void DeveCriarClienteComCnpj()
+    {
+        var cliente = new Cliente(
+            "Empresa Exemplo", "31999999999",
+            "contato@empresa.com", "00.000.000/E08G-12");
+
+        Assert.Equal("00000000E08G12", cliente.DocumentoCliente.Valor);
     }
 
     [Theory]
