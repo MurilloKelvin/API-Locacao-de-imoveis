@@ -1,5 +1,6 @@
 ﻿using LocacaoImoveis.Domain.Enums;
 using LocacaoImoveis.Domain.ValueObjects;
+using LocacaoImoveis.Domain.Validators;
 
 namespace LocacaoImoveis.Domain.Entities
 {
@@ -30,7 +31,7 @@ namespace LocacaoImoveis.Domain.Entities
 
             Id = Guid.NewGuid();
             Nome = nome.Trim();
-            Telefone = telefone;
+            Telefone = ValidaTelefone.ValidarTelefone(telefone); // valida usando o validator
             Status = ClienteStatus.Ativo;
             Email = new Email(email); // recebe o email e cria o Value Object Email
             Cpf = new Cpf(cpf);
@@ -43,7 +44,10 @@ namespace LocacaoImoveis.Domain.Entities
 
 
             Nome = nome.Trim();
-            Telefone = telefone;
+
+            var telefoneValidado = ValidaTelefone.ValidarTelefone(telefone); // valida usando o validator
+
+            Telefone = telefoneValidado;
 
         }
 
