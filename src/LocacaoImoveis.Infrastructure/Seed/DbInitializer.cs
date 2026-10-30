@@ -30,6 +30,12 @@ public static class DbInitializer
             "lucas.silva@teste.com",
             "29875676004");
 
+        var clienteCnpj = new Cliente(
+            "Alfa Hospedagens Ltda",
+            "31988887777",
+            "clientenpj@teste.com",
+            "11222333000181");
+
         //imoveis
         var imovel = new Imovel(
             "Rua da amora, 100",
@@ -49,16 +55,24 @@ public static class DbInitializer
            6,
            100m);
 
+        var imovel4 = new Imovel(
+            "Rua das Acacias, 240",
+            "Apartamento das Acacias",
+            3,
+            220m);
+
 
         //add os clientes
         context.Clientes.Add(cliente);
         context.Clientes.Add(cliente2);
         context.Clientes.Add(cliente3);
+        context.Clientes.Add(clienteCnpj);
 
         // add os imoveis ao context(db
         context.Imoveis.Add(imovel);
         context.Imoveis.Add(imovel2);
         context.Imoveis.Add(imovel3);
+        context.Imoveis.Add(imovel4);
 
 
         // reservas
@@ -99,8 +113,25 @@ public static class DbInitializer
             agora
         );
 
+        var entradaCnpj = DateOnly.FromDateTime(agora.DateTime).AddDays(15);
+        var saidaCnpj = entradaCnpj.AddDays(3);
+        var noitesCnpj = saidaCnpj.DayNumber - entradaCnpj.DayNumber;
+        var subtotalCnpj = imovel4.ValorDiaria * noitesCnpj;
+        var valorTotalCnpj = politicaDesconto.CalcularTotal(subtotalCnpj, noitesCnpj);
+
+        var reservaCnpj = new Reserva(
+            clienteCnpj.Id,
+            imovel4.Id,
+            entradaCnpj,
+            saidaCnpj,
+            2,
+            valorTotalCnpj,
+            agora
+        );
+
         context.Reservas.Add(reserva);
         context.Reservas.Add(reserva2);
+        context.Reservas.Add(reservaCnpj);
 
 
 
