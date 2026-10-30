@@ -14,6 +14,15 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 builder.Services.AddControllers();
+
+// inicia o middleware de tratamento de exceções global com ProblemDetails, que padroniza a resposta de erros da API
+builder.Services.AddProblemDetails(options =>
+{
+    options.CustomizeProblemDetails = context =>
+    {
+        context.ProblemDetails.Instance ??= context.HttpContext.Request.Path;
+    };
+});
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 
 
@@ -69,6 +78,7 @@ var app = builder.Build();
 
 // configura o middleware de tratamento de exceções
 app.UseMiddleware<ExceptionHandlingMiddleware>();
+app.UseStatusCodePages();
 
 // garante que o banco exista e que as tabelas sejam criadas
 using (var scope = app.Services.CreateScope())

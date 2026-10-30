@@ -11,16 +11,21 @@ public sealed class ExceptionHandlingMiddleware
 
     // Registra detalhes dos erros para diagnóstico interno da aplicação.
     private readonly ILogger<ExceptionHandlingMiddleware> _logger;
+    private readonly IProblemDetailsService _problemDetailsService;
 
     /// <summary>Inicializa o tratamento global de exceções.</summary>
     /// <param name="next">Próximo componente da pipeline HTTP.</param>
     /// <param name="logger">Logger dos erros da requisição.</param>
+    /// <param name="problemDetailsService">Serviço que escreve respostas ProblemDetails.</param>
     public ExceptionHandlingMiddleware(
         RequestDelegate next,
-        ILogger<ExceptionHandlingMiddleware> logger)
+        ILogger<ExceptionHandlingMiddleware> logger,
+        IProblemDetailsService problemDetailsService)
     {
+        // next continua a execucao da requisiçao o logger registra o erro e o problemDetailsService escreve a resposta padronizada
         _next = next;
         _logger = logger;
+        _problemDetailsService = problemDetailsService;
     }
 
 
@@ -46,7 +51,8 @@ public sealed class ExceptionHandlingMiddleware
         }
     }
 
-    private static async Task WriteProblemDetailsAsync(
+    // mapeia as exeçoes para os codigos http e escreve a resposta padrao com o problemadetails
+    private async Task WriteProblemDetailsAsync(
         HttpContext context,
         Exception exception)
     {
@@ -76,7 +82,7 @@ public sealed class ExceptionHandlingMiddleware
         {
             Status = statusCode,
             Title = title,
-            // Não expõe a mensagem real de erros internos ao consumidor da API.
+            // Mensagem generica para erros inesperados
             Detail = statusCode == StatusCodes.Status500InternalServerError
                 ? "Ocorreu um erro inesperado."
                 : exception.Message,
@@ -84,11 +90,20 @@ public sealed class ExceptionHandlingMiddleware
             Instance = context.Request.Path
         };
 
-        // Define o status e o tipo de conteúdo da resposta HTTP.
+        // Define o statuscode do erro
         context.Response.StatusCode = statusCode;
-        context.Response.ContentType = "application/problem+json";
-
-        // Serializa o ProblemDetails como JSON no corpo da resposta.
-        await context.Response.WriteAsJsonAsync(problemDetails);
+        if (!await _problemDetailsService.TryWriteAsync(new ProblemDetailsContext
+            {
+                HttpContext = context,
+                ProblemDetails = problemDetails,
+                Exception = exception
+            }))
+        {
+            // Se o serviço de ProblemDetails não conseguiu escrever a resposta, escreve manualmente.
+            await context.Response.WriteAsJsonAsync(
+                problemDetails,
+                options: null,
+                contentType: "application/problem+json");
+        }
     }
 }
