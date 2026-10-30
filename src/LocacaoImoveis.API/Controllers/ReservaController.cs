@@ -3,10 +3,13 @@ using LocacaoImoveis.Application.Exceptions;
 using LocacaoImoveis.Application.Services;
 using Microsoft.AspNetCore.Http.Metadata;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+
 
 namespace LocacaoImoveis.API.Controllers
 {
     /// <summary>Operações HTTP de reservas.</summary>
+    [Authorize]
     [ApiController]
     [Route("api/v1/reservas")]
     public class ReservaController : ControllerBase

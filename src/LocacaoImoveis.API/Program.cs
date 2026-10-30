@@ -8,12 +8,19 @@ using Microsoft.Data.Sqlite;
 using LocacaoImoveis.Domain.Policies.Desconto;
 using Microsoft.EntityFrameworkCore;
 using LocacaoImoveis.API.OpenApi;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.OpenApi;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
 builder.Services.AddControllers();
+
+// adiciona autenticação JWT para proteger os endpoints da API
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer();
+
 
 // inicia o middleware de tratamento de exceções global com ProblemDetails, que padroniza a resposta de erros da API
 builder.Services.AddProblemDetails(options =>
@@ -72,6 +79,42 @@ builder.Services.AddHealthChecks();
 builder.Services.AddOpenApi(options =>
 {
     options.AddOperationTransformer<OpenApiExamplesTransformer>();
+
+    // adiciona o esquema de segurança Bearer para autenticação JWT
+    options.AddDocumentTransformer((doc, _, _) =>
+    {
+        doc.Components ??= new OpenApiComponents();
+        doc.Components.SecuritySchemes ??= new Dictionary<string, IOpenApiSecurityScheme>();
+
+        doc.Components.SecuritySchemes["Bearer"] = new OpenApiSecurityScheme
+        {
+            Type = SecuritySchemeType.Http,
+            Scheme = "bearer"
+        };
+
+        foreach (var (rota, item) in doc.Paths)
+        {
+            if (item?.Operations is null ||
+                (!rota.StartsWith("/api/v1/clientes", StringComparison.OrdinalIgnoreCase) &&
+                 !rota.StartsWith("/api/v1/reservas", StringComparison.OrdinalIgnoreCase)))
+                continue;
+
+            foreach (var operacao in item.Operations.Values)
+            {
+                if (operacao is null)
+                    continue;
+
+                operacao.Security ??= [];
+                operacao.Security.Add(new OpenApiSecurityRequirement
+                {
+                    [new OpenApiSecuritySchemeReference("Bearer", doc)] = []
+                });
+            }
+        }
+
+        return Task.CompletedTask;
+    });
+
 });
 
 var app = builder.Build();
@@ -99,7 +142,10 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+//usa a autenticação e autorização para proteger os endpoints da API
+app.UseAuthentication();
 app.UseAuthorization();
+
 
 app.MapControllers();
 

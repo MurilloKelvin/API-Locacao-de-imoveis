@@ -1,11 +1,13 @@
 ﻿using LocacaoImoveis.Application.DTOs.Clientes;
 using LocacaoImoveis.Application.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.Metadata;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LocacaoImoveis.API.Controllers
 {
     /// <summary>Operações HTTP de clientes.</summary>
+    [Authorize]
     [ApiController]
     [Route("api/v1/clientes")]
     public class ClienteController : ControllerBase
