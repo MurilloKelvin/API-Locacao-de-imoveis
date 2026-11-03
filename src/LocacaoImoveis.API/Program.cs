@@ -9,6 +9,7 @@ using LocacaoImoveis.Domain.Policies.Desconto;
 using Microsoft.EntityFrameworkCore;
 using LocacaoImoveis.API.OpenApi;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using LocacaoImoveis.API.Jobs;
 using Microsoft.OpenApi;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -53,6 +54,9 @@ builder.Services.AddScoped<IReservaRepository, ReservaRepository>();
 builder.Services.AddScoped<ReservaService>();
 
 builder.Services.AddScoped<PoliticaDeReembolso>();
+
+// registra o job de inativar cliente
+builder.Services.AddHostedService<InativarClientesJob>();
 
 //configuraçao do desconto 7 dias ou mais, 10% de desconto (VALOR PADRAO caso nao tenha no appsettings)
 var minimoNoites = builder.Configuration.GetValue<int>("Desconto:MinimoNoites", 7);

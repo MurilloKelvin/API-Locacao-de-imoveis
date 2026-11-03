@@ -10,6 +10,7 @@ namespace LocacaoImoveis.Domain.Entities
         public string Nome { get; private set; }
         public string Telefone { get; private set; }
         public ClienteStatus Status { get; private set; }
+        public DateTimeOffset CriadoEm { get; private set; }
 
         // Obj
         public Email Email { get; private set; }
@@ -21,9 +22,10 @@ namespace LocacaoImoveis.Domain.Entities
             Telefone = null!;
             Email = null!;
             DocumentoCliente = null!;
+            
         }
 
-        public Cliente(string nome, string telefone, string email, string documento)
+        public Cliente(string nome, string telefone, string email, string documento, DateTimeOffset? criadoEm = null)
         {
             if (string.IsNullOrWhiteSpace(nome))
                 throw new ArgumentException("Nome não pode ser vazio.", nameof(nome));
@@ -34,6 +36,7 @@ namespace LocacaoImoveis.Domain.Entities
             Status = ClienteStatus.Ativo;
             Email = new Email(email); // recebe o email e cria o Value Object Email
             DocumentoCliente = new DocumentoCliente(documento);
+            CriadoEm = criadoEm ?? DateTimeOffset.UtcNow;
         }
 
         public void AtualizarDadosCliente(string nome, string telefone)
