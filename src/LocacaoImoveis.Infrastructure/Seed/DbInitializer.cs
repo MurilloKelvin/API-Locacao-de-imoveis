@@ -36,6 +36,14 @@ public static class DbInitializer
             "clientenpj@teste.com",
             "11222333000181");
 
+        
+        var clienteAntigo = new Cliente(
+            "Cliente Antigo",
+            "11988887777",
+            "cliente.antigo@teste.com",
+            "11144477735",
+            DateTimeOffset.UtcNow.AddMonths(-4));
+
         //imoveis
         var imovel = new Imovel(
             "Rua da amora, 100",
@@ -67,6 +75,7 @@ public static class DbInitializer
         context.Clientes.Add(cliente2);
         context.Clientes.Add(cliente3);
         context.Clientes.Add(clienteCnpj);
+        context.Clientes.Add(clienteAntigo);
 
         // add os imoveis ao context(db
         context.Imoveis.Add(imovel);
