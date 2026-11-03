@@ -28,7 +28,6 @@ Release/
 .env
 .env.*
 !.env.example
-appsettings.Development.json
 appsettings.Local.json
 
 # Resultados de testes
