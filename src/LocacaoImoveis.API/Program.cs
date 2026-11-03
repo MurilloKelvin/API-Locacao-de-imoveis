@@ -1,15 +1,16 @@
+using LocacaoImoveis.API.GraphQL;
+using LocacaoImoveis.API.Jobs;
 using LocacaoImoveis.API.Middleware;
+using LocacaoImoveis.API.OpenApi;
 using LocacaoImoveis.Application.Interfaces;
 using LocacaoImoveis.Application.Services;
+using LocacaoImoveis.Domain.Policies.Desconto;
 using LocacaoImoveis.Domain.Policies.Reembolso;
 using LocacaoImoveis.Infrastructure;
 using LocacaoImoveis.Infrastructure.Repositories;
-using Microsoft.Data.Sqlite;
-using LocacaoImoveis.Domain.Policies.Desconto;
-using Microsoft.EntityFrameworkCore;
-using LocacaoImoveis.API.OpenApi;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using LocacaoImoveis.API.Jobs;
+using Microsoft.Data.Sqlite;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -41,6 +42,17 @@ builder.Services.AddSingleton<SqliteConnection>(_ =>
     connection.Open(); 
     return connection;
 });
+
+
+
+builder.Services.AddAuthorization();
+// graphql com o authorization query e mutation
+builder.Services
+    .AddGraphQLServer() // cria o servidor
+    .AddAuthorization() 
+    .AddQueryType<Query>() // adiciona a query
+    .AddMutationType<Mutation>();
+
 
 // registra o repositório e o serviço de cliente para injeção de dependência
 builder.Services.AddScoped<IClienteRepository, ClienteRepository>();
@@ -149,6 +161,9 @@ app.UseHttpsRedirection();
 //usa a autenticação e autorização para proteger os endpoints da API
 app.UseAuthentication();
 app.UseAuthorization();
+
+// cria a rota/graphql
+app.MapGraphQL();
 
 
 app.MapControllers();
