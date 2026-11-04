@@ -118,8 +118,9 @@ namespace LocacaoImoveis.Integration.Tests
             var cliente2 = new Cliente(
                 "Bruno", "31988888888", "bruno@email.com", "52998224725");
 
-            
-            await Assert.ThrowsAsync<CpfJaCadastradoException>(
+            // o repositório não valida CPF duplicado (isso é feito no ClienteService),
+            // então quem barra é a constraint única do banco
+            await Assert.ThrowsAsync<DbUpdateException>(
                 () => repository.AdicionarClienteAsync(cliente2));
         }
 
