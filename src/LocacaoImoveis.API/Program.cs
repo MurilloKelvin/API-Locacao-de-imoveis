@@ -1,3 +1,4 @@
+using LocacaoImoveis.API.Auth;
 using LocacaoImoveis.API.GraphQL;
 using LocacaoImoveis.API.Jobs;
 using LocacaoImoveis.API.Middleware;
@@ -11,7 +12,9 @@ using LocacaoImoveis.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,9 +22,30 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 
+// lê a seção Jwt (appsettings + user secrets) e registra o gerador de tokens
+builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("Jwt"));
+builder.Services.AddSingleton<TokenService>();
+
+// pega a seçao Jwt do appsettings.json e user secrets e transforma em objeto JwtOptions
+var jwtOptions = builder.Configuration.GetSection("Jwt").Get<JwtOptions>()
+    ?? throw new InvalidOperationException("Seção Jwt não configurada.");
+
 // adiciona autenticação JWT para proteger os endpoints da API
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer();
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidIssuer = jwtOptions.Issuer,
+            ValidateAudience = true,
+            ValidAudience = jwtOptions.Audience,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.Key)),
+            ClockSkew = TimeSpan.FromSeconds(30)
+        };
+    });
 
 
 // inicia o middleware de tratamento de exceções global com ProblemDetails, que padroniza a resposta de erros da API
