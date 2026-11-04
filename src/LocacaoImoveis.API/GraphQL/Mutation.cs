@@ -1,6 +1,8 @@
 ﻿using HotChocolate.Authorization;
 using LocacaoImoveis.Application.DTOs.Clientes;
 using LocacaoImoveis.Application.DTOs.Imoveis;
+using LocacaoImoveis.API.Auth;
+using Microsoft.Extensions.Options;
 using LocacaoImoveis.Application.DTOs.Reservas;
 using LocacaoImoveis.Application.Services;
 
@@ -8,6 +10,27 @@ namespace LocacaoImoveis.API.GraphQL;
 
 public class Mutation
 {
+    // auth
+    //publica
+    [AllowAnonymous]
+    public LoginResponse Login(
+        string clientId,
+        string clientSecret,
+        TokenService tokenService,
+        IOptions<JwtOptions> options)
+    {
+        var jwt = options.Value;
+        // Confere as credenciais enviadas com as configuradas no user secrets
+        // Se estiverem erradas, responde 401 (não autorizado)
+        if (clientId != jwt.ClientId || clientSecret != jwt.ClientSecret)
+            throw new GraphQLException("Credenciais inválidas.");
+        var (token, expiraEm) = tokenService.GerarToken(jwt.ClientId);
+        return new LoginResponse(token, expiraEm);
+    }
+
+
+
+
     // Clientes
     [Authorize]
     public Task<Guid> CriarCliente(
@@ -105,3 +128,5 @@ public class Mutation
         return true;
     }
 }
+// resposta do login, com o token e a data de expiração
+public record LoginResponse(string AccessToken, DateTime ExpiraEm);
