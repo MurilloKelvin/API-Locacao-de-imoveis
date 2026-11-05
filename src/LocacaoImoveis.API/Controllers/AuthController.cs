@@ -5,13 +5,19 @@ using Microsoft.Extensions.Options;
 
 namespace LocacaoImoveis.API.Controllers;
 
+/// <summary>Emite tokens para clientes autenticados da API.</summary>
 [ApiController]
 [AllowAnonymous]
 [Route("api/v1/auth")]
 public class AuthController(TokenService tokenService, IOptions<JwtOptions> options) : ControllerBase
 {
+    /// <summary>Credenciais enviadas para obter um token de acesso.</summary>
     public record TokenRequest(string ClientId, string ClientSecret);
 
+    /// <summary>Valida as credenciais e emite um token de acesso.</summary>
+    /// <param name="request">Dados da operação.</param>
+    /// <response code="200">Token de acesso e data de expiração.</response>
+    /// <response code="401">Credenciais inválidas.</response>
     [HttpPost("token")]
     public IActionResult Token(TokenRequest request)
     {

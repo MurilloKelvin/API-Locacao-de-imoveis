@@ -6,10 +6,14 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace LocacaoImoveis.API.Auth;
 
+/// <summary>Gera tokens JWT assinados para clientes da API.</summary>
 public sealed class TokenService(IOptions<JwtOptions> options)
 {
     private readonly JwtOptions _jwt = options.Value;
 
+    /// <summary>Gera um token JWT assinado para o cliente da API.</summary>
+    /// <param name="clientId">Identificador do cliente da API.</param>
+    /// <returns>Token de acesso e data de expiração em UTC.</returns>
     public (string Token, DateTime ExpiraEm) GerarToken(string clientId)
     {
         var expiraEm = DateTime.UtcNow.AddMinutes(_jwt.ExpiracaoMinutos);

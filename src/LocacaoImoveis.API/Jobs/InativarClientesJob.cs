@@ -6,11 +6,15 @@ using Microsoft.EntityFrameworkCore;
 namespace LocacaoImoveis.API.Jobs;
 
 // background roda enquanto a api ta ligaada
+/// <summary>Inativa periodicamente clientes sem atividade recente.</summary>
 public class InativarClientesJob : BackgroundService
 {
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly ILogger<InativarClientesJob> _logger;
 
+    /// <summary>Inicializa InativarClientesJob.</summary>
+    /// <param name="scopeFactory">Fábrica de escopos de serviço.</param>
+    /// <param name="logger">Serviço de registro de eventos.</param>
     public InativarClientesJob(
         IServiceScopeFactory scopeFactory,
         ILogger<InativarClientesJob> logger)
@@ -21,6 +25,8 @@ public class InativarClientesJob : BackgroundService
 
     // roda quando a api inicia dps espera 24h (1dia)
     // stoppingToken é usado para parar o job caso a api seja desligada
+    /// <summary>Executa a verificação ao iniciar a API e depois a cada dia.</summary>
+    /// <param name="stoppingToken">Token de cancelamento do serviço em segundo plano.</param>
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         await ExecutarAsync(stoppingToken);

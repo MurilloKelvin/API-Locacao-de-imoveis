@@ -1,10 +1,10 @@
 # API de Locação de Imóveis
 
-API REST para cadastro de clientes e imóveis e gerenciamento de reservas. Desenvolvida em .NET 10 com ASP.NET Core, Entity Framework Core e SQLite em memória, a solução separa domínio, casos de uso, persistência e interface HTTP em quatro projetos.
+API REST e GraphQL para cadastro de clientes e imóveis e gerenciamento de reservas. Desenvolvida em .NET 10 com ASP.NET Core, Entity Framework Core e SQLite em memória, a solução separa domínio, casos de uso, persistência e interface HTTP em quatro projetos.
 
 ## Funcionalidades
 
-- **Clientes:** cadastro, consulta por ID ou CPF, filtros, paginação, atualização e ativação/inativação.
+- **Clientes:** cadastro, consulta por ID ou documento (CPF/CNPJ), filtros, paginação, atualização e ativação/inativação.
 - **Imóveis:** cadastro, consulta, filtros, paginação, atualização, alteração de status e disponibilidade por período.
 - **Reservas:** criação, consulta, filtros, paginação, confirmação, conclusão e cancelamento com cálculo de reembolso.
 - **API:** documentação OpenAPI/Swagger, erros em formato `ProblemDetails` e endpoint `/health`.
@@ -16,6 +16,10 @@ Requer o SDK do **.NET 10**. Na raiz do repositório:
 ```powershell
 dotnet restore LocacaoImoveis.slnx
 dotnet build LocacaoImoveis.slnx
+# Antes de iniciar, configure credenciais locais (substitua os exemplos).
+dotnet user-secrets set "Jwt:Key" "SUBSTITUA-POR-UMA-CHAVE-ALEATORIA-DE-32-BYTES-OU-MAIS" --project src/LocacaoImoveis.API
+dotnet user-secrets set "Jwt:ClientId" "cliente-local" --project src/LocacaoImoveis.API
+dotnet user-secrets set "Jwt:ClientSecret" "SUBSTITUA-POR-UM-SEGREDO-LOCAL" --project src/LocacaoImoveis.API
 dotnet run --project src/LocacaoImoveis.API/LocacaoImoveis.API.csproj --launch-profile http
 ```
 
@@ -25,13 +29,14 @@ Com a API em execução no perfil `http`:
 |---|---|
 | Swagger UI | <http://localhost:5088/swagger> |
 | Especificação OpenAPI | <http://localhost:5088/openapi/v1.json> |
+| GraphQL / Nitro | <http://localhost:5088/graphql> |
 | Health check | <http://localhost:5088/health> |
 
 Swagger e OpenAPI são disponibilizados no ambiente `Development`, configurado pelo perfil acima. Os modelos, exemplos e códigos de resposta podem ser consultados no Swagger.
 
 ### Dados iniciais
 
-Na inicialização, `EnsureCreated()` cria as tabelas e o seed insere três clientes, três imóveis e duas reservas. A conexão SQLite com `Data Source=:memory:` permanece aberta enquanto a aplicação está em execução. **Os dados são descartados ao encerrar o processo** e recriados na próxima inicialização.
+Na inicialização, `EnsureCreated()` cria as tabelas e o seed insere cinco clientes, quatro imóveis e três reservas. A conexão SQLite com `Data Source=:memory:` permanece aberta enquanto a aplicação está em execução. **Os dados são descartados ao encerrar o processo** e recriados na próxima inicialização.
 
 ## Estrutura da solução
 
@@ -40,11 +45,11 @@ Na inicialização, `EnsureCreated()` cria as tabelas e o seed insere três clie
 | `src/LocacaoImoveis.Domain` | Entidades, objetos de valor, enums e políticas de desconto e reembolso |
 | `src/LocacaoImoveis.Application` | Serviços, DTOs, contratos de repositório e exceções |
 | `src/LocacaoImoveis.Infrastructure` | `AppDbContext`, repositórios e carga inicial de dados |
-| `src/LocacaoImoveis.API` | Controllers, middleware, injeção de dependência e OpenAPI |
+| `src/LocacaoImoveis.API` | Controllers, GraphQL, JWT, job de inativação, middleware e OpenAPI |
 | `tests/LocacaoImoveis.Domain.Tests` | Testes das entidades e políticas |
 | `tests/LocacaoImoveis.Integration.Tests` | Testes de persistência, serviços e endpoints HTTP |
 
-O `AppDbContext` mapeia CPF e e-mail como objetos de valor convertidos para texto, cria índices únicos para ambos e configura as chaves estrangeiras de reservas para clientes e imóveis.
+O `AppDbContext` mapeia documento e e-mail como objetos de valor convertidos para texto, cria índices únicos para ambos e configura as chaves estrangeiras de reservas para clientes e imóveis.
 
 ## API
 
@@ -90,3 +95,13 @@ Os testes incluem regras de domínio, persistência e chamadas HTTP com `WebAppl
 - [Fluxos de execução](docs/sequencias.md)
 - [Galeria UML](docs/uml/galeria.html) — fontes PlantUML em `docs/uml/fontes` e imagens em `docs/uml/imagens`
 - [Uso de inteligência artificial](docs/AI_USAGE.md)
+
+## Autenticação e novas funcionalidades
+
+A API emite seu próprio JWT por `POST /api/v1/auth/token` ou pela mutation GraphQL `login`. Ambos recebem `clientId` e `clientSecret` configurados no servidor e retornam `accessToken` e `expiraEm`. Use `Authorization: Bearer <accessToken>` nas operações de clientes e reservas. Imóveis e health são públicos. Não há login individual de clientes nem políticas por perfil; a identidade autenticada representa o consumidor da API.
+
+O token é assinado com HS256. Emissor, destinatário e duração são definidos em `Jwt`; a configuração versionada usa 60 minutos. A chave e as credenciais precisam ser fornecidas antes da inicialização. A configuração antiga `Authentication:Schemes:Bearer` não substitui os parâmetros `Jwt` usados pelo código atual.
+
+O cadastro usa o campo `documento` para CPF ou CNPJ. Telefone permanece `string`, com validação de 10 ou 11 dígitos. O job diário inativa clientes sem atividade há pelo menos três meses e sem reservas pendentes ou confirmadas.
+
+Consulte os [exemplos de autenticação e GraphQL](docs/casos-de-uso.md) e os [novos fluxos UML](docs/uml/galeria.html#23-sequencia-autenticacao).
