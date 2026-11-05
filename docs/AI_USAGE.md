@@ -21,6 +21,8 @@ Entre as regras implementadas estão a criação, confirmação, conclusão e ca
 | Uso de factory para testar a API | A IA explicou como utilizar `WebApplicationFactory<Program>`, como expor o `Program` para os testes e como criar um `HttpClient` para testar a aplicação hospedada em memória. |
 | Testes HTTP e testes de reserva | A IA ajudou a entender como estruturar testes de integração para consultar clientes e imóveis, criar reservas por HTTP e verificar o comportamento de duas tentativas concorrentes para o mesmo período. |
 | Configuração do middleware | Foram solicitadas orientações para registrar o middleware de tratamento de exceções e transformar exceções de negócio em respostas HTTP com status e `ProblemDetails`. |
+| Autenticação com JWT | A IA explicou o funcionamento do token JWT e auxiliou na configuração de sua emissão e validação na API. |
+| Consultas GraphQL | A IA foi utilizada para criar as queries GraphQL de consulta a clientes, imóveis e reservas, reaproveitando os serviços da aplicação. |
 | Configuração inicial do banco de dados | A configuração inicial do SQLite em memória, do `AppDbContext`, da criação das tabelas e do seed foi apoiada principalmente pelo autocomplete do Visual Studio. A IA não foi usada para substituir a implementação manual dessa configuração. |
 | Bug de SQL com `OrderBy` direto em `criadaEm` | No commit `20c6e95`, foi solicitada uma explicação sobre o problema causado pelo `OrderBy` aplicado diretamente a `criadaEm` e sobre o que deveria ser feito para corrigi-lo. |
 
@@ -29,6 +31,8 @@ Entre as regras implementadas estão a criação, confirmação, conclusão e ca
 A implementação inicial do código funcional da aplicação — incluindo as entidades, regras de negócio, serviços, controllers, repositórios, políticas, middleware e configurações — foi escrita manualmente. Nessa etapa, a IA foi utilizada principalmente para explicar conceitos, investigar bugs e sugerir caminhos de implementação. Em alguns casos, quando uma explicação não era suficiente, a IA apresentava parte do código como exemplo; a implementação final era então concluída, adaptada e validada manualmente.
 
 Posteriormente, os testes de filtro e paginação foram feitos com IA e auditados manualmente.
+
+Na evolução da API, a IA também foi usada para explicar o JWT e apoiar sua configuração, além de auxiliar na criação das queries GraphQL. Essas partes foram revisadas no contexto do projeto.
 
 Alguns testes, especialmente os testes HTTP e de reserva mencionados acima, foram gerados ou tiveram sua estrutura inicial criada com auxílio de IA. A aplicação, suas regras de negócio e a maior parte dos testes de domínio e integração foram implementadas manualmente. As sugestões recebidas foram revisadas e ajustadas para refletir o comportamento efetivo da aplicação.
 
