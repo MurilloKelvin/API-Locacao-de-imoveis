@@ -17,17 +17,18 @@ activate C
 C -> S : CriarClienteAsync(request) [await]
 activate S
 create E
-S -> E : new Cliente(nome, telefone, email, cpf)
+S -> E : new Cliente(nome, telefone, email, documento)
 activate E
 E --> S : cliente válido, Ativo
  deactivate E
 == 2. Verificar duplicidade ==
-S -> R : ObterPorCpfAsync(cpf) [await]
+note over S,R : Consulta de e-mail precede a de documento (omitida neste recorte)
+S -> R : ObterPorDocumentoAsync(documento) [await]
 activate R
-R -> R : new Cpf(cpf)
+R -> R : new DocumentoCliente(documento)
 R -> D : FirstOrDefaultAsync(...) [await]
 activate D
-D -> B : consultar CPF
+D -> B : consultar documento
 B --> D : nenhum registro
 D --> R : null
  deactivate D
@@ -50,6 +51,6 @@ R --> S : conclusão
  deactivate R
 S --> C : cliente.Id
  deactivate S
-C --> A : 201 { id }\nsem Location
+C --> A : 201 { id }\ncom Location
  deactivate C
 @enduml

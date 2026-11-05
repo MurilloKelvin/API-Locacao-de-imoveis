@@ -7,14 +7,26 @@ package Domain {
     +Id : Guid {get; private set;}
     +Nome : string {get; private set;}
     +Telefone : string {get; private set;}
+    +CriadoEm : DateTimeOffset {get; private set;}
     +Status : ClienteStatus {get; private set;}
     +Email : Email {get; private set;}
-    +Cpf : Cpf {get; private set;}
+    +DocumentoCliente : DocumentoCliente {get; private set;}
     -Cliente()
-    +Cliente(nome: string, telefone: string, email: string, cpf: string)
+    +Cliente(nome: string, telefone: string, email: string, documento: string, criadoEm: DateTimeOffset? = null)
     +AtualizarDadosCliente(nome: string, telefone: string) : void
     +AtivarCliente() : void
     +InativarCliente() : void
+  }
+  class DocumentoCliente <<value object>> {
+    +Valor : string {get;}
+    +DocumentoCliente(valor: string)
+  }
+  class Cnpj <<value object>> {
+    +Valor : string {get;}
+    +Cnpj(valor: string)
+  }
+  class ValidaTelefone <<utility>> {
+    {static} +ValidarTelefone(telefone: string) : string
   }
   class Email <<value object>> {
     +Valor : string {get;}
@@ -32,7 +44,10 @@ package Domain {
     {static} +IsCpf(cpf: string) : bool
   }
   Cliente --> "1" Email : Email
-  Cliente --> "1" Cpf : Cpf
+  Cliente --> "1" DocumentoCliente : documento
+  DocumentoCliente ..> Cpf : 11 caracteres
+  DocumentoCliente ..> Cnpj : 14 caracteres
+  Cliente ..> ValidaTelefone : valida string
   Cliente ..> ClienteStatus : tipo de Status
   Cpf ..> ValidaCPF : valida dígitos
 }

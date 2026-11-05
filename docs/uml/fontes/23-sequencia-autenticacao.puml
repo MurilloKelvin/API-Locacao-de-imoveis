@@ -1,0 +1,30 @@
+@startuml
+!include estilo.iuml
+hide footbox
+autonumber
+title Autenticação: REST e GraphQL
+actor Consumidor as C
+participant "AuthController\nou Mutation.Login" as E
+participant TokenService as T
+participant "JWT Bearer\ne autorização" as A
+participant "Controller protegido\nou resolver GraphQL" as R
+C -> E : clientId e clientSecret
+E -> E : comparar com JwtOptions
+alt credenciais incorretas
+ E --> C : REST: 401\nGraphQL: errors
+else credenciais corretas
+ E -> T : GerarToken(clientId)
+ T -> T : assinar HS256\nsub, papel, emissor, audience, expiração
+ T --> E : token e expiração UTC
+ E --> C : accessToken e expiraEm
+end
+C -> A : chamada com Authorization: Bearer token
+A -> A : validar assinatura, emissor,\naudience e validade
+alt token aceito
+ A -> R : permitir execução
+ R --> C : resultado da operação
+else token ausente ou inválido
+ A --> C : REST: 401\nGraphQL: rejeição do campo em errors
+end
+note over A,R : Clientes e reservas exigem autenticação.\nImóveis são públicos; não há políticas por papel.
+@enduml

@@ -1,0 +1,29 @@
+@startuml
+!include estilo.iuml
+hide footbox
+autonumber
+title Inativação automática por ausência de atividade
+participant "Host da API" as H
+participant InativarClientesJob as J
+participant "Escopo / AppDbContext" as D
+participant Cliente as C
+H -> J : iniciar BackgroundService
+loop inicialização e a cada 24 horas
+ J -> D : criar escopo e carregar\nclientes ativos e reservas
+ D --> J : entidades rastreadas e reservas
+ J -> J : limite = dia UTC de agora menos 3 meses
+ loop cada cliente ativo
+  alt possui reserva pendente ou confirmada
+   J -> J : preservar cliente ativo
+  else sem reserva ativa
+   J -> J : última atividade = maior data entre\ncriação do cliente, saída concluída\ne cancelamento (fallback: criação)
+   opt última atividade <= limite
+    J -> C : InativarCliente()
+   end
+  end
+ end
+ J -> D : SaveChangesAsync e encerrar escopo
+ J -> J : registrar quantidade inativada
+end
+note over H,J : Executa somente enquanto a API está ligada.
+@enduml

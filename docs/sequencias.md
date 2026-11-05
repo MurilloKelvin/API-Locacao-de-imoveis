@@ -7,9 +7,8 @@ Os passos abaixo mostram o caminho de uma requisicao pela API. Os controllers re
 ```text
 Cliente -> API: POST /api/v1/clientes/criarCliente
 API -> ClienteService: CriarClienteAsync(request)
-ClienteService -> Cpf/Email: normalizar e validar
-ClienteService -> ClienteRepository: verificar CPF e e-mail
-ClienteService -> Cliente: criar entidade
+ClienteService -> Cliente: criar entidade e validar nome, telefone, documento e e-mail
+ClienteService -> ClienteRepository: verificar e-mail e documento
 ClienteService -> ClienteRepository: adicionar e salvar
 ClienteService -> API: retornar Guid
 API -> Cliente: 201 Created com id
@@ -29,7 +28,7 @@ Service -> API: response
 API -> Cliente: 200 ou 404
 ```
 
-Consulta por CPF normaliza o CPF antes da busca. O framework rejeita valores que nao podem ser convertidos para Guid.
+Consulta por documento normaliza o CPF ou CNPJ antes da busca. O framework rejeita valores que nao podem ser convertidos para Guid.
 
 ## Listar clientes
 
@@ -115,3 +114,11 @@ API -> Cliente: 200 ou 503 com status
 ```
 
 O health atual nao consulta banco. Ele executa somente os checks registrados em `AddHealthChecks()`.
+
+## Novos fluxos
+
+Antes dos fluxos protegidos de clientes e reservas, o consumidor obtém um token em `POST /api/v1/auth/token` ou `mutation login`. As credenciais são comparadas à configuração. `TokenService` assina o JWT e devolve token/expiração. Na próxima chamada, `UseAuthentication` valida o Bearer e a autorização permite executar o controller ou campo GraphQL. Veja `23-sequencia-autenticacao`.
+
+GraphQL usa `Query` para consultar e `Mutation` para alterar, reaproveitando os services REST. O cadastro constrói `Cliente` e valida telefone, e-mail e documento antes das consultas de duplicidade. `DocumentoCliente` delega para CPF ou CNPJ conforme o tamanho; o repositório salva o valor convertido para texto. Veja `24-classes-novas-features`.
+
+Na inicialização e a cada 24 horas, `InativarClientesJob` abre um escopo, lê clientes ativos e reservas, preserva reservas ativas, calcula a última atividade e salva a inativação quando alcança três meses. Veja `25-sequencia-inativacao`.

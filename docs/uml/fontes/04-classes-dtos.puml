@@ -7,7 +7,7 @@ package Application {
     +Nome : string {get; set;}
     +Telefone : string {get; set;}
     +Email : string {get; set;}
-    +Cpf : string {get; set;}
+    +Documento : string {get; set;}
   }
   class AtualizarClienteRequest <<DTO>> {
     +Nome : string {get; set;}
@@ -24,7 +24,7 @@ package Application {
     +Nome : string {get; set;}
     +Telefone : string {get; set;}
     +Email : string {get; set;}
-    +Cpf : string {get; set;}
+    +Documento : string {get; set;}
     +Status : ClienteStatus {get; set;}
   }
 }

@@ -23,7 +23,7 @@ O Domain nao referencia as outras camadas. A Application conhece o Domain, mas n
 
 ### Cliente
 
-`Cliente` possui `Id`, nome, telefone, `Cpf`, `Email` e `Status`. O construtor publico valida os dados e cria o cliente como `Ativo`. O construtor privado existe para o EF Core reconstruir a entidade a partir do banco.
+`Cliente` possui `Id`, nome, telefone, `DocumentoCliente`, `Email`, `CriadoEm` e `Status`. O construtor publico valida os dados e cria o cliente como `Ativo`. O construtor privado existe para o EF Core reconstruir a entidade a partir do banco.
 
 ### Imovel
 
@@ -37,7 +37,7 @@ O Domain nao referencia as outras camadas. A Application conhece o Domain, mas n
 
 `Cpf` e `Email` sao `sealed record` imutaveis. O CPF normaliza a entrada removendo pontos e hifens, exige 11 numeros e rejeita uma sequencia com todos os digitos iguais. Depois, `ValidaCPF.IsCpf` calcula os dois digitos verificadores: usa os pesos de 10 a 2 nos nove primeiros digitos, calcula o primeiro digito pelo resto da divisao por 11, inclui esse resultado e repete o calculo com os pesos de 11 a 2. O valor so e aceito quando os dois digitos calculados sao iguais aos dois ultimos digitos informados.
 
-O e-mail normaliza espacos e letras maiusculas e usa `MailAddress.TryCreate`. O EF Core converte CPF e e-mail para `string` no banco e reconstrui os objetos na leitura.
+O e-mail normaliza espacos e letras maiusculas e usa `MailAddress.TryCreate`. O EF Core converte documento e e-mail para `string` no banco e reconstrui os objetos na leitura.
 
 ### Politicas
 
@@ -57,7 +57,7 @@ Os DTOs evitam expor diretamente as entidades. Existem requests para criar e atu
 
 ## Infrastructure
 
-`AppDbContext` possui os conjuntos `Clientes`, `Imoveis` e `Reservas`. Ele configura chaves, campos obrigatorios, conversao de CPF e e-mail, indices unicos e chaves estrangeiras de reserva.
+`AppDbContext` possui os conjuntos `Clientes`, `Imoveis` e `Reservas`. Ele configura chaves, campos obrigatorios, conversao de documento e e-mail, indices unicos e chaves estrangeiras de reserva.
 
 Os repositorios usam consultas assincronas do EF Core. Conflitos de reserva consideram somente estados `Pendente` e `Confirmada`, usando a regra de sobreposicao:
 
@@ -66,7 +66,7 @@ entradaExistente < saidaSolicitada
 e saidaExistente > entradaSolicitada
 ```
 
-`DbInitializer` cria tres clientes, tres imoveis e duas reservas quando o banco ainda esta vazio. Uma reserva do seed permanece pendente, como qualquer reserva criada pelo servico.
+`DbInitializer` cria cinco clientes, quatro imoveis e tres reservas quando o banco ainda esta vazio. Uma reserva do seed permanece pendente, como qualquer reserva criada pelo servico.
 
 ## API
 
@@ -81,3 +81,23 @@ Operacoes de banco usam `Task` e metodos `Async` do EF Core. Controllers de imov
 ## Injecao de dependencia
 
 Repositorios e servicos sao registrados como `Scoped`, acompanhando o ciclo de uma requisicao. A conexao SQLite em memoria e `Singleton` para permanecer aberta durante a vida da API. `AppDbContext` e criado por escopo. A politica de desconto e `Singleton` porque seus parametros sao imutaveis apos a configuracao.
+
+## Documento, telefone e atividade
+
+`DocumentoCliente` é um objeto de valor que escolhe `Cpf` para 11 caracteres alfanuméricos ou `Cnpj` para 14. CPF calcula os dígitos verificadores. CNPJ remove pontuação, converte letras para maiúsculas e exige 12 caracteres alfanuméricos seguidos de dois números; atualmente não calcula dígitos verificadores. A propriedade persistida é `DocumentoCliente`, com índice único e tamanho máximo de 14 caracteres.
+
+`ValidaTelefone.ValidarTelefone` exige a expressão `^\d{10,11}$` antes de aparar espaços. Portanto, envie somente dígitos, sem espaços, DDI, parênteses ou hífen. A entidade guarda o telefone como `string` e valida na criação e atualização.
+
+## Entradas REST e GraphQL
+
+Controllers e resolvers `Query`/`Mutation` chamam os mesmos services. GraphQL usa Hot Chocolate em `/graphql`. Consultas leem dados; mutations criam, alteram estados ou emitem token. A autorização é aplicada nos controllers de clientes/reservas e nos respectivos campos GraphQL; operações de imóveis são públicas.
+
+`JwtOptions` recebe a seção `Jwt`; `TokenService` é Singleton e emite JWT HS256 com `sub` igual ao ClientId e claim de papel `api-client`. `AuthController.Token` e `Mutation.Login` conferem as credenciais e chamam o mesmo gerador. Não há usuários, senhas individuais, refresh token ou restrição por papel implementados. A validação confere assinatura, emissor, audience e validade, com tolerância de 30 segundos.
+
+## Inativação automática
+
+`InativarClientesJob` deriva de `BackgroundService`, executa após a inicialização e repete a cada 24 horas enquanto a API está ligada. Cria um escopo para acessar `AppDbContext` diretamente; não passa por `ClienteService`. Carrega clientes ativos e reservas, preserva quem possui reserva pendente/confirmada e calcula a última atividade a partir de `CriadoEm`, saída de reserva concluída ou cancelamento (com fallback para criação). Inativa quando essa data é menor ou igual ao dia UTC de três meses atrás. O seed inclui um cliente de quatro meses sem reservas para demonstrar a regra.
+
+## Limites do tratamento de erros
+
+`ExceptionHandlingMiddleware` usa `IProblemDetailsService` no REST: argumentos inválidos viram 400, recurso ausente 404, duplicidades e operações de negócio inválidas 409, demais exceções 500 com mensagem genérica. O repositório atual não traduz `DbUpdateException` de unicidade: uma disputa de gravação pode chegar como 500. GraphQL usa seu próprio envelope `errors`, e não deve ser descrito como uma resposta REST ProblemDetails.

@@ -8,7 +8,7 @@ O consumidor usa Swagger, curl ou outro cliente HTTP. O prefixo dos recursos e `
 |---|---|---|
 | Cliente | `POST /api/v1/clientes/criarCliente` | Cria e retorna `201` com ID |
 | Cliente | `GET /api/v1/clientes/{id:guid}/detalhes` | Consulta por GUID |
-| Cliente | `GET /api/v1/clientes/{cpf}/detalhes` | Consulta por CPF |
+| Cliente | `GET /api/v1/clientes/{documento}/detalhes` | Consulta por CPF ou CNPJ |
 | Cliente | `GET /api/v1/clientes/obterTodosClientes` | Lista com filtros e paginação |
 | Cliente | `PUT /api/v1/clientes/{id:guid}/atualizar` | Atualiza e retorna `204` |
 | Cliente | `PUT /api/v1/clientes/{id:guid}/ativar` | Ativa e retorna `204` |
@@ -36,13 +36,13 @@ Para criar, envie:
   "nome": "Ana Exemplo",
   "telefone": "31999999999",
   "email": "ana@example.com",
-  "cpf": "529.982.247-25"
+  "documento": "529.982.247-25"
 }
 ```
 
-O nome e aparado. O CPF remove pontos e hifens, exige 11 numeros, rejeita todos os digitos iguais e calcula os dois digitos verificadores pelo modulo 11. O primeiro calculo usa pesos de 10 a 2; o segundo usa pesos de 11 a 2. O CPF so e aceito quando os resultados conferem com os dois ultimos digitos informados. Depois, ele e armazenado como objeto de valor. O e-mail e aparado, convertido para minusculas e validado. O cliente nasce como `Ativo`. CPF e e-mail possuem indices unicos no banco.
+O nome e aparado. O CPF remove pontos e hifens, exige 11 numeros, rejeita todos os digitos iguais e calcula os dois digitos verificadores pelo modulo 11. O primeiro calculo usa pesos de 10 a 2; o segundo usa pesos de 11 a 2. O CPF so e aceito quando os resultados conferem com os dois ultimos digitos informados. Depois, ele e armazenado como objeto de valor. O e-mail e aparado, convertido para minusculas e validado. O cliente nasce como `Ativo`. Documento e e-mail possuem indices unicos no banco.
 
-Nome, CPF e e-mail invalidos produzem erro `400`. CPF ou e-mail duplicado produz conflito. Consultas inexistentes produzem `404`. A listagem aceita `Nome`, `Status`, `Pagina` e `TamanhoPagina` como parâmetros de consulta e retorna `200` com uma lista; sem resultados, retorna `[]`.
+Nome, telefone, documento e e-mail invalidos produzem erro `400`. CPF ou e-mail duplicado produz conflito. Consultas inexistentes produzem `404`. A listagem aceita `Nome`, `Status`, `Pagina` e `TamanhoPagina` como parâmetros de consulta e retorna `200` com uma lista; sem resultados, retorna `[]`.
 
 Exemplo: `GET /api/v1/clientes/obterTodosClientes?Nome=ana&Status=1&Pagina=1&TamanhoPagina=10`. O nome é buscado por parte do texto, sem diferenciar maiúsculas de minúsculas. A ordenação é por nome e ID.
 
@@ -129,3 +129,87 @@ O servico usa um `SemaphoreSlim` estatico para serializar a criacao de reservas 
 ## Erros
 
 O middleware global converte excecoes em respostas HTTP. A classificacao exata depende da excecao lancada pelo servico, por isso o Swagger deve ser consultado junto com o codigo para ver os status declarados em cada endpoint. IDs precisam ser GUIDs validos; valores que nao podem ser convertidos sao rejeitados pelo framework antes do controller.
+
+## Autenticação
+
+Configure `Jwt:Key`, `Jwt:ClientId` e `Jwt:ClientSecret` como mostrado no README. `Jwt:Issuer`, `Jwt:Audience` e `Jwt:ExpiracaoMinutos` vêm de `appsettings.json` (60 minutos). A chave de assinatura precisa ter pelo menos 32 bytes para HS256.
+
+```http
+POST /api/v1/auth/token
+Content-Type: application/json
+
+{"clientId":"cliente-local","clientSecret":"SUBSTITUA-PELO-SEGREDO-CONFIGURADO"}
+```
+
+Sucesso retorna `200` com `accessToken` e `expiraEm` (UTC); credenciais incorretas retornam `401`. No Swagger, copie o token para Authorize. Nas requisições, envie `Authorization: Bearer <accessToken>`.
+
+| Recurso | Acesso atual |
+|---|---|
+| Token REST e mutation login | Público; credenciais são conferidas na operação |
+| Clientes e reservas (REST/GraphQL) | JWT válido obrigatório |
+| Imóveis (REST/GraphQL) e health | Público |
+| Swagger/OpenAPI | Disponível em Development |
+
+A autorização atual exige identidade autenticada, sem restrições por papel ou proprietário do recurso. O token representa o consumidor configurado, não um Cliente cadastrado.
+
+## GraphQL e Nitro
+
+Abra `/graphql` no ambiente local. Primeiro execute a mutation pública (substitua as credenciais):
+
+```graphql
+mutation {
+  login(clientId: "cliente-local", clientSecret: "SUBSTITUA-PELO-SEGREDO-CONFIGURADO") {
+    accessToken
+    expiraEm
+  }
+}
+```
+
+Depois configure nos headers do Nitro:
+
+```json
+{"Authorization":"Bearer SUBSTITUA-PELO-ACCESS-TOKEN"}
+```
+
+```graphql
+query {
+  clientes(filtro: { pagina: 1, tamanhoPagina: 10 }) {
+    id
+    nome
+    documento
+    status
+  }
+}
+```
+
+```graphql
+mutation {
+  criarCliente(input: {
+    nome: "Empresa Exemplo"
+    telefone: "31988887777"
+    email: "empresa@example.com"
+    documento: "11222333000181"
+  })
+}
+```
+
+`Query` oferece `cliente`, `clientePorDocumento`, `clientes`, `reserva`, `reservas`, `imovel`, `imoveis` e `imoveisDisponiveis`. `Mutation` oferece login, criação/atualização/ativação/inativação de cliente, criação/confirmação/conclusão/cancelamento de reserva e criação/atualização/alteração de status de imóvel. Criações retornam UUID; alterações retornam booleano. O login retorna um objeto. Erros aparecem em `errors` do GraphQL; credenciais incorretas no login lançam `GraphQLException("Credenciais inválidas.")`, sem equivalência obrigatória com HTTP 401.
+
+## Documento e telefone
+
+O campo de entrada e resposta agora é `documento`. Aceita CPF ou CNPJ; o CNPJ atual valida formato, sem calcular dígitos verificadores, e admite letras nos primeiros 12 caracteres. Duplicidade de documento ainda usa `CpfJaCadastradoException` e a mensagem menciona CPF mesmo para CNPJ. Telefone deve conter somente 10 ou 11 dígitos, inclusive na atualização.
+
+## Inativação automática
+
+O job roda na inicialização e a cada 24 horas. Clientes com reserva pendente ou confirmada permanecem ativos. Para os demais, compara a última atividade com o dia UTC de três meses atrás (inclusive). Considera criação do cliente, saída de reservas concluídas e data de cancelamento ou criação de reservas canceladas. O job não depende de uma requisição HTTP e só executa enquanto a API está ligada. A inativação manual também impede clientes com reservas ativas.
+
+## ProblemDetails no REST
+
+| Exceção | Status |
+|---|---:|
+| `ArgumentException` | 400 |
+| `RecursoNaoEncontradoException` | 404 |
+| Duplicidade de documento/e-mail ou `InvalidOperationException` | 409 |
+| Outras exceções | 500 |
+
+As respostas incluem `status`, `title`, `detail` e `instance`; o serviço pode acrescentar outros campos. Erros inesperados recebem detalhe genérico. Recursos ausentes durante a criação de reserva atualmente lançam `ArgumentException` e retornam 400. A classificação segue o código executado; erros GraphQL seguem outro formato.

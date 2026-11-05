@@ -1,0 +1,73 @@
+@startuml
+!include estilo.iuml
+!pragma layout smetana
+title Novas funcionalidades: pontos de extensão
+package "API: autenticação" {
+ class JwtOptions {
+ +Issuer : string
+ +Audience : string
+ +Key : string
+ +ExpiracaoMinutos : int
+ +ClientId : string
+ +ClientSecret : string
+ }
+ class TokenService {
+ +GerarToken(clientId: string) : (string, DateTime)
+ }
+ class AuthController {
+ +Token(request: TokenRequest) : IActionResult
+ }
+ AuthController --> TokenService
+ TokenService --> JwtOptions
+}
+package "API: GraphQL" {
+ class Query <<resolver>> {
+ +Cliente(...)
+ +Clientes(...)
+ +Reservas(...)
+ +ImoveisDisponiveis(...)
+ }
+ class Mutation <<resolver>> {
+ +Login(...) : LoginResponse
+ +CriarCliente(...) : Task<Guid>
+ +CriarReserva(...) : Task<Guid>
+ +CancelarReserva(...) : Task<bool>
+ }
+ Mutation --> TokenService : login
+}
+package Application {
+ class ClienteService
+ class ReservaService
+ class ImovelService
+}
+Query ..> ClienteService
+Query ..> ReservaService
+Query ..> ImovelService
+Mutation ..> ClienteService
+Mutation ..> ReservaService
+Mutation ..> ImovelService
+note bottom of Mutation : Recorte de operações.\nClientes e reservas exigem JWT; imóveis são públicos.
+package Domain {
+ class Cliente {
+ +Telefone : string
+ +CriadoEm : DateTimeOffset
+ +InativarCliente() : void
+ }
+ class DocumentoCliente <<value object>>
+ class Cpf <<value object>>
+ class Cnpj <<value object>>
+ class ValidaTelefone <<utility>>
+ Cliente --> DocumentoCliente
+ DocumentoCliente ..> Cpf : 11 caracteres
+ DocumentoCliente ..> Cnpj : 14 caracteres
+ Cliente ..> ValidaTelefone
+}
+ClienteService ..> Cliente
+package "API: rotina automática" {
+ class InativarClientesJob <<BackgroundService>>
+}
+class AppDbContext <<Infrastructure>>
+InativarClientesJob --> AppDbContext : escopo próprio
+InativarClientesJob ..> Cliente : inativar
+note bottom of InativarClientesJob : Inicialização e a cada 24h.\nSem reserva ativa e última atividade\nhá pelo menos três meses.
+@enduml

@@ -12,33 +12,33 @@ A -> C : POST /api/v1/clientes/criarCliente
 activate C
 C -> S : CriarClienteAsync(request) [await]
 activate S
-alt nome, e-mail ou CPF inválido
+alt nome, e-mail ou documento ou telefone inválido
  note over S : Construção de Cliente rejeitada pelo domínio
  S --> C : ArgumentException
- C --> A : 400 { message }
+ C --> A : 400 ProblemDetails
 else e-mail já cadastrado
  S -> R : ObterPorEmailAsync(email) [await]
  activate R
  R --> S : cliente existente
  deactivate R
  S --> C : EmailJaCadastradoException
- C --> A : 409 { message }
-else CPF já cadastrado
- S -> R : ObterPorCpfAsync(cpf) [await]
+ C --> A : 409 ProblemDetails
+else documento já cadastrado
+ S -> R : ObterPorDocumentoAsync(documento) [await]
  activate R
  R --> S : cliente existente
  deactivate R
  S --> C : CpfJaCadastradoException
- C --> A : 409 { message }
+ C --> A : 409 ProblemDetails
 else unicidade violada ao gravar
  note over S, R : Consulta prévia sem registro; tentativa de inclusão
  S -> R : AdicionarClienteAsync(cliente) [await]
  activate R
  note over R : SaveChangesAsync lança DbUpdateException
- R --> S : CpfJaCadastradoException ou emailJaCadastradoException
+ R --> S : DbUpdateException
  deactivate R
  S --> C : propaga exceção
- C --> A : 409 { message }
+ C --> A : 500 ProblemDetails (detalhe genérico)
 end
  deactivate S
  deactivate C

@@ -6,7 +6,7 @@ package API {
  class ClienteController <<controller>> {
   +CriarCliente(...) : Task<IActionResult>
   +ObterClientePorId(...) : Task<IActionResult>
-  +ObterPorCpfAsync(...) : Task<IActionResult>
+  +ObterPorDocumentoAsync(...) : Task<IActionResult>
   +ObterTodosClientes(filtro: ListarClientesRequest, token: CancellationToken) : Task<IActionResult>
   +AtualizarClienteRequest(...) : Task<IActionResult>
   +AtivarCliente(...) : Task<IActionResult>

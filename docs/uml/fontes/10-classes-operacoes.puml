@@ -6,7 +6,7 @@ package Application {
  class ClienteService <<service>> {
   +CriarClienteAsync(...) : Task<Guid>
   +ObterClientePorIdAsync(...) : Task<ClienteResponse>
-  +ObterClientePorCpfAsync(...) : Task<ClienteResponse>
+  +ObterClientePorDocumentoAsync(...) : Task<ClienteResponse>
   +ObterTodosClientesAsync(filtro: ListarClientesRequest, token: CancellationToken) : Task<List<ClienteResponse>>
   +AtualizarClienteAsync(...) : Task
   +AtivarClienteAsync(...) : Task
